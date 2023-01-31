@@ -5,6 +5,7 @@ use App\Http\Controllers\PostController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\SiteController;
 
 /*
 |--------------------------------------------------------------------------
@@ -17,9 +18,7 @@ use App\Http\Controllers\DashboardController;
 |
 */
 
-// Route::get('/', function () {
-//     return view('admin.pages.index');
-// });
+
 //LOGIN
 Route::post('login', [UserController::class, 'login'])->name('login');
 Route::get('login', [UserController::class, 'loginForm'])->name('login-form');
@@ -68,4 +67,18 @@ Route::middleware('auth')->prefix('admin')->group(function () {
         Route::post('update/{id}', 'update')->name('post.update');
         Route::post('destroy/{id}', 'destroy')->name('post.delete');
     });
+});
+
+
+/********************************************************************* */
+
+
+route::controller(SiteController::class)->group(function(){
+    route::get('','index')->name('accueil');
+    route::get('post/category','post')->name('post.list');
+    route::get('post/detail','detail')->name('post.detail');
+    route::get('contact','contact')->name('contact');
+
+
+
 });

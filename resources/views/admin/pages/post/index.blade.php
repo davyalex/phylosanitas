@@ -39,7 +39,7 @@
                 
                   <td>
                    <div class="d-flex">
-                    <button class="btn btn-warning rounded-circle"><i class="bi bi-eye"></i></button>
+                    <a href="/post/detail?slug={{ $item['slug'] }}"  role="button" class="btn btn-warning rounded-circle"><i class="bi bi-eye"></i></a>
                     <a href="{{ route('post.edit',$item['slug']) }}" class="btn btn-success rounded-circle" role="button"  class="btn btn-success mx-2 "><i class="bi bi-pencil"></i></a>
                     
                     <form  action="{{ route('post.delete',$item['id']) }}" method="POST">

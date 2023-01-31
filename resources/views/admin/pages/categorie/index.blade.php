@@ -65,11 +65,13 @@
                 
                   <td>
                    <div class="d-flex">
-                    <a href="{{ route('category.edit',$item['slug']) }}" role="button" data-id = {{ $item['slug'] }} data-bs-toggle="modal" data-bs-target="#basicModalEdit{{ $item['slug'] }}" class="btn btn-success mx-2 "><i class="bi bi-pencil me-1"></i></a>
+                    <a href="/post/category?category={{ $item['slug'] }}"  role="button" class="btn btn-warning rounded-circle"><i class="bi bi-eye"></i></a>
+
+                    <a href="{{ route('category.edit',$item['slug']) }}" role="button" data-id = {{ $item['slug'] }} data-bs-toggle="modal" data-bs-target="#basicModalEdit{{ $item['slug'] }}" class="btn btn-success rounded-circle mx-2 "><i class="bi bi-pencil me-1"></i></a>
                     
                     <form  action="{{ route('category.delete',$item->id) }}" method="POST">
                       @csrf
-                      <a  class="btn btn-danger" data-id="{{ $item->id }}" data-bs-toggle="modal" data-bs-target="#confirmDelete{{ $item->id }}"><i class="bi bi-trash me-1"></i> </a>
+                      <a  class="btn btn-danger rounded-circle" data-id="{{ $item->id }}" data-bs-toggle="modal" data-bs-target="#confirmDelete{{ $item->id }}"><i class="bi bi-trash me-1"></i> </a>
                      @include('admin.partials.deleteConfirm')
                     </form>
                    </div>

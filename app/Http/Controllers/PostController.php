@@ -6,6 +6,7 @@ use App\Models\Post;
 use App\Models\Category;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
 use App\Http\Requests\StorePostRequest;
 use App\Http\Requests\UpdatePostRequest;
 use RealRashid\SweetAlert\Facades\Alert;
@@ -21,6 +22,8 @@ class PostController extends Controller
     {
         //
         $post = Post::with(['category', 'commentaires', 'media', 'user'])->orderBy('created_at','desc')->get();
+       
+       
         return view('admin.pages.post.index', compact('post'));
     }
 
@@ -58,7 +61,7 @@ class PostController extends Controller
             'description' => $request['description'],
             'category_id' => $request['category'],
             'lien' => $request['lien'],
-            // 'user_id' => Auth::user()->id,
+            'user_id' => Auth::user()->id,
         ]);
 
         if ($request->file('image')) {
@@ -121,6 +124,8 @@ class PostController extends Controller
             'description' => $request['description'],
             'category_id' => $request['category'],
             'lien' => $request['lien'],
+            'user_id' => Auth::user()->id,
+
         ]);
 
         if ($request->hasFile('image')) {
@@ -129,7 +134,7 @@ class PostController extends Controller
             $post->addMediaFromRequest('image')
                 ->toMediaCollection('image');
         }
-        $post = Post::with(['category', 'commentaires', 'media', 'user'])->get();
+        $post = Post::with(['category', 'commentaires', 'media', 'user'])->orderBy('created_at','desc')->get();
 
         Alert::toast('post modifié avec success', 'success');
         return view('admin.pages.post.index',compact('post'));

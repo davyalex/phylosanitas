@@ -101,8 +101,8 @@
                     @foreach ($post_recent as $item)
                     <div class="post-item clearfix">
                       <img src="{{ asset($item->getFirstMediaUrl('image')) }}" alt="">
-                      <h4><a href="#">{{ Str::limit($item['title'] ,50)}}</a></h4>
-                      {{-- <p>Sit recusandae non aspernatur laboriosam. Quia enim eligendi sed ut harum...</p> --}}
+                      <h4><a href="/post/detail?slug={{ $item['slug'] }}">{{ Str::limit($item['title'] ,50)}}</a></h4>
+                      <p>Publié {{ \Carbon\Carbon::parse($item['created_at'])->diffForHumans() }}</p>
                       </div>
                     @endforeach
                   </div><!-- End sidebar recent posts-->

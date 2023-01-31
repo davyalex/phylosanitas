@@ -99,7 +99,7 @@
                          <button class="btn btn-primary w-100" type="submit">Connexion</button>
                        </div>
                        <div class="col-12">
-                         <p class="small mb-0 text-center text-bold"><a href="pages-register.html">Retour au site web <i class="bi bi-arrow-90deg-right"></i></a></p>
+                         <p class="small mb-0 text-center text-bold"><a href="{{ route('accueil') }}">Retour au site web <i class="bi bi-arrow-90deg-right"></i></a></p>
                        </div>
                      </form>
    

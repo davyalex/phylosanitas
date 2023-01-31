@@ -20,7 +20,7 @@
                                 <label for="inputNanme4" class="form-label">Titre du post </label>
                                 <input type="text" name="title" value="{{ old('title') }}" class="form-control @error('title') is-invalid
                                     
-                                @enderror" id="inputNanme4">
+                                @enderror" id="inputNanme4" required>
                                 @error('title')
                                     <p class="text-danger">{{ $message }}</p>
                                 @enderror
@@ -30,28 +30,7 @@
                                 <input class="form-control" name="image" type="file" id="formFile">
                             </div>
               
-                            <div class="row mb-3">
-                              <label class="form-label">Categorie</label>
-                                <select name="category" class="form-select  @error('category') is-invalid @enderror" aria-label="Default select example">
-                                  <option selected>selectionner</option>
-                                  @foreach ($category as $item)
-                                  <option value="{{ $item['id'] }}">{{ $item['title'] }}</option>
-                                  @endforeach
-                                </select>
-                                @error('category')
-                                <p class="text-danger">{{ $message }}</p>
-                            @enderror
-                            </div>
-              
-                            {{-- <div class="row mb-3">
-                              <label for="inputText" class="form-label">Tags</label>
-                                <input type="text" class="form-control">
-                            </div> --}}
-              
-                            <div class="row mb-3">
-                              <label for="inputText" class="form-label">Lien</label>
-                                <input type="text" class="form-control">
-                            </div>
+                         
               
               
                         </div>
@@ -60,6 +39,38 @@
                     </div>
               
                     <div class="col-lg-6">
+                      <div class="card">
+                        <div class="card-body">
+                          <div class="row mb-3">
+                            <label class="form-label">Categorie</label>
+                              <select name="category" class="form-select  @error('category') is-invalid @enderror" aria-label="Default select example" required>
+                                <option disabled selected>selectionner</option>
+                                @foreach ($category as $item)
+                                <option value="{{ $item['id'] }}">{{ $item['title'] }}</option>
+                                @endforeach
+                              </select>
+                              @error('category')
+                              <p class="text-danger">{{ $message }}</p>
+                          @enderror
+                          </div>
+            
+                          {{-- <div class="row mb-3">
+                            <label for="inputText" class="form-label">Tags</label>
+                              <input type="text" class="form-control">
+                          </div> --}}
+            
+                          <div class="row mb-3">
+                            <label for="inputText" class="form-label">Lien</label>
+                              <input type="text" class="form-control">
+                          </div>
+              
+                        </div>
+                      </div>
+              
+                    </div>
+
+
+                    <div class="col-lg-12">
                       <div class="card">
                         <div class="card-body">
                           <h5 class="card-title">Description</h5>
@@ -73,6 +84,7 @@
                       </div>
               
                     </div>
+
 
                 </div>
                 <div class="col-ld-12">

@@ -38,29 +38,7 @@
                                     </div>
                             </div>
               
-                            <div class="row mb-3">
-                              <label class="form-label">Categorie</label>
-                                <select name="category" class="form-select  @error('category') is-invalid @enderror" aria-label="Default select example">
-                                  <option selected>selectionner</option>
-                                  @foreach ($category as $item)
-                                  <option value="{{ $item['id'] }}" {{ $item['id'] == $post['category_id'] ? 'selected' : '' }} >{{ $item['title'] }}</option>
-                                  @endforeach
-                                </select>
-                                @error('category')
-                                <p class="text-danger">{{ $message }}</p>
-                            @enderror
-                            </div>
-              
-                            {{-- <div class="row mb-3">
-                              <label for="inputText" class="form-label">Tags</label>
-                                <input type="text" class="form-control">
-                            </div> --}}
-              
-                            <div class="row mb-3">
-                              <label for="inputText" class="form-label">Lien</label>
-                                <input type="text" class="form-control">
-                            </div>
-              
+                         
               
                         </div>
                       </div>
@@ -68,6 +46,37 @@
                     </div>
               
                     <div class="col-lg-6">
+                      <div class="card">
+                        <div class="card-body">
+                          <div class="row mb-3">
+                            <label class="form-label">Categorie</label>
+                              <select name="category" class="form-select  @error('category') is-invalid @enderror" aria-label="Default select example">
+                                <option selected>selectionner</option>
+                                @foreach ($category as $item)
+                                <option value="{{ $item['id'] }}" {{ $item['id'] == $post['category_id'] ? 'selected' : '' }} >{{ $item['title'] }}</option>
+                                @endforeach
+                              </select>
+                              @error('category')
+                              <p class="text-danger">{{ $message }}</p>
+                          @enderror
+                          </div>
+            
+                          {{-- <div class="row mb-3">
+                            <label for="inputText" class="form-label">Tags</label>
+                              <input type="text" class="form-control">
+                          </div> --}}
+            
+                          <div class="row mb-3">
+                            <label for="inputText" class="form-label">Lien</label>
+                              <input type="text" class="form-control">
+                          </div>
+            
+                        </div>
+                      </div>
+              
+                    </div>
+
+                    <div class="col-lg-12">
                       <div class="card">
                         <div class="card-body">
                           <h5 class="card-title">Description</h5>
