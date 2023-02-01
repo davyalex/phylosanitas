@@ -28,61 +28,10 @@
 
           <!-- ======= Comments ======= -->
           <div class="comments">
-            <h5 class="comment-title py-4">200 Commentaires</h5>
-            <div class="comment d-flex mb-4">
-              <div class="flex-shrink-0">
-                <div class="avatar avatar-sm rounded-circle">
-                  <img class="avatar-img" src="{{ asset('assets_admin/img/avatar.jpg') }}" alt="" class="img-fluid">
-                </div>
-              </div>
-              <div class="flex-grow-1 ms-2 ms-sm-3">
-                <div class="comment-meta d-flex align-items-baseline">
-                  <h6 class="me-2">Jordan Singer</h6>
-                  <span class="text-muted">2d</span>
-                </div>
-                <div class="comment-body">
-                  Lorem ipsum, dolor sit amet consectetur adipisicing elit. Non minima ipsum at amet doloremque qui magni, placeat deserunt pariatur itaque laudantium impedit aliquam eligendi repellendus excepturi quibusdam nobis esse accusantium.
-                </div>
-
-                <div class="comment-replies bg-light p-3 mt-3 rounded">
-                  <h6 class="comment-replies-title mb-4 text-muted text-uppercase">2 replies</h6>
-
-                  <div class="reply d-flex mb-4">
-                    <div class="flex-shrink-0">
-                      <div class="avatar avatar-sm rounded-circle">
-                        <img class="avatar-img" src="{{ asset('assets_admin/img/avatar.jpg') }}" alt="" class="img-fluid">
-                    </div>
-                    </div>
-                    <div class="flex-grow-1 ms-2 ms-sm-3">
-                      <div class="reply-meta d-flex align-items-baseline">
-                        <h6 class="mb-0 me-2">Brandon Smith</h6>
-                        <span class="text-muted">2d</span>
-                      </div>
-                      <div class="reply-body">
-                        Lorem ipsum dolor sit, amet consectetur adipisicing elit.
-                      </div>
-                    </div>
-                  </div>
-                  <div class="reply d-flex">
-                    <div class="flex-shrink-0">
-                      <div class="avatar avatar-sm rounded-circle">
-                        <img class="avatar-img" src="{{ asset('assets_admin/img/avatar.jpg') }}" alt="" class="img-fluid">
-                    </div>
-                    </div>
-                    <div class="flex-grow-1 ms-2 ms-sm-3">
-                      <div class="reply-meta d-flex align-items-baseline">
-                        <h6 class="mb-0 me-2">James Parsons</h6>
-                        <span class="text-muted">1d</span>
-                      </div>
-                      <div class="reply-body">
-                        Lorem ipsum dolor sit amet, consectetur adipisicing elit. Distinctio dolore sed eos sapiente, praesentium.
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div class="comment d-flex">
+            <h5 class="comment-title py-4">{{ $post->commentaires->count() }} Commentaires</h5>
+            @foreach ($post->commentaires as $item)
+                
+            <div class="comment d-flex mb-3">
               <div class="flex-shrink-0">
                 <div class="avatar avatar-sm rounded-circle">
                     <img class="avatar-img" src="{{ asset('assets_admin/img/avatar.jpg') }}" alt="" class="img-fluid">
@@ -90,40 +39,52 @@
               </div>
               <div class="flex-shrink-1 ms-2 ms-sm-3">
                 <div class="comment-meta d-flex">
-                  <h6 class="me-2">Santiago Roberts</h6>
-                  <span class="text-muted">4d</span>
+                  <h6 class="me-2">{{ $item['user_name'] }}</h6>
+                  <span class="text-muted">{{ \Carbon\Carbon::parse($item['created_at'])->diffForHumans() }}</span>
                 </div>
                 <div class="comment-body">
-                  Lorem ipsum dolor sit amet consectetur adipisicing elit. Iusto laborum in corrupti dolorum, quas delectus nobis porro accusantium molestias sequi.
+                  {{ $item['message'] }}
                 </div>
               </div>
             </div>
+
+            @endforeach
+
           </div><!-- End Comments -->
 
           <!-- ======= Comments Form ======= -->
           <div class="row justify-content-center mt-5">
 
-            <div class="col-lg-12">
+            <form action="{{ route('post.comment') }}" method="POST">
+                @csrf
+              <div class="col-lg-12">
               <h5 class="comment-title">Laisser un commentaire</h5>
               <div class="row">
+                <input type="number" name="post_id" value="{{$post['id']}}" hidden>
+                @guest
                 <div class="col-lg-6 mb-3">
                   <label for="comment-name">Nom</label>
-                  <input type="text" class="form-control" id="comment-name" placeholder="" required>
+                  <input type="text" name="name" class="form-control" id="comment-name" placeholder="" required>
                 </div>
-                <div class="col-lg-6 mb-3">
+                @endguest
+              
+                {{-- <div class="col-lg-6 mb-3">
                   <label for="comment-email">Email</label>
-                  <input type="text" class="form-control" id="comment-email" placeholder="" required>
-                </div>
+                  <input type="text" name="email" class="form-control" id="comment-email" placeholder="">
+                </div> --}}
                 <div class="col-12 mb-3">
                   <label for="comment-message">Message</label>
 
-                  <textarea class="form-control" id="comment-message" placeholder="" required cols="30" rows="10"></textarea>
+                  <textarea class="form-control" id="comment-message" name="message" placeholder="" required cols="30" rows="10"></textarea>
                 </div>
                 <div class="col-12">
                   <input type="submit" class="btn btn-primary" value="Envoyer">
                 </div>
               </div>
             </div>
+            </form>
+
+          
           </div><!-- End Comments Form -->
 
         </div>

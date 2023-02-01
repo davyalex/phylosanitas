@@ -6,14 +6,15 @@
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-  <meta name="description" content="@yield('description')">
+  <meta property="og:description" content="@yield('description')">
   <meta property="og:image" content="@yield('image')">
-  <meta name="title" content="@yield('title')">
-  <meta name="url" content="@yield('url')">
+  <meta property="og:title" content="@yield('title')">
+  <meta property="og:url" content="@yield('url')">
 
   <!-- Favicons -->
   <link href="assets_site/img/favicon.png" rel="icon">
   <link href="assets_site/img/apple-touch-icon.png" rel="apple-touch-icon">
+  {{-- <link rel="preload" href="{{ asset('assets_site/img/person-1.jpg') }}" as="image"> --}}
 
   <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -35,7 +36,10 @@
 </head>
 
 <body>
-
+  {{-- <div class="preloader flex-column justify-content-center align-items-center">
+    <img class="animation__shake" src="{{ asset('assets_site/img/preload.png') }}" alt="AdminLTELogo"
+        height="60" width="60">
+</div> --}}
   <!-- ======= Header ======= -->
   <header id="header" class="header d-flex align-items-center fixed-top">
     <div class="container-fluid fixed-top bg-info mb-2">
@@ -53,10 +57,10 @@
 
       <a href="{{ route('accueil') }}" class="logo d-flex align-items-center mt-3">
         <!-- Uncomment the line below if you also wish to use an image logo -->
-        <!-- <img src="assets_site/img/logo.png" alt=""> -->
-        <h1 class="text-info">Φ</h1> <h3 class="text-danger m-1">S</h3>
+         <img src="{{ asset('assets_site/img/logo/logo_tp.png') }}"  alt=""> 
+        {{-- <h1 class="text-info">Φ</h1> <h3 class="text-danger m-1">S</h3>
         <h2 class="m-2"> 
-          <span class="text-info">Phylo</span><span class="text-danger">Sanitas</span></h2>
+          <span class="text-info">Phylo</span><span class="text-danger">Sanitas</span></h2> --}}
       </a>
 
       <!-- menu -->

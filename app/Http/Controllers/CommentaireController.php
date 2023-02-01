@@ -2,7 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Post;
 use App\Models\Commentaire;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use App\Http\Requests\StoreCommentaireRequest;
 use App\Http\Requests\UpdateCommentaireRequest;
 
@@ -34,9 +37,38 @@ class CommentaireController extends Controller
      * @param  \App\Http\Requests\StoreCommentaireRequest  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(StoreCommentaireRequest $request)
+    public function store(Request $request)
     {
         //
+      
+        if (Auth::check()) {
+            $request->validate([
+                'name'=>'',
+                'message'=>'required',
+    
+            ]);
+          $user_name = Auth::user()->roles[0]->name;
+        }else {
+            $request->validate([
+                'name'=>'required',
+                'message'=>'required',
+    
+            ]);
+            $user_name = $request['name'];
+        }
+        $commentaire = Commentaire::create([
+            'user_name'=>$user_name,
+            'user_email'=>$request['email'],
+            'message'=>$request['message'],
+            'post_id'=>$request['post_id']
+        ]);
+
+        // $post = Post::with(['category', 'commentaires', 'media', 'user'])
+        // ->whereId($id)->first();
+        
+        return back();
+        
+        // return view('site.pages.detail', compact([ 'post', 'commentaire']));    
     }
 
     /**

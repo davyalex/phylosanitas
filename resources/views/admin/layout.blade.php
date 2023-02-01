@@ -58,9 +58,9 @@
   <header id="header" class="header fixed-top d-flex align-items-center">
 
     <div class="d-flex align-items-center justify-content-between">
-      <a href="index.html" class="logo d-flex align-items-center">
-        <img src="assets_admin/img/logo.png" alt="">
-        <span class="d-none d-lg-block">{{ config('app.name') }}</span>
+      <a href="{{ route('dashboard') }}" class="logo d-flex align-items-center">
+        <img src="{{ asset('assets_site/img/logo/logo_tp.png') }}" height="100" alt=""> 
+        {{-- <span class="d-none d-lg-block">{{ config('app.name') }}</span> --}}
       </a>
       <i class="bi bi-list toggle-sidebar-btn"></i>
     </div><!-- End Logo -->
@@ -171,6 +171,13 @@
           </a>
         </li><!-- End Profile Page Nav -->
      @endrole
+
+     <li class="nav-item">
+      <a class="nav-link collapsed" href="">
+          <i class="bi bi-image"></i>
+          <span>Actualités</span>
+      </a>
+  </li><!-- End Login Page Nav -->
 
     </ul>
 

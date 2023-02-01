@@ -14,7 +14,7 @@ return new class extends Migration
     public function up()
     {
         Schema::create('commentaires', function (Blueprint $table) {
-            // $table->string('code')->unique()->nullable();
+            $table->id();
             $table->text('message')->nullable();
             $table->string('user_name')->nullable();
             $table->string('user_email')->nullable();

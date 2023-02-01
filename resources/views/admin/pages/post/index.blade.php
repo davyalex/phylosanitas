@@ -19,6 +19,8 @@
                   <th scope="col">image</th>
                   <th scope="col">title</th>
                   <th scope="col">categorie</th>
+                  <th scope="col">commentaires</th>
+                  <th scope="col">vues</th>
                   <th scope="col">Date</th>
                   <th scope="col">Action</th>
                 </tr>
@@ -35,6 +37,8 @@
                       /></td>
                   <td> {{ Str::limit($item['title'] , 20,'...') }}</td>
                   <td><span class="badge bg-secondary">{{ $item ->category->title }}</span></td>
+                  <td>{{ $item ->commentaires->count() }}</td>
+                  <td>2 vues</td>
                   <td> {{ \Carbon\Carbon::parse($item['created_at'])->diffForHumans() }}</td>
                 
                   <td>

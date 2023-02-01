@@ -2,10 +2,11 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\PostController;
+use App\Http\Controllers\SiteController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\DashboardController;
-use App\Http\Controllers\SiteController;
+use App\Http\Controllers\CommentaireController;
 
 /*
 |--------------------------------------------------------------------------
@@ -78,7 +79,9 @@ route::controller(SiteController::class)->group(function(){
     route::get('post/category','post')->name('post.list');
     route::get('post/detail','detail')->name('post.detail');
     route::get('contact','contact')->name('contact');
+});
 
 
-
+route::controller(CommentaireController::class)->group(function(){
+    route::post('comment','store')->name('post.comment');
 });
