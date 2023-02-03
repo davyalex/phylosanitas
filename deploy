@@ -1,0 +1,1 @@
+rsync -av ./ -e "ssh -p 65002" u823812213@145.14.156.41 :~/domains/phylosanitas

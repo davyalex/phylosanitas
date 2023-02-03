@@ -46,7 +46,7 @@ h6 {
 # Sections & Section Header
 --------------------------------------------------------------*/
 section {
-  padding: 40px 0;
+  padding: 20px 0;
   overflow: hidden;
 }
 
@@ -470,6 +470,7 @@ section {
 
 .post-entry-1 h2 a {
   color: rgb(0 69 111);
+  text-transform: capitalize;
 }
 
 .post-entry-1.lg h2 {
@@ -478,12 +479,12 @@ section {
 }
 
 .post-meta {
-  font-size: 11px;
+  font-size: 14px;
   letter-spacing: 0.07rem;
-  text-transform: uppercase;
-  font-weight: 600;
+  text-transform: capitalize;
+  font-weight: 300;
   font-family: var(--font-secondary);
-  color: rgba(var(--color-black-rgb), 0.4);
+  color: rgb(36, 35, 35);
   margin-bottom: 10px;
 }
 
@@ -573,13 +574,14 @@ section {
 }
 
 .post-entry-2 .post-meta {
-  font-size: 11px;
+  font-size: 14px;
   letter-spacing: 0.07rem;
-  text-transform: uppercase;
+  text-transform: capitalize;
   font-weight: 600;
   font-family: var(--font-secondary);
-  color: rgba(var(--color-black-rgb), 0.4);
-  margin-bottom: 10px;
+  color: #00456f;
+  margin-bottom: 5px;
+  margin-top: 10px;
 }
 
 .post-entry-2 .author {

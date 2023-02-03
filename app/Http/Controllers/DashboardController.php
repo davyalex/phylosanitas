@@ -6,6 +6,8 @@ use App\Models\Post;
 use App\Models\User;
 use App\Models\Category;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 
 class DashboardController extends Controller
@@ -19,13 +21,60 @@ class DashboardController extends Controller
     {
         //
         if (Auth::check()) {
-        $post_count = Post::get()->count();
-        $category_count = Category::get()->count();
-        $user_count = User::get()->count();
 
+        //nombre de post
+        $post_count = Post::get()->count();
+        //nombre de category
+        $category_count = Category::get()->count();
+        //nombre de user
+        $user_count = User::get()->count();
+        //5 derniers post
         $post_recent = Post::with(['category', 'commentaires', 'media', 'user'])->orderBy('created_at','desc')->get()->take(10);
 
-            return view('admin.pages.index',compact(['post_count','category_count','user_count','post_recent']));
+
+        //vue par pays
+           //count by group
+
+           $viewByCountry = DB::table('views')
+           ->select('country','viewable_id', DB::raw('count(viewable_id) as vue ' ))
+           // ->where('viewable_id',$post['id'])
+           ->groupBy('country','viewable_id')
+           ->get();
+
+           $key =   $viewByCountry->keys();
+           $data =   $viewByCountry->values();
+
+        //    dd($data[0]->country);
+
+           $count = [];
+
+           for ($i=0; $i <count($viewByCountry) ; $i++) { 
+                $country = $viewByCountry[$i]  ->country;
+                $vue = $viewByCountry[$i]  ->vue;
+                $viewable_id = $viewByCountry[$i]  ->viewable_id;
+                array_push( $count,[  "country"=>$country,
+                "vue"=>$vue,
+                "post_vue"=> $viewable_id]);
+
+           }
+   
+        //    $collection = new Collection( $viewByCountry);
+        //    $viewByCountry =  $collection->map(function($row){
+        //          return  $row;
+        //    });
+
+        // for ($i=0; $i <count($view) ; $i++) { 
+        //     $viewByCountry = $view[$i]['country'];
+        // }
+
+
+
+
+       
+           
+           
+
+            return view('admin.pages.index',compact(['post_count','category_count','user_count','post_recent','key','data']));
         } else {
            return redirect('login');
         }

@@ -63,7 +63,7 @@
           
             </div>
             <div class="post-meta d-flex justify-content-around ">
-                <h6 class="text-capitalize mr-auto"><i class="bi bi-eye"> </i> 200 vues</h6> 
+                <h6 class="text-capitalize mr-auto"><i class="bi bi-eye"> </i> {{ views($item)->count() }} vues</h6> 
                 <h6 class="text-capitalize "><i class="bi bi-chat-left-quote"> </i>{{ $item->commentaires->count() }} commentaires</h6>
             </div>
               <h3><a href="/post/detail?slug={{ $item['slug'] }}">{{ $item['title'] }}</a></h3>

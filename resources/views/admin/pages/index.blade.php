@@ -78,6 +78,8 @@
 
           </div><!-- End Customers Card -->
 
+       
+
           <div class="col-xxl-4 col-md-12">
                <!-- News & Updates Traffic -->
               <div class="card">
@@ -102,8 +104,8 @@
                     <div class="post-item clearfix">
                       <img src="{{ asset($item->getFirstMediaUrl('image')) }}" alt="">
                       <h4><a href="/post/detail?slug={{ $item['slug'] }}">{{ Str::limit($item['title'] ,50)}}</a></h4>         
-                          <p><i class="bi bi-eye"> </i> 200 vues &nbsp;   <i class="bi bi-chat-left-quote"> </i> {{ $item->commentaires->count() }}Commentaires
-                          &nbsp;<i class="bi bi-calendar-check"></i> Publié {{ \Carbon\Carbon::parse($item['created_at'])->diffForHumans() }}
+                          <p><i class="bi bi-eye"> </i> {{ views($item)->count() }} vues &nbsp; &nbsp;   <i class="bi bi-chat-left-quote"> </i> {{ $item->commentaires->count() }}Commentaires
+                         &nbsp; &nbsp;<i class="bi bi-calendar-check"></i> Publié {{ \Carbon\Carbon::parse($item['created_at'])->diffForHumans() }}
                           </p>
                       </div>
                     @endforeach

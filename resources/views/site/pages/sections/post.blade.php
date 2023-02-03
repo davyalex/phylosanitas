@@ -36,7 +36,7 @@
                   <img src="{{ asset('assets_site/img/medc.jpg')}}" alt="" class="img-fluid" style=" width:auto; height:300px; object-fit:contain"></a>
                 @endif
                 <div class="post-meta text-center "><span class="date text-capitalize "> {{ $item['category']['title'] }}</span>
-                     <span class="mx-1">&bullet;</span> <i class="bi bi-eye-fill w-100" >2000</i>
+                     <span class="mx-1">&bullet;</span> <i class="bi bi-eye-fill w-100" >{{ views($item)->count(); }}</i>
                      <span class="mx-1">&bullet;</span> <i class="bi bi-chat-left-quote w-100" >{{ $item->commentaires->count() }}</i>
                      <br>
                      <span class="text-lowercase">publié {{ \Carbon\Carbon::parse($post_recent['created_at'])->diffForHumans() }}</span> 

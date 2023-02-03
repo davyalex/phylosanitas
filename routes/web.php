@@ -5,6 +5,7 @@ use App\Http\Controllers\PostController;
 use App\Http\Controllers\SiteController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\ActualiteController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\CommentaireController;
 
@@ -67,6 +68,14 @@ Route::middleware('auth')->prefix('admin')->group(function () {
         Route::get('edit/{slug}', 'edit')->name('post.edit');
         Route::post('update/{id}', 'update')->name('post.update');
         Route::post('destroy/{id}', 'destroy')->name('post.delete');
+    });
+
+    route::controller(ActualiteController::class)->prefix('actualite')->group(function(){
+        route::get('index','index')->name('actualite.index');
+        route::post('store','store')->name('actualite.store');
+        Route::get('edit/{id}', 'edit')->name('actualite.edit');
+        Route::post('update/{id}', 'update')->name('actualite.update');
+        Route::post('destroy/{id}', 'destroy')->name('actualite.delete');
     });
 });
 

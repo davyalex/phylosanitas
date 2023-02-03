@@ -173,7 +173,7 @@
      @endrole
 
      <li class="nav-item">
-      <a class="nav-link collapsed" href="">
+      <a class="nav-link collapsed" href="{{ route('actualite.index') }}">
           <i class="bi bi-image"></i>
           <span>Actualités</span>
       </a>

@@ -2,12 +2,23 @@
 
 namespace App\Http\Controllers;
 
+
 use App\Models\Post;
+use  InteractsWithViews;
 use App\Models\Category;
+use App\Models\Actualite;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
+use Stevebauman\Location\Facades\Location;
+use CyrildeWit\EloquentViewable\Contracts\Visitor;
+use Illuminate\Database\Eloquent\Relations\Relation;
+
+// use App\Services\Views\Visitor;
 
 class SiteController extends Controller
 {
+
 
 public function __construct()
 {
@@ -32,9 +43,10 @@ public function __construct()
             ->get()->take(12);
 
         $category = Category::with('posts')->get()->sortBy('title');
+        $actualite = Actualite::with('media')->orderBy('created_at','desc')->get();
 
 
-        return view('site.pages.accueil', compact(['post_recent', 'post_last', 'post', 'category']));
+        return view('site.pages.accueil', compact(['post_recent', 'post_last', 'post', 'category','actualite']));
     }
 
 
@@ -68,7 +80,7 @@ public function __construct()
     }
 
 
-    public function detail(Request $request)
+    public function detail(Request $request, Post $post)
     {
 
 
@@ -86,7 +98,27 @@ public function __construct()
 
         $post = Post::with(['category', 'commentaires', 'media', 'user'])
         ->whereSlug($slug_req)->first();
-        
+       $ip = $request->getClientIp();
+
+    //    $currentUserInfo = Location::get('8.8.1.1');
+    //   $country =  $currentUserInfo->countryName;
+    //   $city =  $currentUserInfo->cityName;
+
+       
+       views($post)->record();
+       DB::table('views')->where('viewable_id',$post['id'])->update([
+        'ip'=>$ip,
+        // 'country'=> $country ,
+        // 'city'=> $city ,
+    ]);
+        // $post->visitsCounter()->increment();
+
+
+
+     
+
+
+        // dd(  $count);
         return view('site.pages.detail', compact(['post_last', 'post', 'category']));
 
     }

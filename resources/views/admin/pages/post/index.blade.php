@@ -38,7 +38,7 @@
                   <td> {{ Str::limit($item['title'] , 20,'...') }}</td>
                   <td><span class="badge bg-secondary">{{ $item ->category->title }}</span></td>
                   <td>{{ $item ->commentaires->count() }}</td>
-                  <td>2 vues</td>
+                  <td>{{ views($item)->count() }}</td>
                   <td> {{ \Carbon\Carbon::parse($item['created_at'])->diffForHumans() }}</td>
                 
                   <td>
