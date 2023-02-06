@@ -15,13 +15,17 @@
 
           <!-- ======= Single Post Content ======= -->
           <div class="single-post">
-            <div class="post-meta"><span class="date">{{ $post['category']['title'] }}</span> <span class="mx-1">&bullet;</span> <span>publié {{ \Carbon\Carbon::parse($post['created_at'])->diffForHumans() }}</span> </div>            
+            <div class="post-meta">
+              <span class="date">{{ $post['category']['title'] }}</span> <span class="mx-1">&bullet;</span> <span>publié {{ \Carbon\Carbon::parse($post['created_at'])->diffForHumans() }}</span> 
+            </div>            
            
-              <img src="{{ asset($post->getFirstMediaUrl('image'))}}" alt="" class="img-fluid"style="max-width:100; height:auto; object-fit:cover"> 
+              <img src="{{ asset($post->getFirstMediaUrl('image'))}}" alt="" class="img-fluid"style="width:100%; height:auto; object-fit:cover"> 
             <h1 class="mb-5 text-center" style="color: #00456f">{{ $post['title'] }}</h1>
-            <p>
-                {!! $post['description'] !!}
-            </p>
+            <div class="max-width:50%; max-height:200px; object-fit:cover">
+              {!!  $post['description'] !!}
+
+            </div>
+          
 
           
           </div><!-- End Single Post Content -->

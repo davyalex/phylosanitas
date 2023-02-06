@@ -28,12 +28,12 @@
               
               @foreach ($post as $item)
               <div class="col-lg-4 mb-0 border border-white">
-              <div class="post-entry-1 border">
+              <div class="post-entry-1 border mw-100 mh-300">
                 @if ($item->getFirstMediaUrl('image'))
-                <a href="/post/detail?slug={{ $item['slug'] }}"><img src="{{ asset($item->getFirstMediaUrl('image'))}}" alt="" class="img-fluid"style=" width:auto; height:300px; object-fit:contain"></a>
+                <a href="/post/detail?slug={{ $item['slug'] }}"><img src="{{ asset($item->getFirstMediaUrl('image'))}}" alt="" class="img-fluid"style=" width:100%; height:200px; object-fit:cover"></a>
                 @else
                 <a href="/post/detail?slug={{ $item['slug'] }}">
-                  <img src="{{ asset('assets_site/img/medc.jpg')}}" alt="" class="img-fluid" style=" width:auto; height:300px; object-fit:contain"></a>
+                  <img src="{{ asset('assets_site/img/medc.jpg')}}" alt="" class="img-fluid" style=" width:100%; height:200px; object-fit:cover"></a>
                 @endif
                 <div class="post-meta text-center "><span class="date text-capitalize "> {{ $item['category']['title'] }}</span>
                      <span class="mx-1">&bullet;</span> <i class="bi bi-eye-fill w-100" >{{ views($item)->count(); }}</i>
@@ -43,7 +43,7 @@
                      &bullet; 
                     
                     </div>
-                <h2 class="text-center text-justify"><a href="/post/detail?slug={{ $item['slug'] }}">{{ Str::limit($item['title'], 20, '...') }}</a></h2>
+                <h2 class="text-center text-justify"><a href="/post/detail?slug={{ $item['slug'] }}">{{ Str::limit($item['title'], 30, '...') }}</a></h2>
               </div>
            
             </div>

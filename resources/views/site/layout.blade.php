@@ -12,7 +12,7 @@
   <meta property="og:url" content="@yield('url')">
 
   <!-- Favicons -->
-  <link href="assets_site/img/favicon-32x32.png" rel="icon">
+  <link href="{{ asset('assets_site/img/favicon-32x32.png') }}" rel="icon">
   <link href="assets_site/img/apple-touch-icon.png" rel="apple-touch-icon">
   {{-- <link rel="preload" href="{{ asset('assets_site/img/person-1.jpg') }}" as="image"> --}}
 <link rel="apple-touch-icon" sizes="180x180" href="{{asset('assets_site/')}}">
