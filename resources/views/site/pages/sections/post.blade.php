@@ -39,7 +39,7 @@
                      <span class="mx-1">&bullet;</span> <i class="bi bi-eye-fill w-100" >{{ views($item)->count(); }}</i>
                      <span class="mx-1">&bullet;</span> <i class="bi bi-chat-left-quote w-100" >{{ $item->commentaires->count() }}</i>
                      <br>
-                     <span class="text-lowercase">publié {{ \Carbon\Carbon::parse($post_recent['created_at'])->diffForHumans() }}</span> 
+                     <span class="text-lowercase">publié {{ \Carbon\Carbon::parse($item['created_at'])->diffForHumans() }}</span> 
                      &bullet; 
                     
                     </div>

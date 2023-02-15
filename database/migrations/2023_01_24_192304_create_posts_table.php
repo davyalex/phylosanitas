@@ -19,6 +19,7 @@ return new class extends Migration
             $table->string('title')->nullable();
             $table->string('slug')->nullable();
             $table->string('tag')->nullable();
+            $table->string('published')->nullable();
             $table->string('lien')->nullable();
             $table->longText('description')->nullable();
             

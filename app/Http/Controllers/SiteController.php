@@ -35,12 +35,18 @@ public function __construct()
     {
         //
         // first recent post
-        $post_recent = Post::with(['category', 'commentaires', 'media', 'user'])->orderBy('created_at', 'desc')->first();
+        $post_recent = Post::with(['category', 'commentaires', 'media', 'user'])
+        ->where('published','public')
+        ->orderBy('created_at', 'desc')->first();
 
         // recent post
-        $post_last = Post::with(['category', 'commentaires', 'media', 'user'])->orderBy('created_at', 'desc')->get()->take(4);
+        $post_last = Post::with(['category', 'commentaires', 'media', 'user'])->orderBy('created_at', 'desc')
+        ->where('published','public')
+        ->get()->take(4);
+
         $post = Post::with(['category', 'commentaires', 'media', 'user'])->orderBy('created_at', 'desc')
-            ->get()->take(12);
+        ->where('published','public')
+        ->get()->take(12);
 
         $category = Category::with('posts')->get()->sortBy('title');
         $actualite = Actualite::with('media')->orderBy('created_at','desc')->get();
@@ -58,7 +64,9 @@ public function __construct()
         $category = Category::with('posts')->get()->sortBy('title');
 
         //liste recent post
-        $post_last = Post::with(['category', 'commentaires', 'media', 'user'])->orderBy('created_at', 'desc')->get()->take(4);
+        $post_last = Post::with(['category', 'commentaires', 'media', 'user'])->orderBy('created_at', 'desc')
+        ->where('published','public')
+        ->get()->take(4);
 
 
         /******* */
@@ -70,7 +78,8 @@ public function __construct()
 
         $post = Post::with(['category', 'commentaires', 'media', 'user'])
         ->when($slug_req, function($q) use( $category_req){
-            return $q->where('category_id', $category_req['id']);
+            return $q->where('category_id', $category_req['id'])
+            ->where('published','public');
         })->orderBy('created_at', 'desc')->paginate(5);
         
        
@@ -88,7 +97,9 @@ public function __construct()
         $category = Category::with('posts')->get()->sortBy('title');
 
         //liste recent post
-        $post_last = Post::with(['category', 'commentaires', 'media', 'user'])->orderBy('created_at', 'desc')->get()->take(4);
+        $post_last = Post::with(['category', 'commentaires', 'media', 'user'])->orderBy('created_at', 'desc')
+        ->where('published','public')
+        ->get()->take(4);
 
 
         /******* */
@@ -122,6 +133,20 @@ public function __construct()
         return view('site.pages.detail', compact(['post_last', 'post', 'category']));
 
     }
+
+
+    // public function search(Request $request){
+    //         $search = $request['search'];
+            
+    //         if ($search) {
+    //             $search = Post::with(['category', 'commentaires', 'media', 'user'])->orderBy('created_at', 'desc')
+    //             ->where('published','public')
+    //             ->whereLike('title',$search)
+    //             ->get()->pignate(12);
+    //             return view('site.pages.accueil', compact(['search']));
+
+    //         }
+    // }
 
 
 public function contact(){

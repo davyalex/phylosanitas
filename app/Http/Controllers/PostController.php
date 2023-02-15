@@ -21,11 +21,32 @@ class PostController extends Controller
     public function index()
     {
         //
-        $post = Post::with(['category', 'commentaires', 'media', 'user'])->orderBy('created_at','desc')->get();
-       
-       
+        $post = Post::with(['category', 'commentaires', 'media', 'user'])->orderBy('created_at', 'desc')->get();
+
+
         return view('admin.pages.post.index', compact('post'));
     }
+
+
+    public function published(Request $request)
+    {
+
+        $status = request('status');
+        $post = request('post');
+
+        if ($status & $post) {
+            $published = Post::whereId($post)->update(['published' => $status]);
+            $post = Post::with(['category', 'commentaires', 'media', 'user'])->orderBy('created_at', 'desc')->get();
+            Alert::Success('Status modifié avec success');
+
+            return view('admin.pages.post.index', compact('post'));
+        }
+
+        //
+       
+    }
+
+
 
     /**
      * Show the form for creating a new resource.
@@ -61,6 +82,7 @@ class PostController extends Controller
             'description' => $request['description'],
             'category_id' => $request['category'],
             'lien' => $request['lien'],
+            'published' => 'prive',
             'user_id' => Auth::user()->id,
         ]);
 
@@ -91,15 +113,14 @@ class PostController extends Controller
      * @param  \App\Models\Post  $post
      * @return \Illuminate\Http\Response
      */
-    public function edit(Post $post , $slug)
+    public function edit(Post $post, $slug)
     {
         //
         $category = Category::with('posts')->get();
         $post = Post::with(['category', 'commentaires', 'media', 'user'])
-        ->whereSlug($slug)
-        ->first();
-        return view('admin.pages.post.edit', compact(['post','category']));
-
+            ->whereSlug($slug)
+            ->first();
+        return view('admin.pages.post.edit', compact(['post', 'category']));
     }
 
     /**
@@ -113,14 +134,14 @@ class PostController extends Controller
     {
         //
         $request->validate([
-             'title' => 'required',
+            'title' => 'required',
             'description' => '',
             'category' => 'required',
             'lien' => '',
         ]);
 
         $post = tap(Post::find($id))->update([
-             'title' => $request['title'],
+            'title' => $request['title'],
             'description' => $request['description'],
             'category_id' => $request['category'],
             'lien' => $request['lien'],
@@ -134,10 +155,10 @@ class PostController extends Controller
             $post->addMediaFromRequest('image')
                 ->toMediaCollection('image');
         }
-        $post = Post::with(['category', 'commentaires', 'media', 'user'])->orderBy('created_at','desc')->get();
+        $post = Post::with(['category', 'commentaires', 'media', 'user'])->orderBy('created_at', 'desc')->get();
 
         Alert::toast('post modifié avec success', 'success');
-        return view('admin.pages.post.index',compact('post'));
+        return view('admin.pages.post.index', compact('post'));
     }
 
     /**

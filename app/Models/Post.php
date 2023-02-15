@@ -44,6 +44,7 @@ class Post extends Model implements HasMedia,Viewable
         'lien',
         'category_id',
         'user_id',
+        'published',
         'created_at',
         'updated_at',
         'deleted_at',

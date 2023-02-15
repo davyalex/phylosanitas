@@ -22,63 +22,24 @@ class DashboardController extends Controller
         //
         if (Auth::check()) {
 
-        //nombre de post
-        $post_count = Post::get()->count();
-        //nombre de category
-        $category_count = Category::get()->count();
-        //nombre de user
-        $user_count = User::get()->count();
-        //5 derniers post
-        $post_recent = Post::with(['category', 'commentaires', 'media', 'user'])->orderBy('created_at','desc')->get()->take(10);
-
-
-        //vue par pays
-           //count by group
-
-           $viewByCountry = DB::table('views')
-           ->select('country','viewable_id', DB::raw('count(viewable_id) as vue ' ))
-           // ->where('viewable_id',$post['id'])
-           ->groupBy('country','viewable_id')
-           ->get();
-
-           $key =   $viewByCountry->keys();
-           $data =   $viewByCountry->values();
-
-        //    dd($data[0]->country);
-
-           $count = [];
-
-           for ($i=0; $i <count($viewByCountry) ; $i++) { 
-                $country = $viewByCountry[$i]  ->country;
-                $vue = $viewByCountry[$i]  ->vue;
-                $viewable_id = $viewByCountry[$i]  ->viewable_id;
-                array_push( $count,[  "country"=>$country,
-                "vue"=>$vue,
-                "post_vue"=> $viewable_id]);
-
-           }
-   
-        //    $collection = new Collection( $viewByCountry);
-        //    $viewByCountry =  $collection->map(function($row){
-        //          return  $row;
-        //    });
-
-        // for ($i=0; $i <count($view) ; $i++) { 
-        //     $viewByCountry = $view[$i]['country'];
-        // }
-
-
-
-
-       
-           
-           
-
-            return view('admin.pages.index',compact(['post_count','category_count','user_count','post_recent','key','data']));
+            //nombre de post
+            $post_count = Post::get()->count();
+            //nombre de category
+            $category_count = Category::get()->count();
+            //nombre de user
+            $user_count = User::get()->count();
+            //5 derniers post
+            $post_recent = Post::with(['category', 'commentaires', 'media', 'user'])->orderBy('created_at', 'desc')
+            ->wherePublished('public')
+            ->get()->take(10);
+            //nombre de visiteur
+            $countVisitor = DB::table('views')->get('visitor')->count();
+            // dd( $countVisitor);
+            
+            return view('admin.pages.index', compact(['post_count', 'category_count', 'user_count', 'post_recent','countVisitor']));
         } else {
-           return redirect('login');
+            return redirect('login');
         }
-        
     }
 
     /**

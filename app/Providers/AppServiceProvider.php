@@ -30,7 +30,9 @@ class AppServiceProvider extends ServiceProvider
     {
         
         $category = Category::with('posts')->get();
-        $post_last = Post::with(['category', 'commentaires', 'media', 'user'])->orderBy('created_at', 'desc')->get()->take(4);
+        $post_last = Post::with(['category', 'commentaires', 'media', 'user'])->orderBy('created_at', 'desc')
+        ->where('published','public')
+        ->get()->take(4);
 
         View::composer('*', function ($view) use ($category, $post_last) {
             $view->with([

@@ -68,6 +68,8 @@ Route::middleware('auth')->prefix('admin')->group(function () {
         Route::get('edit/{slug}', 'edit')->name('post.edit');
         Route::post('update/{id}', 'update')->name('post.update');
         Route::post('destroy/{id}', 'destroy')->name('post.delete');
+        Route::get('published', 'published');
+        // Route::post('recherche', 'search')->name('post.search');
     });
 
     route::controller(ActualiteController::class)->prefix('actualite')->group(function(){

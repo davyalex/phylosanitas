@@ -16,7 +16,7 @@
               <thead>
                 <tr>
                   <th scope="col">#</th>
-                  <th scope="col">image</th>
+                  <th scope="col-2">image</th>
                   <th scope="col">title</th>
                   <th scope="col">categorie</th>
                   <th scope="col">commentaires</th>
@@ -29,12 +29,18 @@
                 @foreach ($post as $key =>$item)
                 <tr>
                   <th scope="row">{{ ++$key }}</th>
-                    <td>  <img
+                    <td class="col-2">  <img
                       src="{{ $item ->getFirstMediaUrl('image') }}"
                       alt="{{ $item ->getFirstMediaUrl('image') }}"
                       style="width: 45px; height: 45px"
                       class="rounded-circle"
-                      /></td>
+                      />
+                      @if ($item['published']=='prive')
+                      <br><span class=""> <i class="bi bi-circle-fill text-warning"></i> non publié</span>
+                      @elseif ($item['published']=='public')
+                     <br> <span class=""> <i class="bi bi-circle-fill text-success"></i> en ligne</span>
+                      @endif
+                    </td>
                   <td> {{ Str::limit($item['title'] , 20,'...') }}</td>
                   <td><span class="badge bg-secondary">{{ $item ->category->title }}</span></td>
                   <td>{{ $item ->commentaires->count() }}</td>
@@ -43,6 +49,16 @@
                 
                   <td>
                    <div class="d-flex">
+                      
+                     <div class="dropdown">
+                            <button  role="button" class="btn btn-primary rounded-circle dropdown-toggle" data-bs-toggle="dropdown" aria-haspopup="false"><i class="bi bi-globe"></i></button>
+                            <div class="dropdown-menu">
+                              <a href="/admin/post/published?status=public&post={{ $item['id'] }}" class="dropdown-item " style="font-weight:700; font-size:1em" href="#"><i class="bi bi-globe2"></i> Public</a>
+                              <div class="dropdown-divider"></div>
+                              <a href="/admin/post/published?status=prive&post={{ $item['id'] }}" class="dropdown-item " style="font-weight:700; font-size:1em" href="#"><i class="bi bi-lock-fill"></i> Privé</a>
+                            </div>
+                          
+                          </div>
                     <a href="/post/detail?slug={{ $item['slug'] }}"  role="button" class="btn btn-warning rounded-circle"><i class="bi bi-eye"></i></a>
                     <a href="{{ route('post.edit',$item['slug']) }}" class="btn btn-success rounded-circle" role="button"  class="btn btn-success mx-2 "><i class="bi bi-pencil"></i></a>
                     

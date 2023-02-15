@@ -113,12 +113,12 @@
         <a href="#" class="mx-2"><span class="bi-twitter"></span></a>
         <a href="#" class="mx-2"><span class="bi-instagram"></span></a> -->
 
-        <a href="#" class="mx-2 js-search-open mt-3"><span class="bi-search"></span></a>
+        <a href="#" class="mx-2 js-search-open mt-3"><span class=""></span></a>
         <i class="bi bi-list mobile-nav-toggle"></i>
 
         <!-- ======= Search Form ======= -->
         <div class="search-form-wrap js-search-form-wrap">
-          <form action="search-result.html" class="search-form">
+          <form action="" class="search-form">
             <span class="icon bi-search"></span>
             <input type="text" placeholder="Search" class="form-control">
             <button class="btn js-search-close"><span class="bi-x"></span></button>
@@ -189,7 +189,7 @@
    
                   @endif
                   <div>
-                    <div class="post-meta d-block"><span class="date">{{ $item['category']['title'] }}</span> <span class="mx-1">&bullet;</span> <span>Jul 5th '22</span></div>
+                    <div class="post-meta d-block"><span class="date">{{ $item['category']['title'] }}</span> <span class="mx-1">&bullet;</span> <span>{{ \Carbon\Carbon::parse($item['created_at'])->diffForHumans() }}</span></div>
                     <span>{{ $item['title'] }}</span>
                   </div>
                 </a>
