@@ -29,8 +29,18 @@ class AppServiceProvider extends ServiceProvider
     public function boot()
     {
         
-        $category = Category::with('posts')->get();
+        // $category = Category::with('posts')->get();
+
+        $request = request('type');
+        $category = Category::with('posts')
+         ->when($request =='sondage',
+         fn($q)=>$q->whereTitle('sondage')
+         )
+        ->get();
+
+         $category_sondage = Category::whereTitle('sondage')->first();
         $post_last = Post::with(['category', 'commentaires', 'media', 'user'])->orderBy('created_at', 'desc')
+        ->where('category_id','!=',$category_sondage['id'])
         ->where('published','public')
         ->get()->take(4);
 

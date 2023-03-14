@@ -57,8 +57,6 @@
 
           <!--  Section right -->
           <div class="col-lg-2">
-
-           
             <div class="aside-block">
               <h3 class="aside-title">Tags &amp;Categories</h3>
               <ul class="aside-tags list-unstyled">
@@ -68,7 +66,14 @@
                
               </ul>
             </div><!-- End Tags -->
+            
           </div> 
+
+
+          
+
+
+          
           
 
       </div> <!-- End .row -->

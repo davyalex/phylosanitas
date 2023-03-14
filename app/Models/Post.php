@@ -77,6 +77,18 @@ class Post extends Model implements HasMedia,Viewable
     }
 
 
+    public function optionSondages(): HasMany
+    {
+        return $this->hasMany(OptionSondage::class);
+    }
+
+
+    public function soumissions(): HasMany
+    {
+        return $this->hasMany(Soumission::class);
+    }
+
+
    /**
      * Get the instance of the user visits
      *

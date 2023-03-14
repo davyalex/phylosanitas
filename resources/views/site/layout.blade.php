@@ -1,23 +1,28 @@
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <head>
-  <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title> {{ config('app.name') }}-@yield('title') </title>
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-  <meta property="og:description" content="@yield('description')">
+  <meta name="description" content="@yield('title')">
   <meta property="og:image" content="@yield('image')">
-  <meta property="og:title" content="@yield('title')">
-  <meta property="og:url" content="@yield('url')">
+  <meta name="title" content="@yield('title')">
+  <meta name="url" content="@yield('url')">
+
+
+  <meta name="csrf-token" content="{{ csrf_token() }}">
+  <title> {{ config('app.name') }}-@yield('title') </title>
+
+ 
+ {{-- @yield('meta') --}}
+
+
 
   <!-- Favicons -->
-  <link href="{{ asset('assets_site/img/favicon-32x32.png') }}" rel="icon">
-  <link href="assets_site/img/apple-touch-icon.png" rel="apple-touch-icon">
-  {{-- <link rel="preload" href="{{ asset('assets_site/img/person-1.jpg') }}" as="image"> --}}
-<link rel="apple-touch-icon" sizes="180x180" href="{{asset('assets_site/')}}">
-<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
-<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+  <link rel="shortcut icon" href="{{ asset('favicon.ico') }}" type="image/x-icon">
+  <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('assets_site/img/apple-touch-icon.png') }}">
+    <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('assets_site/img/favicon-32x32.png') }}">
+    <link rel="icon" type="image/png" sizes="16x16" href="{{ asset('assets_site/img/favicon-16x16.png') }}">
 <link rel="manifest" href="/site.webmanifest">
   <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -135,6 +140,7 @@
 
 
   @yield('content')
+  @include('sweetalert::alert')
 
 
 
@@ -213,7 +219,7 @@
             </div>
 
             <div class="credits">
-              Développé par<a href=""> Labodigit</a>
+              Développé par<a href="dolubux.com" target="_blank"> dolubux.com</a>
             </div>
 
           </div>

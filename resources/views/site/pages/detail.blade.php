@@ -1,11 +1,22 @@
 @extends('site.layout')
-@section('title',$post ->title)
-@section('description',$post ->description)
+@section('title',$post->slug)
+@section('description',$post->description)
 @section('image',asset($post->getFirstMediaUrl('image')))
 @section('url',url()->current())
-
+{{-- @section('meta')
+<x-meta
+title="{{ $post->slug }}"
+description="{{ $post->description }}"
+image="{{ asset($post->getFirstMediaUrl('image')) }}"
+url="{{ url()->current() }}"
+/>
+@endsection
+  --}}
 @section('content')
+
 <section class="single-post-content">
+
+ 
     <div class="container">
       <div class="row">
         <div class="col-md-9 post-content" data-aos="fade-up">
@@ -30,7 +41,46 @@
           
           </div><!-- End Single Post Content -->
 
-          <!-- ======= Comments ======= -->
+
+          {{-- formulaire du sondage --}}
+         
+              
+         
+            @if ($post['category']['title']=='sondage')
+            <div class="row col-6 m-auto ">
+              <h4 class="fw-bold text-center mt-3"></h4>
+               {{-- affichage des statistics du sondage --}}
+              @foreach ($statistic_sondage as $item)
+                <div class="d-flex alert alert-primary ">
+                  <span class="m-auto text-bold" style="font-weight:500; font-size:19px">{{ $item['optionSondage']['title'] }} ({{ $item['choice'] }} vote(s))</span>
+                </div>
+              @endforeach
+                 {{-- affichage des statistics du sondage --}}
+              <form class="bg-white px-4" action="{{ route('sondage.store') }}" method="post">
+                @csrf
+                @if ($post['optionSondages'])
+                <span class="text-danger">Veuillez sélectionner une réponse</span>
+                @foreach ($post['optionSondages'] as $item)
+                <div class="form-check mb-2" style="font-size: 25px;">
+                  <input type="text"  name="post_id" value="{{ $post['id'] }}" hidden required>
+                  <input class="form-check-input"  value="{{ $item['id'] }}" type="radio" name="sondage_option" id="radioExample{{ $item['id'] }}" required />
+                  <label class="form-check-label" style="font-size:15px"  for="radioExample{{ $item['id'] }}">
+                    <span style="font-size: 25px">  {{ $item['title'] }}</span>
+                  </label>
+                </div>
+                @endforeach
+                    
+                @endif
+               
+                <div class="text-center mt-4">
+                  <button type="submit"  class="btn btn-primary m-auto">Valider ma reponse <i class="bi bi-send"></i></button>
+                </div>
+              </form>
+            </div>
+            {{-- end-formulaire du sondage --}}
+
+            @else
+               <!-- ======= Comments ======= -->
           <div class="comments">
             <h5 class="comment-title py-4">{{ $post->commentaires->count() }} Commentaires</h5>
             @foreach ($post->commentaires as $item)
@@ -90,6 +140,13 @@
 
           
           </div><!-- End Comments Form -->
+            @endif
+
+
+
+          
+
+       
 
         </div>
         <div class="col-md-3">
@@ -98,6 +155,31 @@
       </div>
     </div>
   </section>
+
+  <script>
+    // $(document).ready(function(){
+
+
+    //   $('#btn').click(function (e) { 
+    //     e.preventDefault();
+
+    //     var post_sondage = $('#post_sondage').val();
+    //     var option_sondage = $('#option_sondage').val();
+
+    //     $.ajax({
+    //       type: "POST",
+    //       url: "{{ route('sondage.store') }}",
+    //       data: { post_sondage:post_sondage, option_sondage:option_sondage },
+    //       dataType: "json",
+    //       success: function (response) {
+            
+    //       }
+    //     });
+
+        
+    //   });
+    // })
+  </script>
 @endsection
 
 

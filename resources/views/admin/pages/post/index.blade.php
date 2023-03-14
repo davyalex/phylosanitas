@@ -9,9 +9,17 @@
         <div class="card">
           <div class="card-body">
             <h5 class="card-title">
-                <a href="{{ route('post.create') }}"   role="button" class="btn btn-primary"> <i class="bi bi-plus-lg"></i> Ajouter un post</a>
+              @if (request('type')=='sondage')
+              <a href="/admin/post/create?type=sondage" role="button" class="btn btn-primary"> <i class="bi bi-plus-lg"></i> Ajouter un sondage</a>
+              @else
+              <a href="{{ route('post.create') }}"   role="button" class="btn btn-primary"> <i class="bi bi-plus-lg"></i> Ajouter un post</a>
+              @endif
             </h5>
-            <!-- Table with stripped rows -->
+
+            @if (request('type')=='sondage')
+                @include('admin.pages.sondage.index')
+            @else
+                   <!-- Table with stripped rows -->
             <table class="table datatable">
               <thead>
                 <tr>
@@ -75,6 +83,8 @@
               </tbody>
             </table>
             <!-- End Table with stripped rows -->
+            @endif
+         
 
           </div>
         </div>
