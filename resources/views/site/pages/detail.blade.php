@@ -55,7 +55,7 @@ url="{{ url()->current() }}"
                 <div class="d-flex ">
                    @foreach ($statistic_sondage as $item)
                    <span class="m-auto " style="font-weight:400; font-size:19px;">{{ $item['optionSondage']['title'] }} 
-                      <i class="text-dark">{{ ($item['choice']*100) / $sondage_total }} %</i>
+                      <i class="text-dark">{{ number_format(($item['choice']*100) / $sondage_total,2) }} %</i>
                    </span><br>
                    @endforeach
                  </div>
