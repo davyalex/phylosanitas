@@ -46,22 +46,27 @@ url="{{ url()->current() }}"
          
               
          
-            @if ($post['category']['title']=='sondage')
-            <div class="row col-6 m-auto ">
+            @if ($post['category']['title']=='Sondage')
+            <div class="row col-12 m-auto ">
               <h4 class="fw-bold text-center mt-3"></h4>
                {{-- affichage des statistics du sondage --}}
-              @foreach ($statistic_sondage as $item)
-                <div class="d-flex alert alert-primary ">
-                  <span class="m-auto text-bold" style="font-weight:500; font-size:19px">{{ $item['optionSondage']['title'] }} ({{ $item['choice'] }} vote(s))</span>
-                </div>
-              @endforeach
+              <div class="alert alert-info ">
+                <p class="mb-1 text-bold text-primary" style="text-align:center; font-size:21px"><i class="bi bi-people"></i> Partcipants: {{ $sondage_total }} </p>
+                <div class="d-flex ">
+                   @foreach ($statistic_sondage as $item)
+                   <span class="m-auto " style="font-weight:400; font-size:19px;">{{ $item['optionSondage']['title'] }} 
+                      <i class="text-dark">{{ ($item['choice']*100) / $sondage_total }} %</i>
+                   </span><br>
+                   @endforeach
+                 </div>
+              </div>
                  {{-- affichage des statistics du sondage --}}
               <form class="bg-white px-4" action="{{ route('sondage.store') }}" method="post">
                 @csrf
                 @if ($post['optionSondages'])
                 <span class="text-danger">Veuillez sélectionner une réponse</span>
                 @foreach ($post['optionSondages'] as $item)
-                <div class="form-check mb-2" style="font-size: 25px;">
+                <div class="form-check mb-2 " style="font-size: 25px;">
                   <input type="text"  name="post_id" value="{{ $post['id'] }}" hidden required>
                   <input class="form-check-input"  value="{{ $item['id'] }}" type="radio" name="sondage_option" id="radioExample{{ $item['id'] }}" required />
                   <label class="form-check-label" style="font-size:15px"  for="radioExample{{ $item['id'] }}">

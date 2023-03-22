@@ -92,8 +92,8 @@ class SiteController extends Controller
     public function detail(Request $request, Post $post)
     {
 
-    
-    
+
+
         //liste des categories
         $category = Category::with('posts')->get()->sortBy('title');
 
@@ -111,17 +111,24 @@ class SiteController extends Controller
         $post = Post::with(['category', 'commentaires', 'media', 'user', 'optionSondages'])
             ->whereSlug($slug_req)->first();
 
-// statistics des sondages
-            $statistic_sondage = Soumission::with(['post', 'optionSondage'])
-            ->where('post_id',$post['id'])
+
+        // statistics des sondages
+        $statistic_sondage = Soumission::with(['post', 'optionSondage'])
+            ->where('post_id', $post['id'])
             ->selectRaw('post_id,option_sondage_id,count(*) as choice')
-           ->groupBy([
-          'post_id',
-           'option_sondage_id'])->get();
-        
-           
-            // dd($statistic_sondage->toArray());
-    
+            ->groupBy([
+                'post_id',
+                'option_sondage_id'
+            ])->get();
+
+            //total votant
+            $sondage_total = Soumission::get()
+            ->where('post_id', $post['id'])
+            ->count();
+
+
+        // dd($statistic_sondage->toArray());
+
 
 
         // dd($post ->toArray());
@@ -140,14 +147,7 @@ class SiteController extends Controller
         ]);
         // $post->visitsCounter()->increment();
 
-
-
-        // $request->session()->put('sondage', $post);
-
-
-
-        // dd(  $count);
-        return view('site.pages.detail', compact(['post_last', 'post', 'category','statistic_sondage']));
+        return view('site.pages.detail', compact(['post_last', 'post', 'category', 'statistic_sondage','sondage_total']));
     }
 
 
@@ -170,7 +170,4 @@ class SiteController extends Controller
         $this->category;
         return view('site.pages.contact');
     }
-
-
- 
 }

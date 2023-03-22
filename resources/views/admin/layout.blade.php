@@ -215,7 +215,7 @@
       &copy; Copyright <strong><span>{{ config('app.name') }}</span></strong>. Tous droits reservés
     </div>
     <div class="credits">
-      Développé par <a href="dolubux.com" target="blank">dolubux</a>
+      Développé par<a href="https://dolubux.com" target="_blank"> dolubux.com</a>
     </div>
   </footer><!-- End Footer -->
 

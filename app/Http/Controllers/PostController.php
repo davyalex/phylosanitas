@@ -32,7 +32,7 @@ class PostController extends Controller
         )
         ->orderBy('created_at', 'desc')->get();
 
-        $post = $post = Post::with(['category', 'commentaires', 'media', 'user'])
+        $post = $post = Post::with(['category', 'commentaires', 'media', 'user','views'])
         ->where('category_id','!=',$category['id'])
         ->orderBy('created_at', 'desc')->get();
         
