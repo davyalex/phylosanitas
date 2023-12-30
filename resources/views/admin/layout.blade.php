@@ -163,6 +163,13 @@
                 <span>Posts</span>
             </a>
         </li><!-- End Login Page Nav -->
+
+        <li class="nav-item">
+          <a class="nav-link collapsed" href="/admin/post?type=sondage">
+              <i class="bi bi-card-text"></i>
+              <span>Sondages</span>
+          </a>
+      </li><!-- End Login Page Nav -->
         @role('administrateur')
         <li class="nav-item">
           <a class="nav-link collapsed" href="{{ route('user') }}">
@@ -208,7 +215,7 @@
       &copy; Copyright <strong><span>{{ config('app.name') }}</span></strong>. Tous droits reservés
     </div>
     <div class="credits">
-      Développé par <a href="">Labodigit</a>
+      Développé par<a href="https://dolubux.com" target="_blank"> dolubux.com</a>
     </div>
   </footer><!-- End Footer -->
 

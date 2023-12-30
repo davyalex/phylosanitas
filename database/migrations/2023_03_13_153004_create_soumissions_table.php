@@ -13,29 +13,24 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('posts', function (Blueprint $table) {
+        Schema::create('soumissions', function (Blueprint $table) {
             $table->id();
-            // $table->string('code')->unique()->nullable();
-            $table->longText('title')->nullable();
-            $table->longText('slug')->nullable();
-            $table->string('tag')->nullable();
-            $table->string('published')->nullable();
-            $table->string('lien')->nullable();
-            $table->longText('description')->nullable();
+
+            $table->string('user_session');
             
-            $table->foreignId('category_id')
+            $table->foreignId('post_id')
             ->nullable()
-            ->constrained('categories')
+            ->constrained('posts')
             ->onUpdate('cascade')
             ->onDelete('set null');
 
-            $table->foreignId('user_id')
+            $table->foreignId('option_sondage_id')
             ->nullable()
-            ->constrained('users')
+            ->constrained('option_sondages')
             ->onUpdate('cascade')
             ->onDelete('set null');
 
-            $table->softDeletes();
+           $table->softDeletes();
             $table->timestamps();
         });
     }
@@ -47,6 +42,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('posts');
+        Schema::dropIfExists('soumissions');
     }
 };

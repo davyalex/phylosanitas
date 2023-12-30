@@ -44,6 +44,7 @@ class Post extends Model implements HasMedia,Viewable
         'lien',
         'category_id',
         'user_id',
+        'published',
         'created_at',
         'updated_at',
         'deleted_at',
@@ -73,6 +74,18 @@ class Post extends Model implements HasMedia,Viewable
     public function commentaires(): HasMany
     {
         return $this->hasMany(Commentaire::class);
+    }
+
+
+    public function optionSondages(): HasMany
+    {
+        return $this->hasMany(OptionSondage::class);
+    }
+
+
+    public function soumissions(): HasMany
+    {
+        return $this->hasMany(Soumission::class);
     }
 
 

@@ -53,21 +53,21 @@
           <div class="d-md-flex post-entry-2 half">
            
             @if ($item->getFirstMediaUrl('image'))
-            <a class="me-4 thumbnail" href="/post/detail?slug={{ $item['slug'] }}"><img src="{{ asset($item->getFirstMediaUrl('image'))}}" alt="" class="img-fluid"style=" width:auto; height:300px; object-fit:contain"></a>
+            <a class="me-4 thumbnail" href="/post/detail?slug={{ $item['slug'] }}"><img src="{{ asset($item->getFirstMediaUrl('image'))}}" alt="" class="img-fluid"style=" width:auto; height:250px; object-fit:contain"></a>
             @else
             <a class="me-4 thumbnail" href="/post/detail?slug={{ $item['slug'] }}">
               <img src="{{ asset('assets_site/img/medc.jpg')}}" alt="" class="img-fluid" style=" width:auto; height:300px; object-fit:contain"></a>
             @endif
             <div>
-              <div class="post-meta"><span class="date">{{ $item['category']['title'] }}</span> <span class="mx-1">&bullet;</span> <span>publié {{ \Carbon\Carbon::parse($item['created_at'])->diffForHumans() }}</span>
+              <div class="post-meta"><span class="date">{{ $item['category']['title'] }}</span> <span class="mx-1">&bullet;</span> <span style="font-style:italic">publié {{ \Carbon\Carbon::parse($item['created_at'])->diffForHumans() }}</span>
           
             </div>
             <div class="post-meta d-flex justify-content-around ">
                 <h6 class="text-capitalize mr-auto"><i class="bi bi-eye"> </i> {{ views($item)->count() }} vues</h6> 
                 <h6 class="text-capitalize "><i class="bi bi-chat-left-quote"> </i>{{ $item->commentaires->count() }} commentaires</h6>
             </div>
-              <h3><a href="/post/detail?slug={{ $item['slug'] }}">{{ $item['title'] }}</a></h3>
-              <p>{!! Str::words($item['description'],60,'...') !!}</p>
+              <h3><a href="/post/detail?slug={{ $item['slug'] }}" style='color:red'>{{ $item['title'] }}</a></h3>
+              <!--<p>{!! Str::words($item['description'],20,'...') !!}</p>-->
               {{-- <div class="d-flex align-items-center author">
                 <div class="photo"><img src="assets/img/person-2.jpg" alt="" class="img-fluid"></div>
                 <div class="name">

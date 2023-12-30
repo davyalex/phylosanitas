@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\SiteController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\SondageController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\ActualiteController;
 use App\Http\Controllers\DashboardController;
@@ -68,6 +69,8 @@ Route::middleware('auth')->prefix('admin')->group(function () {
         Route::get('edit/{slug}', 'edit')->name('post.edit');
         Route::post('update/{id}', 'update')->name('post.update');
         Route::post('destroy/{id}', 'destroy')->name('post.delete');
+        Route::get('published', 'published');
+        // Route::post('recherche', 'search')->name('post.search');
     });
 
     route::controller(ActualiteController::class)->prefix('actualite')->group(function(){
@@ -77,12 +80,22 @@ Route::middleware('auth')->prefix('admin')->group(function () {
         Route::post('update/{id}', 'update')->name('actualite.update');
         Route::post('destroy/{id}', 'destroy')->name('actualite.delete');
     });
+
 });
 
 
 /********************************************************************* */
 
+//sondage
 
+route::controller(SondageController::class)->prefix('sondage')->group(function(){
+    route::post('index','index')->name('sondage.index');
+    route::post('store','store')->name('sondage.store');
+  
+});
+
+
+//api pour le site
 route::controller(SiteController::class)->group(function(){
     route::get('','index')->name('accueil');
     route::get('post/category','post')->name('post.list');

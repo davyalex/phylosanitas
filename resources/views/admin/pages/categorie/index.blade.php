@@ -92,7 +92,7 @@
                 @csrf
                 <div class="col-12">
                   <label for="inputNanme4" class="form-label">Title</label>
-                  <input type="text" value="{{ $item['slug'] }}" name="title" class="form-control @error('title') is-invalid  @enderror" id="inputNanme4">
+                  <input type="text" value="{{ $item['title'] }}" name="title" class="form-control @error('title') is-invalid  @enderror" id="inputNanme4">
                   @error('title')
                   <p class="text-danger">{{ $message }}</p>
                 @enderror

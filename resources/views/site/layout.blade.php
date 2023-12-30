@@ -1,21 +1,29 @@
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <head>
-  <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title> {{ config('app.name') }}-@yield('title') </title>
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-  <meta property="og:description" content="@yield('description')">
+  <meta name="description" content="@yield('title')">
   <meta property="og:image" content="@yield('image')">
-  <meta property="og:title" content="@yield('title')">
-  <meta property="og:url" content="@yield('url')">
+  <meta name="title" content="@yield('title')">
+  <meta name="url" content="@yield('url')">
+
+
+  <meta name="csrf-token" content="{{ csrf_token() }}">
+  <title> {{ config('app.name') }}-@yield('title') </title>
+
+ 
+ {{-- @yield('meta') --}}
+
+
 
   <!-- Favicons -->
-  <link href="assets_site/img/favicon.png" rel="icon">
-  <link href="assets_site/img/apple-touch-icon.png" rel="apple-touch-icon">
-  {{-- <link rel="preload" href="{{ asset('assets_site/img/person-1.jpg') }}" as="image"> --}}
-
+  <link rel="shortcut icon" href="{{ asset('favicon.ico') }}" type="image/x-icon">
+  <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('assets_site/img/apple-touch-icon.png') }}">
+    <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('assets_site/img/favicon-32x32.png') }}">
+    <link rel="icon" type="image/png" sizes="16x16" href="{{ asset('assets_site/img/favicon-16x16.png') }}">
+<link rel="manifest" href="/site.webmanifest">
   <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -110,12 +118,12 @@
         <a href="#" class="mx-2"><span class="bi-twitter"></span></a>
         <a href="#" class="mx-2"><span class="bi-instagram"></span></a> -->
 
-        <a href="#" class="mx-2 js-search-open mt-3"><span class="bi-search"></span></a>
+        <a href="#" class="mx-2 js-search-open mt-3"><span class=""></span></a>
         <i class="bi bi-list mobile-nav-toggle"></i>
 
         <!-- ======= Search Form ======= -->
         <div class="search-form-wrap js-search-form-wrap">
-          <form action="search-result.html" class="search-form">
+          <form action="" class="search-form">
             <span class="icon bi-search"></span>
             <input type="text" placeholder="Search" class="form-control">
             <button class="btn js-search-close"><span class="bi-x"></span></button>
@@ -132,6 +140,7 @@
 
 
   @yield('content')
+  @include('sweetalert::alert')
 
 
 
@@ -186,7 +195,7 @@
    
                   @endif
                   <div>
-                    <div class="post-meta d-block"><span class="date">{{ $item['category']['title'] }}</span> <span class="mx-1">&bullet;</span> <span>Jul 5th '22</span></div>
+                    <div class="post-meta d-block"><span class="date">{{ $item['category']['title'] }}</span> <span class="mx-1">&bullet;</span> <span>{{ \Carbon\Carbon::parse($item['created_at'])->diffForHumans() }}</span></div>
                     <span>{{ $item['title'] }}</span>
                   </div>
                 </a>
@@ -210,7 +219,7 @@
             </div>
 
             <div class="credits">
-              Développé par<a href=""> Labodigit</a>
+              Développé par<a href="https://dolubux.com" target="_blank"> dolubux.com</a>
             </div>
 
           </div>

@@ -7,9 +7,11 @@ use App\Models\Post;
 use  InteractsWithViews;
 use App\Models\Category;
 use App\Models\Actualite;
+use App\Models\Soumission;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\App;
 use Stevebauman\Location\Facades\Location;
 use CyrildeWit\EloquentViewable\Contracts\Visitor;
 use Illuminate\Database\Eloquent\Relations\Relation;
@@ -20,11 +22,11 @@ class SiteController extends Controller
 {
 
 
-public function __construct()
-{
-    // $category = app('category');
-    $this->category;
-}
+    public function __construct()
+    {
+        // $category = app('category');
+        $this->category;
+    }
 
     /**
      * Display a listing of the resource.
@@ -35,18 +37,24 @@ public function __construct()
     {
         //
         // first recent post
-        $post_recent = Post::with(['category', 'commentaires', 'media', 'user'])->orderBy('created_at', 'desc')->first();
+        $post_recent = Post::with(['category', 'commentaires', 'media', 'user'])
+            ->where('published', 'public')
+            ->orderBy('created_at', 'desc')->first();
 
         // recent post
-        $post_last = Post::with(['category', 'commentaires', 'media', 'user'])->orderBy('created_at', 'desc')->get()->take(4);
+        $post_last = Post::with(['category', 'commentaires', 'media', 'user'])->orderBy('created_at', 'desc')
+            ->where('published', 'public')
+            ->get()->take(4);
+
         $post = Post::with(['category', 'commentaires', 'media', 'user'])->orderBy('created_at', 'desc')
+            ->where('published', 'public')
             ->get()->take(12);
 
         $category = Category::with('posts')->get()->sortBy('title');
-        $actualite = Actualite::with('media')->orderBy('created_at','desc')->get();
+        $actualite = Actualite::with('media')->orderBy('created_at', 'desc')->get();
 
 
-        return view('site.pages.accueil', compact(['post_recent', 'post_last', 'post', 'category','actualite']));
+        return view('site.pages.accueil', compact(['post_recent', 'post_last', 'post', 'category', 'actualite']));
     }
 
 
@@ -58,7 +66,9 @@ public function __construct()
         $category = Category::with('posts')->get()->sortBy('title');
 
         //liste recent post
-        $post_last = Post::with(['category', 'commentaires', 'media', 'user'])->orderBy('created_at', 'desc')->get()->take(4);
+        $post_last = Post::with(['category', 'commentaires', 'media', 'user'])->orderBy('created_at', 'desc')
+            ->where('published', 'public')
+            ->get()->take(4);
 
 
         /******* */
@@ -69,26 +79,29 @@ public function __construct()
         $category_req = Category::whereSlug($slug_req)->first();
 
         $post = Post::with(['category', 'commentaires', 'media', 'user'])
-        ->when($slug_req, function($q) use( $category_req){
-            return $q->where('category_id', $category_req['id']);
-        })->orderBy('created_at', 'desc')->paginate(5);
-        
-       
-          
-        return view('site.pages.post', compact(['post_last', 'post', 'category', 'category_req']));
+            ->when($slug_req, function ($q) use ($category_req) {
+                return $q->where('category_id', $category_req['id'])
+                    ->where('published', 'public');
+            })->orderBy('created_at', 'desc')->paginate(5);
 
+
+
+        return view('site.pages.post', compact(['post_last', 'post', 'category', 'category_req']));
     }
 
 
     public function detail(Request $request, Post $post)
     {
+// dd(env('APP_SERVE'));
 
 
         //liste des categories
         $category = Category::with('posts')->get()->sortBy('title');
 
         //liste recent post
-        $post_last = Post::with(['category', 'commentaires', 'media', 'user'])->orderBy('created_at', 'desc')->get()->take(4);
+        $post_last = Post::with(['category', 'commentaires', 'media', 'user'])->orderBy('created_at', 'desc')
+            ->where('published', 'public')
+            ->get()->take(4);
 
 
         /******* */
@@ -96,37 +109,87 @@ public function __construct()
         $slug_req = request('slug');
 
 
-        $post = Post::with(['category', 'commentaires', 'media', 'user'])
-        ->whereSlug($slug_req)->first();
-       $ip = $request->getClientIp();
-
-    //    $currentUserInfo = Location::get('8.8.1.1');
-    //   $country =  $currentUserInfo->countryName;
-    //   $city =  $currentUserInfo->cityName;
-
-       
-       views($post)->record();
-       DB::table('views')->where('viewable_id',$post['id'])->update([
-        'ip'=>$ip,
-        // 'country'=> $country ,
-        // 'city'=> $city ,
-    ]);
-        // $post->visitsCounter()->increment();
+        $post = Post::with(['category', 'commentaires', 'media', 'user', 'optionSondages'])
+            ->whereSlug($slug_req)->first();
 
 
+        // statistics des sondages
+        $statistic_sondage = Soumission::with(['post', 'optionSondage'])
+            ->where('post_id', $post['id'])
+            ->selectRaw('post_id,option_sondage_id,count(*) as choice')
+            ->groupBy([
+                'post_id',
+                'option_sondage_id'
+            ])->get();
 
-     
+        //total votant
+        $sondage_total = Soumission::get()
+            ->where('post_id', $post['id'])
+            ->count();
 
 
-        // dd(  $count);
-        return view('site.pages.detail', compact(['post_last', 'post', 'category']));
+        // dd($statistic_sondage->toArray());
 
+
+        // verifier si le serveur est en production ou developpement
+
+        if (env('APP_SERVE')=='production') {
+            // dd($post ->toArray());
+            $ip = $request->getClientIp();
+
+            $currentUserInfo = Location::get($ip);
+            $country =  $currentUserInfo->countryName;
+              $city =  $currentUserInfo->cityName;
+
+
+            views($post)->record();
+            DB::table('views')->where('viewable_id', $post['id'])->update([
+                'ip' => $ip,
+                'country' => $country,
+                'city' => $city,
+            ]);
+            // $post->visitsCounter()->increment();
+
+
+        } elseif (env('APP_SERVE')=='local') {
+            $ip = $request->getClientIp();
+
+            //    $currentUserInfo = Location::get('8.8.1.1');
+            //   $country =  $currentUserInfo->countryName;
+            //   $city =  $currentUserInfo->cityName;
+
+
+            views($post)->record();
+            DB::table('views')->where('viewable_id', $post['id'])->update([
+                'ip' => $ip,
+                // 'country'=> $country ,
+                // 'city'=> $city ,
+            ]);
+            // $post->visitsCounter()->increment();
+        }
+
+
+        return view('site.pages.detail', compact(['post_last', 'post', 'category', 'statistic_sondage', 'sondage_total']));
     }
 
 
-public function contact(){
-    $this->category;
-    return view('site.pages.contact');
-}
-   
+    // public function search(Request $request){
+    //         $search = $request['search'];
+
+    //         if ($search) {
+    //             $search = Post::with(['category', 'commentaires', 'media', 'user'])->orderBy('created_at', 'desc')
+    //             ->where('published','public')
+    //             ->whereLike('title',$search)
+    //             ->get()->pignate(12);
+    //             return view('site.pages.accueil', compact(['search']));
+
+    //         }
+    // }
+
+
+    public function contact()
+    {
+        $this->category;
+        return view('site.pages.contact');
+    }
 }
