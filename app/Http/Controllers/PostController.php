@@ -219,7 +219,8 @@ class PostController extends Controller
         $post = Post::with(['category', 'commentaires', 'media', 'user'])->orderBy('created_at', 'desc')->get();
 
         Alert::toast('post modifié avec success', 'success');
-        return view('admin.pages.post.index', compact('post'));
+        return redirect()->route('post');
+        // return view('admin.pages.post.index', compact('post'));
     }
 
     /**
