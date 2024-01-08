@@ -44,10 +44,10 @@
                     
                     </div>
                     @if ($item['category']['title']=='Sondage')
-                    @php
+                    {{-- @php
                         $question_sondage = substr($item['description'], 3, -3)
-                    @endphp
-                    <h2 class="text-center text-justify"><a href="/post/detail?slug={{ $item['slug'] }}">{{ Str::limit($question_sondage, 30, '...') }}</a></h2>
+                    @endphp --}}
+                    <h2 class="text-center text-justify"><a href="/post/detail?slug={{ $item['slug'] }}">{{ Str::limit($item['description'], 30, '...') }}</a></h2>
                     @else
                     <h2 class="text-center text-justify"><a href="/post/detail?slug={{ $item['slug'] }}">{{ Str::limit($item['title'], 30, '...') }}</a></h2>
                     @endif
