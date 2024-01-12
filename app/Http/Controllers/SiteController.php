@@ -92,7 +92,7 @@ class SiteController extends Controller
 
     public function detail(Request $request, Post $post)
     {
-// dd(env('APP_SERVE'));
+        // dd(env('APP_SERVE'));
 
 
         //liste des categories
@@ -133,13 +133,13 @@ class SiteController extends Controller
 
         // verifier si le serveur est en production ou developpement
 
-        if (env('APP_SERVE')=='production') {
+        if (env('APP_SERVE') == 'production') {
             // dd($post ->toArray());
             $ip = $request->getClientIp();
 
             $currentUserInfo = Location::get($ip);
             $country =  $currentUserInfo->countryName;
-              $city =  $currentUserInfo->cityName;
+            $city =  $currentUserInfo->cityName;
 
 
             views($post)->record();
@@ -151,19 +151,19 @@ class SiteController extends Controller
             // $post->visitsCounter()->increment();
 
 
-        } elseif (env('APP_SERVE')=='local') {
+        } elseif (env('APP_SERVE') == 'local') {
             $ip = $request->getClientIp();
 
-            //    $currentUserInfo = Location::get('8.8.1.1');
-            //   $country =  $currentUserInfo->countryName;
-            //   $city =  $currentUserInfo->cityName;
+               $currentUserInfo = Location::get('8.8.1.1');
+              $country =  $currentUserInfo->countryName;
+              $city =  $currentUserInfo->cityName;
 
 
             views($post)->record();
             DB::table('views')->where('viewable_id', $post['id'])->update([
                 'ip' => $ip,
-                // 'country'=> $country ,
-                // 'city'=> $city ,
+                'country'=> $country ,
+                'city'=> $city ,
             ]);
             // $post->visitsCounter()->increment();
         }
