@@ -36,6 +36,9 @@ class PostController extends Controller
         ->where('category_id','!=',$category['id'])
         ->orderBy('created_at', 'desc')->get();
         
+        // $actualite = Actualite::with('media')->orderBy('created_at', 'desc')->get();
+
+        
 // dd($post->toArray());
 
         return view('admin.pages.post.index', compact('post','sondage'));

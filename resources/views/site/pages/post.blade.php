@@ -39,6 +39,7 @@
 
 
 @section('content')
+<!-- ======= Liste des posts en fonction de la categorie ======= -->
 <section>
     <div class="container">
       <div class="row">
@@ -50,7 +51,7 @@
 
           @foreach ($post as $item)
               
-          <div class="d-md-flex post-entry-2 half">
+          <div class="d-md-flex post-entry-2 half bg-white">
            
             @if ($item->getFirstMediaUrl('image'))
             <a class="me-4 thumbnail" href="/post/detail?slug={{ $item['slug'] }}"><img src="{{ asset($item->getFirstMediaUrl('image'))}}" alt="" class="img-fluid"style=" width:auto; height:250px; object-fit:contain"></a>

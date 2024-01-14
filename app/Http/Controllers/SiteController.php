@@ -92,7 +92,7 @@ class SiteController extends Controller
 
     public function detail(Request $request, Post $post)
     {
-        // dd(env('APP_SERVE'));
+        // dd(env('APP_ENV'));
 
 
         //liste des categories
@@ -133,7 +133,7 @@ class SiteController extends Controller
 
         // verifier si le serveur est en production ou developpement
 
-        if (env('APP_SERVE') == 'production') {
+        if (env('APP_ENV') == 'production') {
             // dd($post ->toArray());
             $ip = $request->getClientIp();
 
@@ -151,7 +151,7 @@ class SiteController extends Controller
             // $post->visitsCounter()->increment();
 
 
-        } elseif (env('APP_SERVE') == 'local') {
+        } elseif (env('APP_ENV') == 'local') {
             $ip = $request->getClientIp();
 
                $currentUserInfo = Location::get('8.8.1.1');

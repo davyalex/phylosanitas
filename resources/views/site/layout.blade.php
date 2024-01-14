@@ -40,6 +40,13 @@
   <link href="{{ asset('assets_site/css/variables.css') }}" rel="stylesheet">
   <link href="{{ asset('assets_site/css/main.css') }}" rel="stylesheet">
 
+  <style>
+    body{
+     background-image: url("https://img.freepik.com/photos-premium/soins-sante…-abstract-geometrique-hexa_230610-1567.jpg?w=2000");
+     background-color: transparent;
+     
+    }
+  </style>
 
 </head>
 
@@ -53,7 +60,7 @@
     <div class="container-fluid fixed-top bg-info mb-2">
       <div class="row">
         <div class="col-md-12 text-center">
-          <a href="#" class="mx-2 text-white"><span class="bi-facebook"></span></a>
+          <a href="https://www.facebook.com/drake2077/?paipv=0&eav=Afa2MjwEAZ7eHsVKSa0CympZ6o2CGCLDfcnHnjIt6rXIQxYRT2kjE5NbUEDCpPwpp7I&_rdr" class="mx-2 text-white"><span class="bi-facebook"></span></a>
           <a href="#" class="mx-2 text-white"><span class="bi-twitter"></span></a>
           <a href="#" class="mx-2 text-white"><span class="bi-instagram"></span></a>
         </div>
@@ -227,7 +234,7 @@
           <div class="col-md-6">
             <div class="social-links mb-3 mb-lg-0 text-center text-md-end">
               <a href="#" class="twitter"><i class="bi bi-twitter"></i></a>
-              <a href="#" class="facebook"><i class="bi bi-facebook"></i></a>
+              <a href="https://www.facebook.com/drake2077/?paipv=0&eav=Afa2MjwEAZ7eHsVKSa0CympZ6o2CGCLDfcnHnjIt6rXIQxYRT2kjE5NbUEDCpPwpp7I&_rdr" class="facebook"><i class="bi bi-facebook"></i></a>
               <a href="#" class="instagram"><i class="bi bi-instagram"></i></a>
               <a href="#" class="google-plus"><i class="bi bi-skype"></i></a>
               <a href="#" class="linkedin"><i class="bi bi-linkedin"></i></a>
