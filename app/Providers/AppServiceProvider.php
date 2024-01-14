@@ -36,7 +36,7 @@ class AppServiceProvider extends ServiceProvider
          ->when($request =='sondage',
          fn($q)=>$q->whereTitle('sondage')
          )
-        ->get();
+        ->paginate(5);
 
          $category_sondage = Category::whereTitle('sondage')->first();
         $post_last = Post::with(['category', 'commentaires', 'media', 'user'])->orderBy('created_at', 'desc')
