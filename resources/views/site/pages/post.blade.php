@@ -68,7 +68,9 @@
                 <h6 class="text-capitalize "><i class="bi bi-chat-left-quote"> </i>{{ $item->commentaires->count() }} commentaires</h6>
             </div>
               <h3><a href="/post/detail?slug={{ $item['slug'] }}" style='color:red'>{{ $item['title'] }}</a></h3>
-            <p>{!!Str::words($item->description,15, '...')!!}</p>
+              @if ($item['category']['title'] == 'Sondage')
+              <p >{!!Str::words($item->description,15, '...')!!}</p>
+              @endif
               {{-- <div class="d-flex align-items-center author">
                 <div class="photo"><img src="assets/img/person-2.jpg" alt="" class="img-fluid"></div>
                 <div class="name">
