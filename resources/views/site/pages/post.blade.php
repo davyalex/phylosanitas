@@ -77,9 +77,9 @@
                      </div>
                      <h3><a href="/post/detail?slug={{ $item['slug'] }}"
                         style='color:red'>{{ $item['title'] }}</a></h3>
-                     @if ($item['category']['title'] == 'Sondage')
+                     {{-- @if ($item['category']['title'] == 'Sondage')
                      <h4>{!! Str::words($item->description, 15, '...') !!}</h4>
-                     @endif
+                     @endif --}}
                      {{-- 
                      <div class="d-flex align-items-center author">
                         <div class="photo"><img src="assets/img/person-2.jpg" alt="" class="img-fluid"></div>
