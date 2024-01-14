@@ -41,11 +41,11 @@
   <link href="{{ asset('assets_site/css/main.css') }}" rel="stylesheet">
 
   <style>
-    body{
+    /* body{
      background-image: url("https://img.freepik.com/photos-premium/soins-sante…-abstract-geometrique-hexa_230610-1567.jpg?w=2000");
      background-color: transparent;
      
-    }
+    } */
   </style>
 
 </head>
