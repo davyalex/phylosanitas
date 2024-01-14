@@ -37,14 +37,14 @@ class SiteController extends Controller
     {
         //
         // first recent post
-        $post_recent = Post::with(['category', 'commentaires', 'media', 'user'])
-            ->where('published', 'public')
-            ->orderBy('created_at', 'desc')->first();
+        // $post_recent = Post::with(['category', 'commentaires', 'media', 'user'])
+        //     ->where('published', 'public')
+        //     ->orderBy('created_at', 'desc')->first();
 
-        // recent post
-        $post_last = Post::with(['category', 'commentaires', 'media', 'user'])->orderBy('created_at', 'desc')
-            ->where('published', 'public')
-            ->get()->take(4);
+        // recent post  /**get from appservice provider */
+        // $post_last = Post::with(['category', 'commentaires', 'media', 'user'])->orderBy('created_at', 'desc')
+        //     ->where('published', 'public')
+        //     ->get()->take(4);
 
         $post = Post::with(['category', 'commentaires', 'media', 'user'])->orderBy('created_at', 'desc')
             ->where('published', 'public')
@@ -54,7 +54,7 @@ class SiteController extends Controller
         $actualite = Actualite::with('media')->orderBy('created_at', 'desc')->get();
 
 
-        return view('site.pages.accueil', compact(['post_recent', 'post_last', 'post', 'category', 'actualite']));
+        return view('site.pages.accueil', compact([ 'post', 'category', 'actualite']));
     }
 
 
