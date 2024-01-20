@@ -266,7 +266,7 @@
             class="bi bi-arrow-up-short"></i></a>
 
     <!-- Vendor JS Files -->
-    <script src="{{ asset('assets_site/vendor/bootstrap/js/bootstrap.bundle.min.js') }} defer"></script>
+    <script src="{{ asset('assets_site/vendor/bootstrap/js/bootstrap.bundle.min.js') }} "defer></script>
     <script src="{{ asset('assets_site/vendor/swiper/swiper-bundle.min.js') }}" defer></script>
     <script src="{{ asset('assets_site/vendor/glightbox/js/glightbox.min.js') }}" defer></script>
     <script src="{{ asset('assets_site/vendor/aos/aos.js') }}" defer></script>
