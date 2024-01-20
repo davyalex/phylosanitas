@@ -30,7 +30,7 @@ url="{{ url()->current() }}"
               <span class="date">{{ $post['category']['title'] }}</span> <span class="mx-1">&bullet;</span> <span>publié {{ \Carbon\Carbon::parse($post['created_at'])->diffForHumans() }}</span> 
             </div>            
            
-              <img src="{{ asset($post->getFirstMediaUrl('image'))}}" alt="" class="img-fluid"style="width:100%; height:auto; object-fit:cover"> 
+              <img src="{{ asset($post->getFirstMediaUrl('image'))}}" loading="lazy" alt="" class="img-fluid"style="width:100%; height:auto; object-fit:cover"> 
             <h1 class="mb-5 text-center" style="color: #00456f">{{ $post['title'] }}</h1>
             <div class="max-width:50%; max-height:200px; object-fit:cover">
               {!!  $post['description'] !!}
@@ -101,7 +101,7 @@ url="{{ url()->current() }}"
             <div class="comment d-flex mb-3">
               <div class="flex-shrink-0">
                 <div class="avatar avatar-sm rounded-circle">
-                    <img class="avatar-img" src="{{ asset('assets_admin/img/avatar.jpg') }}" alt="" class="img-fluid">
+                    <img class="avatar-img" src="{{ asset('assets_admin/img/avatar.jpg') }}" loading="lazy" alt="" class="img-fluid">
                 </div>
               </div>
               <div class="flex-shrink-1 ms-2 ms-sm-3">

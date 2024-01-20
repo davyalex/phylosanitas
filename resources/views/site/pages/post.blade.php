@@ -55,11 +55,11 @@
                <div class="d-md-flex post-entry-2 half bg-white">
                   @if ($item->getFirstMediaUrl('image'))
                   <a class="me-4 thumbnail" href="/post/detail?slug={{ $item['slug'] }}"><img
-                     src="{{ asset($item->getFirstMediaUrl('image')) }}" alt=""
+                     src="{{ asset($item->getFirstMediaUrl('image')) }}" loading="lazy" alt=""
                      class="img-fluid"style=" width:auto; height:250px; object-fit:contain"></a>
                   @else
                   <a class="me-4 thumbnail" href="/post/detail?slug={{ $item['slug'] }}">
-                  <img src="{{ asset('assets_site/img/medc.jpg') }}" alt="" class="img-fluid"
+                  <img src="{{ asset('assets_site/img/medc.jpg') }}" alt="" loading="lazy" class="img-fluid"
                      style=" width:auto; height:300px; object-fit:contain"></a>
                   @endif
                   <div>

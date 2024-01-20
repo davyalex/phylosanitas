@@ -31,11 +31,11 @@
                               <div class="post-entry-1 border mw-100 mh-300 bg-white">
                                   @if ($item->getFirstMediaUrl('image'))
                                       <a href="/post/detail?slug={{ $item['slug'] }}"><img
-                                              src="{{ asset($item->getFirstMediaUrl('image')) }}" alt=""
+                                              src="{{ asset($item->getFirstMediaUrl('image')) }}" loading="lazy" alt=""
                                               class="img-fluid"style=" width:100%; height:200px; object-fit:cover"></a>
                                   @else
                                       <a href="/post/detail?slug={{ $item['slug'] }}">
-                                          <img src="{{ asset('assets_site/img/medc.jpg') }}" alt=""
+                                          <img src="{{ asset('assets_site/img/medc.jpg') }}" loading="lazy" alt=""
                                               class="img-fluid" style=" width:100%; height:200px; object-fit:cover"></a>
                                   @endif
                                   <div class="post-meta text-center "><span class="date text-capitalize ">
