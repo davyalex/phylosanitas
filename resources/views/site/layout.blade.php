@@ -20,6 +20,7 @@
 
 
     <!-- Favicons -->
+    <link rel="preload" as="image" href="https://phylosanitas.com/assets_site/img/logo/logo_tp.png">
     <link rel="shortcut icon" href="{{ asset('favicon.ico') }}" type="image/x-icon">
     <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('assets_site/img/apple-touch-icon.png') }}">
     <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('assets_site/img/favicon-32x32.png') }}">
@@ -265,14 +266,14 @@
             class="bi bi-arrow-up-short"></i></a>
 
     <!-- Vendor JS Files -->
-    <script src="{{ asset('assets_site/vendor/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
-    <script src="{{ asset('assets_site/vendor/swiper/swiper-bundle.min.js') }}"></script>
-    <script src="{{ asset('assets_site/vendor/glightbox/js/glightbox.min.js') }}"></script>
-    <script src="{{ asset('assets_site/vendor/aos/aos.js') }}"></script>
+    <script src="{{ asset('assets_site/vendor/bootstrap/js/bootstrap.bundle.min.js') }} defer"></script>
+    <script src="{{ asset('assets_site/vendor/swiper/swiper-bundle.min.js') }}" defer></script>
+    <script src="{{ asset('assets_site/vendor/glightbox/js/glightbox.min.js') }}" defer></script>
+    <script src="{{ asset('assets_site/vendor/aos/aos.js') }}" defer></script>
     {{-- <script src="{{ asset('assets_site/vendor/php-email-form/validate.js') }}"></script> --}}
 
     <!-- Template Main JS File -->
-    <script src="{{ asset('assets_site/js/main.js') }}"></script>
+    <script src="{{ asset('assets_site/js/main.js') }}" defer></script>
 
 </body>
 
