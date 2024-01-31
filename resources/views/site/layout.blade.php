@@ -137,7 +137,7 @@
 
                 <!-- ======= Search Form ======= -->
                 <div class="search-form-wrap js-search-form-wrap">
-                    <form action="{{route('search')}}" class="search-form" method="post">
+                    <form action="#" class="search-form" method="post">
                         @csrf
                         <button type="submit" class="icon bi-search " hidden></button>
                         <input type="text" name="search" placeholder="Rechercher" class="form-control">
