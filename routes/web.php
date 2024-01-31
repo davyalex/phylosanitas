@@ -70,7 +70,6 @@ Route::middleware('auth')->prefix('admin')->group(function () {
         Route::post('update/{id}', 'update')->name('post.update');
         Route::post('destroy/{id}', 'destroy')->name('post.delete');
         Route::get('published', 'published');
-        // Route::post('recherche', 'search')->name('post.search');
     });
 
     route::controller(ActualiteController::class)->prefix('actualite')->group(function(){
@@ -101,7 +100,7 @@ route::controller(SiteController::class)->group(function(){
     route::get('post/category','post')->name('post.list');
     route::get('post/detail','detail')->name('post.detail');
     route::get('contact','contact')->name('contact');
-    route::get('search', 'search')->name('search');
+    route::get('search', 'search')->name('post.search');
 
 });
 
