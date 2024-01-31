@@ -191,7 +191,7 @@ class SiteController extends Controller
     public function search(Request $request){
         try {
             $search = $request['search'];
-            $post = Post::where('title', 'like', "%{$search}%")
+            $post = Post::where('title', 'Like', "%{$search}%")
                 ->where('published', 'public')
             ->orderBy('created_at', 'desc')->get();
            
