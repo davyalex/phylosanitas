@@ -101,6 +101,8 @@ route::controller(SiteController::class)->group(function(){
     route::get('post/category','post')->name('post.list');
     route::get('post/detail','detail')->name('post.detail');
     route::get('contact','contact')->name('contact');
+    route::get('search', 'search')->name('search');
+
 });
 
 

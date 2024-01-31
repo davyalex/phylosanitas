@@ -132,15 +132,17 @@
         <a href="#" class="mx-2"><span class="bi-twitter"></span></a>
         <a href="#" class="mx-2"><span class="bi-instagram"></span></a> -->
 
-                <a href="#" class="mx-2 js-search-open mt-3"><span class=""></span></a>
-                <i class="bi bi-list mobile-nav-toggle"></i>
+               <a href="#" class="mx-2 js-search-open"><span class="bi-search"></span></a>
+        <i class="bi bi-list mobile-nav-toggle"></i>
 
                 <!-- ======= Search Form ======= -->
                 <div class="search-form-wrap js-search-form-wrap">
-                    <form action="" class="search-form">
-                        <span class="icon bi-search"></span>
-                        <input type="text" placeholder="Search" class="form-control">
+                    <form action="{{route('search')}}" class="search-form" method="get">
+                        @csrf
+                        <button type="submit" class="icon bi-search " hidden></button>
+                        <input type="text" name="search" placeholder="Rechercher" class="form-control">
                         <button class="btn js-search-close"><span class="bi-x"></span></button>
+                       
                     </form>
                 </div><!-- End Search Form -->
 

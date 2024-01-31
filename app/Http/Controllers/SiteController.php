@@ -188,6 +188,18 @@ class SiteController extends Controller
     //         }
     // }
 
+    public function search(Request $request){
+        try {
+            $search = $request['search'];
+            $post = Post::where('title', 'like', "%{$search}%")->orderBy('created_at', 'desc')->get();
+           
+            return view('site.pages.searchPost', compact('post'));
+        } catch (\Exception $e) {
+          
+        }
+           
+    }
+
 
     public function contact()
     {
