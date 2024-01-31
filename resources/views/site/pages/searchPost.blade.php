@@ -1,5 +1,5 @@
 @extends('site.layout')
-@section('title', 'Liste des postes')
+@section('title', 'Liste des articles')
 
 @section('content')
     <!-- =======  Liste des Post recent limit ? sur la page d'accueil======= -->
