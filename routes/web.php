@@ -100,7 +100,7 @@ route::controller(SiteController::class)->group(function(){
     route::get('post/category','post')->name('post.list');
     route::get('post/detail','detail')->name('post.detail');
     route::get('contact','contact')->name('contact');
-    route::post('liste-des-articles', 'search')->name('search');
+    // route::post('liste-des-articles', 'search')->name('search');
 
 });
 
