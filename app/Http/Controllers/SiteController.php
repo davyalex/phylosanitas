@@ -177,7 +177,7 @@ class SiteController extends Controller
     }
 
 
-    public function recherche(Request $request)
+    public function search(Request $request)
     {
         try {
             $search = $request['query'];
