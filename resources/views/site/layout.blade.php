@@ -132,19 +132,19 @@
         <a href="#" class="mx-2"><span class="bi-twitter"></span></a>
         <a href="#" class="mx-2"><span class="bi-instagram"></span></a> -->
 
-                {{-- <a href="#" class="mx-2 js-search-open"><span class="bi-search"></span></a>
-                <i class="bi bi-list mobile-nav-toggle"></i> --}}
+                <a href="#" class="mx-2 js-search-open"><span class="bi-search"></span></a>
+                <i class="bi bi-list mobile-nav-toggle"></i>
 
                 <!-- ======= Search Form ======= -->
-                {{-- <div class="search-form-wrap js-search-form-wrap">
-                    <form action="#" class="search-form" method="post">
+                <div class="search-form-wrap js-search-form-wrap">
+                    <form action="{{route('search')}}" class="search-form" method="post">
                         @csrf
                         <button type="submit" class="icon bi-search " hidden></button>
                         <input type="text" name="search" placeholder="Rechercher" class="form-control">
                         <button class="btn js-search-close"><span class="bi-x"></span></button>
 
                     </form>
-                </div> --}}
+                </div>
                 <!-- End Search Form -->
 
             </div>
@@ -270,14 +270,14 @@
             class="bi bi-arrow-up-short"></i></a>
 
     <!-- Vendor JS Files -->
-    <script src="{{ asset('assets_site/vendor/bootstrap/js/bootstrap.bundle.min.js') }} " defer></script>
-    <script src="{{ asset('assets_site/vendor/swiper/swiper-bundle.min.js') }}" defer></script>
-    <script src="{{ asset('assets_site/vendor/glightbox/js/glightbox.min.js') }}" defer></script>
-    <script src="{{ asset('assets_site/vendor/aos/aos.js') }}" defer></script>
+    <script src="{{ asset('assets_site/vendor/bootstrap/js/bootstrap.bundle.min.js') }} " ></script>
+    <script src="{{ asset('assets_site/vendor/swiper/swiper-bundle.min.js') }}" ></script>
+    <script src="{{ asset('assets_site/vendor/glightbox/js/glightbox.min.js') }}" ></script>
+    <script src="{{ asset('assets_site/vendor/aos/aos.js') }}" ></script>
     {{-- <script src="{{ asset('assets_site/vendor/php-email-form/validate.js') }}"></script> --}}
 
     <!-- Template Main JS File -->
-    <script src="{{ asset('assets_site/js/main.js') }}" defer></script>
+    <script src="{{ asset('assets_site/js/main.js') }}" ></script>
 
 </body>
 

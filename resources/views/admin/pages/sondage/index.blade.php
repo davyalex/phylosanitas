@@ -27,7 +27,7 @@
            <br> <span class=""> <i class="bi bi-circle-fill text-success"></i> en ligne</span>
             @endif
           </td>
-        <td> {!! Str::limit($item['description'] , 200,'...') !!}</td>
+        <td> {!! substr(strip_tags($item->description), 0, 50) !!}.... </td>
         <td><span class="badge bg-secondary">{{ $item ->category->title }}</span></td>
         <td>{{ views($item)->count() }}</td>
         <td> {{ \Carbon\Carbon::parse($item['created_at'])->diffForHumans() }}</td>

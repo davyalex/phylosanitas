@@ -51,10 +51,12 @@ class SiteController extends Controller
             ->get()->take(12);
 
         $category = Category::with('posts')->get()->sortBy('title');
+
+        //actualite sous forme de slider //publicite
         $actualite = Actualite::with('media')->orderBy('created_at', 'desc')->get();
 
 
-        return view('site.pages.accueil', compact([ 'post', 'category', 'actualite']));
+        return view('site.pages.accueil', compact(['post', 'category', 'actualite']));
     }
 
 
@@ -92,7 +94,7 @@ class SiteController extends Controller
 
     public function detail(Request $request, Post $post)
     {
-        
+
 
         // config('app.env');
 
@@ -156,16 +158,16 @@ class SiteController extends Controller
         } elseif (config('app.env') == 'local') {
             $ip = $request->getClientIp();
 
-               $currentUserInfo = Location::get('8.8.1.1');
-              $country =  $currentUserInfo->countryName;
-              $city =  $currentUserInfo->cityName;
+            $currentUserInfo = Location::get('8.8.1.1');
+            $country =  $currentUserInfo->countryName;
+            $city =  $currentUserInfo->cityName;
 
 
             views($post)->record();
             DB::table('views')->where('viewable_id', $post['id'])->update([
                 'ip' => $ip,
-                'country'=> $country ,
-                'city'=> $city ,
+                'country' => $country,
+                'city' => $city,
             ]);
             // $post->visitsCounter()->increment();
         }
@@ -175,31 +177,19 @@ class SiteController extends Controller
     }
 
 
-    // public function search(Request $request){
-    //         $search = $request['search'];
-
-    //         if ($search) {
-    //             $search = Post::with(['category', 'commentaires', 'media', 'user'])->orderBy('created_at', 'desc')
-    //             ->where('published','public')
-    //             ->whereLike('title',$search)
-    //             ->get()->pignate(12);
-    //             return view('site.pages.accueil', compact(['search']));
-
-    //         }
-    // }
-
-    public function search(Request $request){
+    public function search(Request $request)
+    {
         try {
             $search = $request['search'];
             $post = Post::where('title', 'Like', "%{$search}%")
+                ->Orwhere('description', 'Like', "%{$search}%")
                 ->where('published', 'public')
-            ->orderBy('created_at', 'desc')->get();
-           
+                ->orderBy('created_at', 'desc')->get();
+
             return view('site.pages.searchPost', compact('post'));
         } catch (\Exception $e) {
-          $e->getMessage();
+            $e->getMessage();
         }
-           
     }
 
 

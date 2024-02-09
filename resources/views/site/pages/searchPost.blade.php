@@ -18,6 +18,10 @@
                                 <span>Mot recherché: {{ request('search') }} </span>
                             </div>
                         @else
+                          <div class="my-3">
+                                <h2>{{count($post)}} résultat(s) trouvés</h2>
+                                <span>Mot recherché: {{ request('search') }} </span>
+                            </div>
                             @foreach ($post as $item)
                                 <div class="col-lg-4  ">
                                     <div class="post-entry-1 border mw-100 mh-300 bg-white">
@@ -32,7 +36,7 @@
                                                     alt="" class="img-fluid"
                                                     style=" width:100%; height:200px; object-fit:cover"></a>
                                         @endif
-                                        <div class="post-meta text-center "><span class="date text-capitalize ">
+                                        <div class="post-meta text-center "><span class="date text-capitalize bg-danger text-white p-1 rounded-pill ">
                                                 {{ $item['category']['title'] }}</span>
                                             <span class="mx-1">&bullet;</span> <i
                                                 class="bi bi-eye-fill w-100">{{ views($item)->count() }}</i>
@@ -72,9 +76,7 @@
                 <!--  Section right categorie -->
                 <div class="col-md-3">
 
-                    @include('site.pages.components.categorie')
-
-                    {{-- @include('site.pages.components.sondage') --}}
+                    @include('site.pages.sections.sidebar')
                 </div>
 
                 {{-- <div class="col-lg-3">

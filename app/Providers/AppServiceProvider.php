@@ -28,32 +28,42 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        
+
         // $category = Category::with('posts')->get();
 
         $request = request('type');
         $category = Category::with('posts')
-         ->when($request =='sondage',
-         fn($q)=>$q->whereTitle('sondage')
-         )
-        ->get();
+            ->when(
+                $request == 'sondage',
+                fn ($q) => $q->whereTitle('sondage')
+            )
+            ->get();
 
-         $category_sondage = Category::whereTitle('sondage')->first();
+        //Liste des articles recents
+        $category_sondage = Category::whereTitle('sondage')->first();
+
         $post_last = Post::with(['category', 'commentaires', 'media', 'user'])->orderBy('created_at', 'desc')
-        ->where('category_id','!=',$category_sondage['id'])
-        ->where('published','public')
-        ->get()->take(4);
+            ->where('category_id', '!=', $category_sondage['id'])
+            ->where('published', 'public')
+            ->get()->take(4);
 
-        View::composer('*', function ($view) use ($category, $post_last) {
-            $view->with([
-                'category'=>$category,
-            ]);
+        //Liste des sondages pour le front
+        $sondage = Post::with([
+            'category', 'commentaires', 'media', 'user'
+        ])->orderBy('created_at', 'desc')
+            ->where('category_id', $category_sondage['id'])
+            ->where('published', 'public')
+            ->get()->take(4);
 
+
+        View::composer('*', function ($view) use ($category, $post_last, $sondage) {
             $view->with([
-                'post_last'=>$post_last,
+                'category' => $category,
+                'post_last' => $post_last,
+                'sondage_front' => $sondage,
             ]);
         });
-        
+
 
         // Paginator::defaultView('view-name');
         // Paginator::defaultSimpleView('view-name');

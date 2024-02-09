@@ -92,6 +92,7 @@ class PostController extends Controller
     {
         //insertion des sondages
         if ($request['sondage']=='sondage') {
+            // dd($request->toArray());
             $generate = Str::random(5);
             $request->validate([
                 'description' => 'required',
