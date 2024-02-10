@@ -12,15 +12,15 @@
                 <div class="col-lg-9">
                     <div class="row">
 
-                        @if (count($post))
+                        @if (count($post) < 1)
                             <div class="text-center mt-4">
                                 <h2>Aucun résultat pour votre recherche</h2>
-                                <span>Mot recherché: {{ request('query') }} </span>
+                                <span>Mot recherché: {{ request('search') }} </span>
                             </div>
                         @else
-                            <div class="my-3">
-                                <h2>{{ count($post) }} résultat(s) trouvés</h2>
-                                <span>Mot recherché: {{ request('query') }} </span>
+                          <div class="my-3">
+                                <h2>{{count($post)}} résultat(s) trouvés</h2>
+                                <span>Mot recherché: {{ request('search') }} </span>
                             </div>
                             @foreach ($post as $item)
                                 <div class="col-lg-4  ">
@@ -36,8 +36,7 @@
                                                     alt="" class="img-fluid"
                                                     style=" width:100%; height:200px; object-fit:cover"></a>
                                         @endif
-                                        <div class="post-meta text-center "><span
-                                                class="date text-capitalize bg-danger text-white p-1 rounded-pill ">
+                                        <div class="post-meta text-center "><span class="date text-capitalize bg-danger text-white p-1 rounded-pill ">
                                                 {{ $item['category']['title'] }}</span>
                                             <span class="mx-1">&bullet;</span> <i
                                                 class="bi bi-eye-fill w-100">{{ views($item)->count() }}</i>
@@ -63,14 +62,7 @@
 
                                 </div>
                             @endforeach
-                                            {!! $post->appends(request()->query())->links('vendor.pagination.custom') !!}
-
                         @endif
-
-
-
-
-
 
                         <!-- End Trending Section -->
                         

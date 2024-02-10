@@ -180,7 +180,7 @@ class SiteController extends Controller
     public function search(Request $request)
     {
         try {
-            $search = request('query');
+            $search = $request['query'];
             $post = Post::where('title', 'Like', "%{$search}%")
                 ->Orwhere('description', 'Like', "%{$search}%")
                 ->where('published', 'public')
