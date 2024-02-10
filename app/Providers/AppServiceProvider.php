@@ -68,12 +68,12 @@ class AppServiceProvider extends ServiceProvider
             ->get()->take(10);
 // dd($category_actualite->toArray());
 
-        View::composer('*', function ($view) use ($category, $post_last, $sondage, $actualite_externe) {
+        View::composer('*', function ($view) use ($category, $post_last, $sondage) {
             $view->with([
                 'category' => $category,
                 'post_last' => $post_last,
                 'sondage_front' => $sondage,
-                'actualite_externe' => $actualite_externe,
+                // 'actualite_externe' => $actualite_externe,
 
             ]);
         });
