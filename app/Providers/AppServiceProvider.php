@@ -43,11 +43,11 @@ class AppServiceProvider extends ServiceProvider
         $category_sondage = Category::whereTitle('sondage')->first();
         $category_sondage = $category_sondage['id'];
 
-        // $category_actualite = Category::whereSlug('actualites')->first();
-        // $category_actualite = $category_actualite['id'];
+        $category_actualite = Category::whereSlug('actualites')->first();
+        $category_actualite = $category_actualite['id'];
 
         $post_last = Post::with(['category', 'commentaires', 'media', 'user'])->orderBy('created_at', 'desc')
-            ->whereNotIn('category_id', [$category_sondage])
+            ->whereNotIn('category_id', [$category_sondage, $category_actualite])
             ->where('published', 'public')
             ->get()->take(4);
 
@@ -60,20 +60,20 @@ class AppServiceProvider extends ServiceProvider
             ->get()->take(4);
 
         //Liste des actualites externes
-        // $category_actualite = Category::whereSlug('actualites')->first();
+        $category_actualite = Category::whereSlug('actualites')->first();
 
-        // $actualite_externe = Post::with(['category', 'commentaires', 'media', 'user'])->orderBy('created_at', 'desc')
-        //     ->where('category_id', $category_actualite['id'])
-        //     ->where('published', 'public')
-        //     ->get()->take(10);
-// dd($category_actualite->toArray());
+        $actualite_externe = Post::with(['category', 'commentaires', 'media', 'user'])->orderBy('created_at', 'desc')
+            ->where('category_id', $category_actualite['id'])
+            ->where('published', 'public')
+            ->get()->take(10);
+        // dd($category_actualite->toArray());
 
-        View::composer('*', function ($view) use ($category, $post_last, $sondage) {
+        View::composer('*', function ($view) use ($category, $post_last, $sondage, $actualite_externe) {
             $view->with([
                 'category' => $category,
                 'post_last' => $post_last,
                 'sondage_front' => $sondage,
-                // 'actualite_externe' => $actualite_externe,
+                'actualite_externe' => $actualite_externe,
 
             ]);
         });
