@@ -76,7 +76,7 @@
               </div>
 
               <!--  Section right  -->
-              <div class="col-md-3">
+              <div class="col-md-3 py-2" style="background-color: #f2f2f2">
 
                 @include('site.pages.sections.sidebar')
 

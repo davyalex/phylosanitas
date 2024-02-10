@@ -107,7 +107,8 @@
                     </div>
                     {!! $post->appends(request()->query())->links('vendor.pagination.custom') !!}
                 </div>
-                <div class="col-md-3">
+                <div class="col-md-3 py-2" style="background-color: #f2f2f2">
+
                     <!-- ======= Sidebar ======= -->
                     <!--  Categories -->
                     @include('site.pages.sections.sidebar')

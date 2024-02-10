@@ -18,8 +18,8 @@
                                 <span>Mot recherché: {{ request('search') }} </span>
                             </div>
                         @else
-                          <div class="my-3">
-                                <h2>{{count($post)}} résultat(s) trouvés</h2>
+                            <div class="my-3">
+                                <h2>{{ count($post) }} résultat(s) trouvés</h2>
                                 <span>Mot recherché: {{ request('search') }} </span>
                             </div>
                             @foreach ($post as $item)
@@ -36,7 +36,8 @@
                                                     alt="" class="img-fluid"
                                                     style=" width:100%; height:200px; object-fit:cover"></a>
                                         @endif
-                                        <div class="post-meta text-center "><span class="date text-capitalize bg-danger text-white p-1 rounded-pill ">
+                                        <div class="post-meta text-center "><span
+                                                class="date text-capitalize bg-danger text-white p-1 rounded-pill ">
                                                 {{ $item['category']['title'] }}</span>
                                             <span class="mx-1">&bullet;</span> <i
                                                 class="bi bi-eye-fill w-100">{{ views($item)->count() }}</i>
@@ -65,12 +66,13 @@
                         @endif
 
                         <!-- End Trending Section -->
-                        
+
                     </div>
                 </div>
 
                 <!--  Section right categorie -->
-                <div class="col-md-3">
+                <div class="col-md-3 py-2" style="background-color: #f2f2f2">
+
 
                     @include('site.pages.sections.sidebar')
                 </div>
