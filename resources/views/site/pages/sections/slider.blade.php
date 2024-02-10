@@ -12,7 +12,7 @@
                                     <a href="#" class="img-bg d-flex align-items-end"
                                         style="background-image: url('{{ $item->getFirstMediaUrl('image') }}');">
                                         <div class="img-bg-inner">
-                                            <h1>{{ $item['title'] }}</h1>
+                                            <h1 class="text-white">{{ $item['title'] }}</h1>
                                             {{-- <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Quidem neque est mollitia! Beatae minima assumenda repellat harum vero, officiis ipsam magnam obcaecati cumque maxime inventore repudiandae quidem necessitatibus rem atque.</p> --}}
                                         </div>
                                     </a>
