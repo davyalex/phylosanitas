@@ -184,7 +184,7 @@ class SiteController extends Controller
             $post = Post::where('title', 'Like', "%{$search}%")
                 ->Orwhere('description', 'Like', "%{$search}%")
                 ->where('published', 'public')
-                ->orderBy('created_at', 'desc')->get();
+                ->orderBy('created_at', 'desc')->paginate(20);
 
             return view('site.pages.searchPost', compact('post'));
         } catch (\Exception $e) {

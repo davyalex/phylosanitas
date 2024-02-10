@@ -108,7 +108,7 @@
         getMessage();
 
         //Repeat
-        window.setInterval(getMessage, 3000);
+        window.setInterval(getMessage, 10000);
 
     });
 </script>
