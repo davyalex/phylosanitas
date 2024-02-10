@@ -180,11 +180,11 @@ class SiteController extends Controller
     public function search(Request $request)
     {
         try {
-            $search = $request['query'];
+            $search = request('query');
             $post = Post::where('title', 'Like', "%{$search}%")
                 ->Orwhere('description', 'Like', "%{$search}%")
                 ->where('published', 'public')
-                ->orderBy('created_at', 'desc')->paginate(20);
+                ->orderBy('created_at', 'desc')->get();
 
             return view('site.pages.searchPost', compact('post'));
         } catch (\Exception $e) {

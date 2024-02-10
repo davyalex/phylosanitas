@@ -12,15 +12,15 @@
                 <div class="col-lg-9">
                     <div class="row">
 
-                        @if (count($post) < 1)
+                        @if (count($post))
                             <div class="text-center mt-4">
                                 <h2>Aucun résultat pour votre recherche</h2>
-                                <span>Mot recherché: {{ request('search') }} </span>
+                                <span>Mot recherché: {{ request('query') }} </span>
                             </div>
                         @else
                             <div class="my-3">
                                 <h2>{{ count($post) }} résultat(s) trouvés</h2>
-                                <span>Mot recherché: {{ request('search') }} </span>
+                                <span>Mot recherché: {{ request('query') }} </span>
                             </div>
                             @foreach ($post as $item)
                                 <div class="col-lg-4  ">
@@ -63,6 +63,8 @@
 
                                 </div>
                             @endforeach
+                                            {!! $post->appends(request()->query())->links('vendor.pagination.custom') !!}
+
                         @endif
 
 
@@ -71,8 +73,7 @@
 
 
                         <!-- End Trending Section -->
-                        {!! $post->appends(request()->query())->links('vendor.pagination.custom') !!}
-
+                        
                     </div>
                 </div>
 
