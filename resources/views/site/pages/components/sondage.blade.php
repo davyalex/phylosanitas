@@ -1,8 +1,8 @@
 <style>
     .messages-wrap {
-        /* margin: 50px auto; */
+        margin: 10px auto;
         width: 100%;
-        /* padding: 10px 0; */
+        padding: 10px 0;
         text-align: center;
         /* background: #ffffff; */
         /* border: 2px solid #ddd; */
@@ -60,12 +60,16 @@
 
 
 <div class="aside-block bg-white p-2">
-    <h3 class="aside-title">Sondages</h3>
+    <div class="d-flex justify-content-between">
+         <h3 class="aside-title">Sondages
+        </h3>
+        <a href="/post/category?category=sondage" class="text-capitalize" href="">Tous voir <i class="bi bi-arrow-bar-right text-bold"></i> </a>
+    </div>
     <div class="messages-wrap">
         @foreach ($sondage_front as $item)
-            <h5 class="message animated fadeInDown">{!! substr(strip_tags($item->description), 0, 50) !!}.... 
+            <h6 class="message animated fadeInDown">{!! substr(strip_tags($item->description), 0, 150) !!}.... 
             <a href="/post/detail?slug={{ $item['slug'] }}" class="btn btn-dark mt-3">Participer</a>
-            </h5>
+            </h6>
         @endforeach
     </div>
 </div>
@@ -108,7 +112,7 @@
         getMessage();
 
         //Repeat
-        window.setInterval(getMessage, 10000);
+        window.setInterval(getMessage, 7000);
 
     });
 </script>

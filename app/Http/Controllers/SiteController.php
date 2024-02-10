@@ -46,17 +46,22 @@ class SiteController extends Controller
         //     ->where('published', 'public')
         //     ->get()->take(4);
 
+        //liste de quelque article pour la page accueil sans categorie actualite
+        $category_actualite = Category::whereSlug('actualites')->first();
+
         $post = Post::with(['category', 'commentaires', 'media', 'user'])->orderBy('created_at', 'desc')
             ->where('published', 'public')
+            ->whereNotIn('category_id',[$category_actualite['id']])
             ->get()->take(12);
 
-        $category = Category::with('posts')->get()->sortBy('title');
+            
+        // $category = Category::with('posts')->get()->sortBy('title');
 
         //actualite sous forme de slider //publicite
         $actualite = Actualite::with('media')->orderBy('created_at', 'desc')->get();
 
 
-        return view('site.pages.accueil', compact(['post', 'category', 'actualite']));
+        return view('site.pages.accueil', compact(['post','actualite']));
     }
 
 

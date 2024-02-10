@@ -41,9 +41,13 @@ class AppServiceProvider extends ServiceProvider
 
         //Liste des articles recents
         $category_sondage = Category::whereTitle('sondage')->first();
+        $category_sondage = $category_sondage['id'];
+
+        $category_actualite = Category::whereSlug('actualites')->first();
+        $category_actualite = $category_actualite['id'];
 
         $post_last = Post::with(['category', 'commentaires', 'media', 'user'])->orderBy('created_at', 'desc')
-            ->where('category_id', '!=', $category_sondage['id'])
+            ->whereNotIn('category_id', [$category_sondage, $category_actualite])
             ->where('published', 'public')
             ->get()->take(4);
 
@@ -51,16 +55,26 @@ class AppServiceProvider extends ServiceProvider
         $sondage = Post::with([
             'category', 'commentaires', 'media', 'user'
         ])->orderBy('created_at', 'desc')
-            ->where('category_id', $category_sondage['id'])
+            ->where('category_id', $category_sondage)
             ->where('published', 'public')
             ->get()->take(4);
 
+        //Liste des actualites externes
+        $category_actualite = Category::whereSlug('actualites')->first();
 
-        View::composer('*', function ($view) use ($category, $post_last, $sondage) {
+        $actualite_externe = Post::with(['category', 'commentaires', 'media', 'user'])->orderBy('created_at', 'desc')
+            ->where('category_id', $category_actualite['id'])
+            ->where('published', 'public')
+            ->get()->take(10);
+// dd($category_actualite->toArray());
+
+        View::composer('*', function ($view) use ($category, $post_last, $sondage, $actualite_externe) {
             $view->with([
                 'category' => $category,
                 'post_last' => $post_last,
                 'sondage_front' => $sondage,
+                'actualite_externe' => $actualite_externe,
+
             ]);
         });
 

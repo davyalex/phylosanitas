@@ -69,6 +69,10 @@
                         class="mx-2 text-white"><span class="bi-facebook"></span></a>
                     <a href="#" class="mx-2 text-white"><span class="bi-twitter"></span></a>
                     <a href="#" class="mx-2 text-white"><span class="bi-instagram"></span></a>
+
+                    @auth
+                        <a href="{{ route('dashboard') }}"> <i class="bi bi-grid"></i> Dashboard</a>
+                    @endauth
                 </div>
             </div>
         </div>
@@ -120,9 +124,7 @@
 
           <li><a href="about.html">About</a></li> -->
                     <li><a href="{{ route('contact') }}">Contact</a></li>
-                    @auth
-                        <li><a href="{{ route('dashboard') }}"> <i class="bi bi-grid"></i> Dashboard</a></li>
-                    @endauth
+
                 </ul>
             </nav><!-- .navbar -->
 
@@ -137,7 +139,7 @@
 
                 <!-- ======= Search Form ======= -->
                 <div class="search-form-wrap js-search-form-wrap">
-                    <form action="{{route('search')}}" class="search-form" method="post">
+                    <form action="{{ route('search') }}" class="search-form" method="post">
                         @csrf
                         <button type="submit" class="icon bi-search " hidden></button>
                         <input type="text" name="query" placeholder="Rechercher" class="form-control">
@@ -270,14 +272,14 @@
             class="bi bi-arrow-up-short"></i></a>
 
     <!-- Vendor JS Files -->
-    <script src="{{ asset('assets_site/vendor/bootstrap/js/bootstrap.bundle.min.js') }} " ></script>
-    <script src="{{ asset('assets_site/vendor/swiper/swiper-bundle.min.js') }}" ></script>
-    <script src="{{ asset('assets_site/vendor/glightbox/js/glightbox.min.js') }}" ></script>
-    <script src="{{ asset('assets_site/vendor/aos/aos.js') }}" ></script>
+    <script src="{{ asset('assets_site/vendor/bootstrap/js/bootstrap.bundle.min.js') }} "></script>
+    <script src="{{ asset('assets_site/vendor/swiper/swiper-bundle.min.js') }}"></script>
+    <script src="{{ asset('assets_site/vendor/glightbox/js/glightbox.min.js') }}"></script>
+    <script src="{{ asset('assets_site/vendor/aos/aos.js') }}"></script>
     {{-- <script src="{{ asset('assets_site/vendor/php-email-form/validate.js') }}"></script> --}}
 
     <!-- Template Main JS File -->
-    <script src="{{ asset('assets_site/js/main.js') }}" ></script>
+    <script src="{{ asset('assets_site/js/main.js') }}"></script>
 
 </body>
 

@@ -65,7 +65,7 @@
             
                           <div class="row mb-3" id="lien">
                             <label for="inputText" class="form-label">Lien</label>
-                              <input type="text" class="form-control">
+                              <input type="url" name="lien" class="form-control">
                           </div>
               
                         </div>

@@ -141,7 +141,7 @@
       <li class="nav-item">
         <a class="nav-link " href="{{ route('dashboard') }}">
           <i class="bi bi-grid"></i>
-          <span>Dashboard</span>
+          <span>Tableau de bord</span>
         </a>
       </li><!-- End Dashboard Nav -->
 
@@ -160,7 +160,7 @@
         <li class="nav-item">
             <a class="nav-link collapsed" href="{{ route('post') }}">
                 <i class="bi bi-card-text"></i>
-                <span>Posts</span>
+                <span>Articles</span>
             </a>
         </li><!-- End Login Page Nav -->
 
@@ -182,7 +182,7 @@
      <li class="nav-item">
       <a class="nav-link collapsed" href="{{ route('actualite.index') }}">
           <i class="bi bi-image"></i>
-          <span>Actualités</span>
+          <span>Publicités</span>
       </a>
   </li><!-- End Login Page Nav -->
 
