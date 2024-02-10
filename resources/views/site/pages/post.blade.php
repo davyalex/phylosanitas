@@ -56,48 +56,92 @@
 
 
                             @foreach ($post as $item)
-                                <div class="col-lg-6  ">
-                                    <div class="post-entry-1 border mw-100 mh-300 bg-white">
-                                        @if ($item->getFirstMediaUrl('image'))
-                                            <a href="/post/detail?slug={{ $item['slug'] }}"><img
-                                                    src="{{ asset($item->getFirstMediaUrl('image')) }}" loading="lazy"
-                                                    alt=""
-                                                    class="img-fluid"style=" width:100%; height:200px; object-fit:cover"></a>
-                                        @else
-                                            <a href="/post/detail?slug={{ $item['slug'] }}">
-                                                <img src="{{ asset('assets_site/img/medc.jpg') }}" loading="lazy"
-                                                    alt="" class="img-fluid"
-                                                    style=" width:100%; height:200px; object-fit:cover"></a>
-                                        @endif
-                                        <div class="post-meta text-center "><span
-                                                class="date text-capitalize text-white bg-danger p-1 rounded-pill ">
-                                                {{ $item['category']['title'] }}</span>
-                                            <span class="mx-1">&bullet;</span> <i
-                                                class="bi bi-eye-fill w-100">{{ views($item)->count() }}</i>
-                                            <span class="mx-1">&bullet;</span> <i
-                                                class="bi bi-chat-left-quote w-100">{{ $item->commentaires->count() }}</i>
-                                            <br>
-                                            <span class="text-lowercase">publié
-                                                {{ \Carbon\Carbon::parse($item['created_at'])->diffForHumans() }}</span>
-                                            &bullet;
+                                <!-- ========== Start actualite  ========== -->
+                                @if ($item['category']['slug'] == 'actualites')
+                                    <div class="col-lg-6">
+                                        <div class="post-entry-1 border mw-100 mh-300 bg-white">
+                                            @if ($item->getFirstMediaUrl('image'))
+                                                <a href="{{ $item['lien'] }}"><img
+                                                        src="{{ asset($item->getFirstMediaUrl('image')) }}" loading="lazy"
+                                                        alt=""
+                                                        class="img-fluid"style=" width:100%; height:200px; object-fit:cover"></a>
+                                            @else
+                                                <a href="{{ $item['lien'] }}">
+                                                    <img src="{{ asset('assets_site/img/medc.jpg') }}" loading="lazy"
+                                                        alt="" class="img-fluid"
+                                                        style=" width:100%; height:200px; object-fit:cover"></a>
+                                            @endif
+                                            <div class="post-meta text-center "><span
+                                                    class="date text-capitalize text-black bg-info p-1 rounded-pill ">
+                                                    {{ $item['category']['title'] }}</span>
+                                                {{-- <span class="mx-1">&bullet;</span> <i
+                                                    class="bi bi-eye-fill w-100">{{ views($item)->count() }}</i> --}}
+                                                {{-- <span class="mx-1">&bullet;</span> <i
+                                                    class="bi bi-chat-left-quote w-100">{{ $item->commentaires->count() }}</i>
+                                                <br> --}}
+                                                <span class="text-lowercase">publié
+                                                    {{ \Carbon\Carbon::parse($item['created_at'])->diffForHumans() }}</span>
+                                                &bullet;
+
+                                            </div>
+
+                                            {{-- @php
+                                                    $question_sondage = substr($item['description'], 3, -3)
+                                                @endphp --}}
+
+                                            <h2 class="text-center text-justify"><a
+                                                    href="/post/detail?slug={{ $item['slug'] }}">{{ Str::limit($item['title'], 150, '...') }}</a>
+                                            </h2>
 
                                         </div>
-                                        @if ($item['category']['title'] == 'Sondage')
-                                            {{-- @php
-                        $question_sondage = substr($item['description'], 3, -3)
-                    @endphp --}}
-                                            <h2 class="text-center text-justify"><a
-                                                    href="/post/detail?slug={{ $item['slug'] }}">{!! Str::words($item->description, 15, '...') !!}
-                                                </a>
-                                            </h2>
-                                        @else
-                                            <h2 class="text-center text-justify"><a
-                                                    href="/post/detail?slug={{ $item['slug'] }}">{{ Str::limit($item['title'], 30, '...') }}</a>
-                                            </h2>
-                                        @endif
+
                                     </div>
 
-                                </div>
+                                    <!-- ========== End actualite  ========== -->
+                                @else
+                                    <div class="col-lg-6">
+                                        <div class="post-entry-1 border mw-100 mh-300 bg-white">
+                                            @if ($item->getFirstMediaUrl('image'))
+                                                <a href="/post/detail?slug={{ $item['slug'] }}"><img
+                                                        src="{{ asset($item->getFirstMediaUrl('image')) }}" loading="lazy"
+                                                        alt=""
+                                                        class="img-fluid"style=" width:100%; height:200px; object-fit:cover"></a>
+                                            @else
+                                                <a href="/post/detail?slug={{ $item['slug'] }}">
+                                                    <img src="{{ asset('assets_site/img/medc.jpg') }}" loading="lazy"
+                                                        alt="" class="img-fluid"
+                                                        style=" width:100%; height:200px; object-fit:cover"></a>
+                                            @endif
+                                            <div class="post-meta text-center "><span
+                                                    class="date text-capitalize text-white bg-danger p-1 rounded-pill ">
+                                                    {{ $item['category']['title'] }}</span>
+                                                <span class="mx-1">&bullet;</span> <i
+                                                    class="bi bi-eye-fill w-100">{{ views($item)->count() }}</i>
+                                                <span class="mx-1">&bullet;</span> <i
+                                                    class="bi bi-chat-left-quote w-100">{{ $item->commentaires->count() }}</i>
+                                                <br>
+                                                <span class="text-lowercase">publié
+                                                    {{ \Carbon\Carbon::parse($item['created_at'])->diffForHumans() }}</span>
+                                                &bullet;
+
+                                            </div>
+                                            @if ($item['category']['title'] == 'Sondage')
+                                                {{-- @php
+                                                    $question_sondage = substr($item['description'], 3, -3)
+                                                @endphp --}}
+                                                <h2 class="text-center text-justify"><a
+                                                        href="/post/detail?slug={{ $item['slug'] }}">{!! Str::words($item->description, 15, '...') !!}
+                                                    </a>
+                                                </h2>
+                                            @else
+                                                <h2 class="text-center text-justify"><a
+                                                        href="/post/detail?slug={{ $item['slug'] }}">{{ Str::limit($item['title'], 30, '...') }}</a>
+                                                </h2>
+                                            @endif
+                                        </div>
+
+                                    </div>
+                                @endif
                             @endforeach
 
 

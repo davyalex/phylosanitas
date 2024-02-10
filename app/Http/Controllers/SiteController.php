@@ -51,17 +51,17 @@ class SiteController extends Controller
 
         $post = Post::with(['category', 'commentaires', 'media', 'user'])->orderBy('created_at', 'desc')
             ->where('published', 'public')
-            ->whereNotIn('category_id',[$category_actualite['id']])
+            ->whereNotIn('category_id', [$category_actualite['id']])
             ->get()->take(12);
 
-            
+
         // $category = Category::with('posts')->get()->sortBy('title');
 
         //actualite sous forme de slider //publicite
         $actualite = Actualite::with('media')->orderBy('created_at', 'desc')->get();
 
 
-        return view('site.pages.accueil', compact(['post','actualite']));
+        return view('site.pages.accueil', compact(['post', 'actualite']));
     }
 
 
@@ -89,7 +89,7 @@ class SiteController extends Controller
             ->when($slug_req, function ($q) use ($category_req) {
                 return $q->where('category_id', $category_req['id'])
                     ->where('published', 'public');
-            })->orderBy('created_at', 'desc')->paginate(5);
+            })->orderBy('created_at', 'desc')->paginate(10);
 
 
 
@@ -150,7 +150,7 @@ class SiteController extends Controller
             $country =  $currentUserInfo->countryName;
             $city =  $currentUserInfo->cityName;
 
-
+            //fonction pour nombre de vue
             views($post)->record();
             DB::table('views')->where('viewable_id', $post['id'])->update([
                 'ip' => $ip,
