@@ -22,12 +22,12 @@
 
 
               {{-- First post --}}
-              <div class="col-lg-9">
+              <div class="col-md-9 col-lg-9 ">
                   <div class="row">
 
 
                       @foreach ($post as $item)
-                          <div class="col-lg-4  ">
+                          <div class="col-lg-4 col-md-9  ">
                               <div class="post-entry-1 border mw-100 mh-300 bg-white">
                                   @if ($item->getFirstMediaUrl('image'))
                                       <a href="/post/detail?slug={{ $item['slug'] }}"><img
@@ -40,7 +40,8 @@
                                               alt="" class="img-fluid"
                                               style=" width:100%; height:200px; object-fit:cover"></a>
                                   @endif
-                                  <div class="post-meta text-center "><span class="date text-capitalize text-white bg-danger p-1 rounded-pill ">
+                                  <div class="post-meta text-center "><span
+                                          class="date text-capitalize text-white bg-danger p-1 rounded-pill ">
                                           {{ $item['category']['title'] }}</span>
                                       <span class="mx-1">&bullet;</span> <i
                                           class="bi bi-eye-fill w-100">{{ views($item)->count() }}</i>
@@ -78,7 +79,7 @@
               <!--  Section right  -->
               <div class="col-md-3 py-2" style="background-color: #f2f2f2">
 
-                @include('site.pages.sections.sidebar')
+                  @include('site.pages.sections.sidebar')
 
                   {{-- @include('site.pages.components.sondage') --}}
               </div>

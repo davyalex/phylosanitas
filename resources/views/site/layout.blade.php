@@ -94,7 +94,7 @@
                     <li><a href="{{ route('accueil') }}">Accueil</a></li>
                     @foreach ($category as $item)
                         <li><a class="text-capitalize"
-                                href="/post/category?category={{ $item['slug'] }}">{{ $item['title'] }}</a></li>
+                                href="/post?category={{ $item['slug'] }}">{{ $item['title'] }}</a></li>
                     @endforeach
 
 
@@ -182,7 +182,7 @@
                         <ul class="footer-links list-unstyled">
                             <li><a href="{{ route('accueil') }}"><i class="bi bi-chevron-right"></i> Accueil</a></li>
                             @foreach ($category as $item)
-                                <li><a href="/post/category?category={{ $item['slug'] }}"><i
+                                <li><a href="/post/?category={{ $item['slug'] }}"><i
                                             class="bi bi-chevron-right"></i> {{ $item['title'] }}</a></li>
                             @endforeach
                             <li><a href=""><i class="{{ route('contact') }}"></i> Contact</a></li>

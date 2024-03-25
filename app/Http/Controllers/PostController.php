@@ -23,25 +23,33 @@ class PostController extends Controller
     public function index()
     {
         //
-        $request = request('type');
-        $category = Category::whereTitle('sondage')->first();
-        
-        $sondage = Post::with(['category', 'commentaires', 'media', 'user'])
-        ->when($request=='sondage',
-        fn($q)=>$q->with('optionSondages')->where('category_id',$category['id'])
-        )
-        ->orderBy('created_at', 'desc')->get();
+        $category_title = request('type');
+        $category_sondage = Category::whereTitle('sondage')->first();
 
-        $post = $post = Post::with(['category', 'commentaires', 'media', 'user','views'])
-        ->where('category_id','!=',$category['id'])
-        ->orderBy('created_at', 'desc')->get();
-        
+        $sondage = Post::with(['category', 'commentaires', 'media', 'user'])
+            ->when(
+                $category_title == 'sondage',
+                fn ($q) => $q->with('optionSondages')->where('category_id', $category_sondage['id'])
+            )
+            ->orderBy('created_at', 'desc')->get();
+
+        //request filtre des articles par categorie
+        $category_filter = request('category_filter');
+        //liste des articles
+        $post = $post = Post::with(['category', 'commentaires', 'media', 'user', 'views'])
+            ->when(
+            $category_filter,
+                fn ($q) => $q->where('category_id', $category_filter)
+            )
+            ->where('category_id', '!=', $category_sondage['id'])
+            ->orderBy('created_at', 'desc')->get();
+
         // $actualite = Actualite::with('media')->orderBy('created_at', 'desc')->get();
 
-        
-// dd($post->toArray());
 
-        return view('admin.pages.post.index', compact('post','sondage'));
+        // dd($post->toArray());
+
+        return view('admin.pages.post.index', compact('post', 'sondage'));
     }
 
 
@@ -60,7 +68,7 @@ class PostController extends Controller
         }
 
         //
-       
+
     }
 
 
@@ -75,10 +83,11 @@ class PostController extends Controller
         //
         $request = request('type');
         $category = Category::with('posts')
-         ->when($request =='sondage',
-         fn($q)=>$q->whereTitle('sondage')
-         )
-        ->get();
+            ->when(
+                $request == 'sondage',
+                fn ($q) => $q->whereTitle('sondage')
+            )
+            ->get();
         return view('admin.pages.post.add', compact('category'));
     }
 
@@ -91,7 +100,7 @@ class PostController extends Controller
     public function store(Request $request)
     {
         //insertion des sondages
-        if ($request['sondage']=='sondage') {
+        if ($request['sondage'] == 'sondage') {
             // dd($request->toArray());
             $generate = Str::random(5);
             $request->validate([
@@ -99,28 +108,28 @@ class PostController extends Controller
                 'category' => 'required',
                 'option.*.title' => 'required',
             ]);
-    
+
             $post = Post::firstOrCreate([
-                'slug' =>'sondage'.$generate,
+                'slug' => 'sondage' . $generate,
                 'description' => $request['description'],
                 'category_id' => $request['category'],
                 'published' => 'prive',
                 // 'user_id' => Auth::user()->id,
             ]);
-            
+
             if ($request->file('image')) {
                 $post->addMediaFromRequest('image')
                     ->toMediaCollection('image');
             }
 
             foreach ($request['option'] as $key => $value) {
-               $option = OptionSondage::create([
-                'post_id' => $post['id'],
-                'title' => $value['title'],
-               ]);
+                $option = OptionSondage::create([
+                    'post_id' => $post['id'],
+                    'title' => $value['title'],
+                ]);
             }
-    
-    
+
+
             Alert::toast('Sondage inséré avec success', 'success');
             return back();
 
@@ -129,7 +138,7 @@ class PostController extends Controller
             //insertion des posts
 
         } else {
-           
+
 
             $request->validate([
                 'title' => 'required',
@@ -137,7 +146,7 @@ class PostController extends Controller
                 'category' => 'required',
                 'lien' => '',
             ]);
-    
+
             $post = Post::firstOrCreate([
                 'title' => $request['title'],
                 'description' => $request['description'],
@@ -146,19 +155,16 @@ class PostController extends Controller
                 'published' => 'prive',
                 'user_id' => Auth::user()->id,
             ]);
-    
+
             if ($request->file('image')) {
                 $post->addMediaFromRequest('image')
                     ->toMediaCollection('image');
             }
-    
-    
+
+
             Alert::toast('post inseré avec success', 'success');
             return back();
         }
-        
-
-      
     }
 
     /**

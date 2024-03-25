@@ -61,27 +61,30 @@
                                     <div class="col-lg-6">
                                         <div class="post-entry-1 border mw-100 mh-300 bg-white">
                                             @if ($item->getFirstMediaUrl('image'))
-                                                <a href="{{ $item['lien'] }}"><img
+                                                <a href="/post/detail?slug={{ $item['slug'] }}"><img
                                                         src="{{ asset($item->getFirstMediaUrl('image')) }}" loading="lazy"
                                                         alt=""
                                                         class="img-fluid"style=" width:100%; height:200px; object-fit:cover"></a>
                                             @else
-                                                <a href="{{ $item['lien'] }}">
+                                                <a href="/post/detail?slug={{ $item['slug'] }}">
                                                     <img src="{{ asset('assets_site/img/medc.jpg') }}" loading="lazy"
                                                         alt="" class="img-fluid"
                                                         style=" width:100%; height:200px; object-fit:cover"></a>
                                             @endif
-                                            <div class="post-meta text-center "><span
-                                                    class="date text-capitalize text-black bg-info p-1 rounded-pill ">
+                                            <div class="post-meta g-3 text-center">
+                                                <span class="date text-capitalize text-white bg-info p-1 rounded-pill">
                                                     {{ $item['category']['title'] }}</span>
-                                                {{-- <span class="mx-1">&bullet;</span> <i
-                                                    class="bi bi-eye-fill w-100">{{ views($item)->count() }}</i> --}}
-                                                {{-- <span class="mx-1">&bullet;</span> <i
-                                                    class="bi bi-chat-left-quote w-100">{{ $item->commentaires->count() }}</i>
-                                                <br> --}}
-                                                <span class="text-lowercase">publié
+
+                                                <i class="bi bi-eye-fill w-100 px-2">{{ views($item)->count() }}</i>
+
+                                                <i
+                                                    class="bi bi-chat-left-quote w-100 px-2">{{ $item->commentaires->count() }}</i>
+
+                                                <span class="text-lowercase"><i class="bi bi-calendar"></i>
                                                     {{ \Carbon\Carbon::parse($item['created_at'])->diffForHumans() }}</span>
-                                                &bullet;
+
+                                                <a href="{{ $item['lien'] }}"> <i class="bi bi-box-arrow-up-right">
+                                                        </i></a>
 
                                             </div>
 

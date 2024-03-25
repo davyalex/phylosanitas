@@ -63,7 +63,7 @@
     <div class="d-flex justify-content-between">
          <h3 class="aside-title">Sondages
         </h3>
-        <a href="/post/category?category=sondage" class="text-capitalize" href="">Tous voir <i class="bi bi-arrow-bar-right text-bold"></i> </a>
+        <a href="/post?category=sondage" class="text-capitalize" href="">Tous voir <i class="bi bi-arrow-bar-right text-bold"></i> </a>
     </div>
     <div class="messages-wrap">
         @foreach ($sondage_front as $item)

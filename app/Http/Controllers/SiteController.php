@@ -69,31 +69,35 @@ class SiteController extends Controller
     {
 
 
-        //liste des categories
-        $category = Category::with('posts')->get()->sortBy('title');
+        try {
+            //liste des categories
+            $category = Category::with('posts')->get()->sortBy('title');
 
-        //liste recent post
-        $post_last = Post::with(['category', 'commentaires', 'media', 'user'])->orderBy('created_at', 'desc')
-            ->where('published', 'public')
-            ->get()->take(4);
-
-
-        /******* */
-
-        $slug_req = request('category');
-
-        // category si request
-        $category_req = Category::whereSlug($slug_req)->first();
-
-        $post = Post::with(['category', 'commentaires', 'media', 'user'])
-            ->when($slug_req, function ($q) use ($category_req) {
-                return $q->where('category_id', $category_req['id'])
-                    ->where('published', 'public');
-            })->orderBy('created_at', 'desc')->paginate(10);
+            //liste recent post
+            $post_last = Post::with(['category', 'commentaires', 'media', 'user'])->orderBy('created_at', 'desc')
+                ->where('published', 'public')
+                ->get()->take(4);
 
 
+            /******* */
 
-        return view('site.pages.post', compact(['post_last', 'post', 'category', 'category_req']));
+            $slug_req = request('category');
+
+            // category si request
+            $category_req = Category::whereSlug($slug_req)->first();
+
+            $post = Post::with(['category', 'commentaires', 'media', 'user'])
+                ->when($slug_req, function ($q) use ($category_req) {
+                    return $q->where('category_id', $category_req['id'])
+                        ->where('published', 'public');
+                })->orderBy('created_at', 'desc')->paginate(10);
+
+
+
+            return view('site.pages.post', compact(['post_last', 'post', 'category', 'category_req']));
+        } catch (\Throwable $th) {
+            return redirect()->action([SiteController::class, 'index']);
+        }
     }
 
 
@@ -101,84 +105,88 @@ class SiteController extends Controller
     {
 
 
-        // config('app.env');
+        try {
+            // config('app.env');
 
 
-        //liste des categories
-        $category = Category::with('posts')->get()->sortBy('title');
+            //liste des categories
+            $category = Category::with('posts')->get()->sortBy('title');
 
-        //liste recent post
-        $post_last = Post::with(['category', 'commentaires', 'media', 'user'])->orderBy('created_at', 'desc')
-            ->where('published', 'public')
-            ->get()->take(4);
-
-
-        /******* */
-
-        $slug_req = request('slug');
+            //liste recent post
+            $post_last = Post::with(['category', 'commentaires', 'media', 'user'])->orderBy('created_at', 'desc')
+                ->where('published', 'public')
+                ->get()->take(4);
 
 
-        $post = Post::with(['category', 'commentaires', 'media', 'user', 'optionSondages'])
-            ->whereSlug($slug_req)->first();
+            /******* */
+
+            $slug_req = request('slug');
 
 
-        // statistics des sondages
-        $statistic_sondage = Soumission::with(['post', 'optionSondage'])
-            ->where('post_id', $post['id'])
-            ->selectRaw('post_id,option_sondage_id,count(*) as choice')
-            ->groupBy([
-                'post_id',
-                'option_sondage_id'
-            ])->get();
-
-        //total votant
-        $sondage_total = Soumission::get()
-            ->where('post_id', $post['id'])
-            ->count();
+            $post = Post::with(['category', 'commentaires', 'media', 'user', 'optionSondages'])
+                ->whereSlug($slug_req)->first();
 
 
-        // dd($statistic_sondage->toArray());
+            // statistics des sondages
+            $statistic_sondage = Soumission::with(['post', 'optionSondage'])
+                ->where('post_id', $post['id'])
+                ->selectRaw('post_id,option_sondage_id,count(*) as choice')
+                ->groupBy([
+                    'post_id',
+                    'option_sondage_id'
+                ])->get();
+
+            //total votant
+            $sondage_total = Soumission::get()
+                ->where('post_id', $post['id'])
+                ->count();
 
 
-        // verifier si le serveur est en production ou developpement
-
-        if (config('app.env') == 'production') {
-            // dd($post ->toArray());
-            $ip = $request->getClientIp();
-
-            $currentUserInfo = Location::get($ip);
-            $country =  $currentUserInfo->countryName;
-            $city =  $currentUserInfo->cityName;
-
-            //fonction pour nombre de vue
-            views($post)->record();
-            DB::table('views')->where('viewable_id', $post['id'])->update([
-                'ip' => $ip,
-                'country' => $country,
-                'city' => $city,
-            ]);
-            // $post->visitsCounter()->increment();
+            // dd($statistic_sondage->toArray());
 
 
-        } elseif (config('app.env') == 'local') {
-            $ip = $request->getClientIp();
+            // verifier si le serveur est en production ou developpement
 
-            $currentUserInfo = Location::get('8.8.1.1');
-            $country =  $currentUserInfo->countryName;
-            $city =  $currentUserInfo->cityName;
+            if (config('app.env') == 'production') {
+                // dd($post ->toArray());
+                $ip = $request->getClientIp();
+
+                $currentUserInfo = Location::get($ip);
+                $country =  $currentUserInfo->countryName;
+                $city =  $currentUserInfo->cityName;
+
+                //fonction pour nombre de vue
+                views($post)->record();
+                DB::table('views')->where('viewable_id', $post['id'])->update([
+                    'ip' => $ip,
+                    'country' => $country,
+                    'city' => $city,
+                ]);
+                // $post->visitsCounter()->increment();
 
 
-            views($post)->record();
-            DB::table('views')->where('viewable_id', $post['id'])->update([
-                'ip' => $ip,
-                'country' => $country,
-                'city' => $city,
-            ]);
-            // $post->visitsCounter()->increment();
+            } elseif (config('app.env') == 'local') {
+                $ip = $request->getClientIp();
+
+                $currentUserInfo = Location::get('8.8.1.1');
+                $country =  $currentUserInfo->countryName;
+                $city =  $currentUserInfo->cityName;
+
+
+                views($post)->record();
+                DB::table('views')->where('viewable_id', $post['id'])->update([
+                    'ip' => $ip,
+                    'country' => $country,
+                    'city' => $city,
+                ]);
+                // $post->visitsCounter()->increment();
+            }
+
+
+            return view('site.pages.detail', compact(['post_last', 'post', 'category', 'statistic_sondage', 'sondage_total']));
+        } catch (\Throwable $th) {
+            return redirect()->action([SiteController::class, 'index']);
         }
-
-
-        return view('site.pages.detail', compact(['post_last', 'post', 'category', 'statistic_sondage', 'sondage_total']));
     }
 
 

@@ -29,11 +29,10 @@ Route::get('login', [UserController::class, 'loginForm'])->name('login-form');
 
 //Route admin
 Route::middleware('auth')->prefix('admin')->group(function () {
- 
+
     /**Post */
     Route::controller(DashboardController::class)->group(function () {
         Route::get('', 'index')->name('dashboard');
-      
     });
 
     Route::controller(UserController::class)->prefix('user')->group(function () {
@@ -48,8 +47,6 @@ Route::middleware('auth')->prefix('admin')->group(function () {
         Route::get('profil/{id}', 'profil')->name('user.profil');
         route::post('logout', 'logout')->name('logout');
         route::post('newpassword/{id}', 'newpassword')->name('user.newpassword');
-
-
     });
 
     /**Category */
@@ -61,7 +58,7 @@ Route::middleware('auth')->prefix('admin')->group(function () {
         Route::post('destroy/{id}', 'destroy')->name('category.delete');
     });
 
-     /**Post */
+    /**Post */
     Route::controller(PostController::class)->prefix('post')->group(function () {
         Route::get('', 'index')->name('post');
         Route::get('create', 'create')->name('post.create');
@@ -72,14 +69,13 @@ Route::middleware('auth')->prefix('admin')->group(function () {
         Route::get('published', 'published');
     });
 
-    route::controller(ActualiteController::class)->prefix('actualite')->group(function(){
-        route::get('index','index')->name('actualite.index');
-        route::post('store','store')->name('actualite.store');
+    route::controller(ActualiteController::class)->prefix('actualite')->group(function () {
+        route::get('index', 'index')->name('actualite.index');
+        route::post('store', 'store')->name('actualite.store');
         Route::get('edit/{id}', 'edit')->name('actualite.edit');
         Route::post('update/{id}', 'update')->name('actualite.update');
         Route::post('destroy/{id}', 'destroy')->name('actualite.delete');
     });
-
 });
 
 
@@ -87,24 +83,22 @@ Route::middleware('auth')->prefix('admin')->group(function () {
 
 //sondage
 
-route::controller(SondageController::class)->prefix('sondage')->group(function(){
-    route::post('index','index')->name('sondage.index');
-    route::post('store','store')->name('sondage.store');
-  
+route::controller(SondageController::class)->prefix('sondage')->group(function () {
+    route::post('index', 'index')->name('sondage.index');
+    route::post('store', 'store')->name('sondage.store');
 });
 
 
 //api pour le site
-route::controller(SiteController::class)->group(function(){
-    route::get('','index')->name('accueil');
-    route::get('post/category','post')->name('post.list');
-    route::get('post/detail','detail')->name('post.detail');
-    route::get('contact','contact')->name('contact');
+route::controller(SiteController::class)->group(function () {
+    route::get('', 'index')->name('accueil');
+    route::get('post', 'post')->name('post.list');
+    route::get('post/detail', 'detail')->name('post.detail');
+    route::get('contact', 'contact')->name('contact');
     route::post('post/search', 'search')->name('search');
-
 });
 
 
-route::controller(CommentaireController::class)->group(function(){
-    route::post('comment','store')->name('post.comment');
+route::controller(CommentaireController::class)->group(function () {
+    route::post('comment', 'store')->name('post.comment');
 });

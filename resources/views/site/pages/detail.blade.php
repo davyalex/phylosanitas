@@ -2,20 +2,11 @@
 @section('title', $post->slug)
 @section('description', $post->description)
 @section('image', asset($post->getFirstMediaUrl('image')))
-@section('url', url()->current())
-{{-- @section('meta')
-<x-meta
-title="{{ $post->slug }}"
-description="{{ $post->description }}"
-image="{{ asset($post->getFirstMediaUrl('image')) }}"
-url="{{ url()->current() }}"
-/>
-@endsection
-  --}}
+@section('url', url()->full())
+
 @section('content')
 
     <section class="single-post-content">
-
 
         <div class="container">
             <div class="row">
@@ -30,6 +21,7 @@ url="{{ url()->current() }}"
                             <span class="date">{{ $post['category']['title'] }}</span> <span
                                 class="mx-1">&bullet;</span> <span>publié
                                 {{ \Carbon\Carbon::parse($post['created_at'])->diffForHumans() }}</span>
+
                         </div>
 
                         <img src="{{ asset($post->getFirstMediaUrl('image')) }}" loading="lazy" alt=""
@@ -38,6 +30,12 @@ url="{{ url()->current() }}"
                         <div class="max-width:50%; max-height:200px; object-fit:cover">
                             {!! $post['description'] !!}
 
+                            
+                            <a href="{{ $post['lien'] }}" target="blank"
+                                class="btn btn-link d-{{ $post['category']['slug'] == 'actualites' ? 'block' : 'none' }}">
+
+                                Consulter le site <i class="bi bi-box-arrow-up-right">
+                                </i></a>
                         </div>
 
 
@@ -46,8 +44,6 @@ url="{{ url()->current() }}"
 
 
                     {{-- formulaire du sondage --}}
-
-
 
                     @if ($post['category']['title'] == 'Sondage')
                         <div class="row col-12 m-auto ">
@@ -61,7 +57,10 @@ url="{{ url()->current() }}"
                                         <span class="m-auto " style="font-weight:400; font-size:19px;"> {{ ++$key }})
                                             {{ $item['optionSondage']['title'] }}
                                             @php
-                                                $stat_value = number_format(($item['choice'] * 100) / $sondage_total, 0);
+                                                $stat_value = number_format(
+                                                    ($item['choice'] * 100) / $sondage_total,
+                                                    0,
+                                                );
                                             @endphp;
                                             <div class="progress">
                                                 <div class="progress-bar" role="progressbar"
