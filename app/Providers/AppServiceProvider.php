@@ -65,7 +65,7 @@ class AppServiceProvider extends ServiceProvider
         $actualite_externe = Post::with(['category', 'commentaires', 'media', 'user'])->orderBy('created_at', 'desc')
             ->where('category_id', $category_actualite['id'])
             ->where('published', 'public')
-            ->where('actualite_une', 1)
+            // ->where('actualite_une', 1)
             ->orderBy('created_at', 'desc')->paginate(10);
         // dd($category_actualite->toArray());
 
