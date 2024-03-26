@@ -65,7 +65,8 @@ class AppServiceProvider extends ServiceProvider
         $actualite_externe = Post::with(['category', 'commentaires', 'media', 'user'])->orderBy('created_at', 'desc')
             ->where('category_id', $category_actualite['id'])
             ->where('published', 'public')
-            ->get()->take(10);
+            ->where('actualite_une', 1)
+            ->orderBy('created_at', 'desc')->paginate(10);
         // dd($category_actualite->toArray());
 
         View::composer('*', function ($view) use ($category, $post_last, $sondage, $actualite_externe) {

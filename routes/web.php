@@ -67,6 +67,9 @@ Route::middleware('auth')->prefix('admin')->group(function () {
         Route::post('update/{id}', 'update')->name('post.update');
         Route::post('destroy/{id}', 'destroy')->name('post.delete');
         Route::get('published', 'published');
+        Route::get('actualite', 'actualite_une'); //Mettre une actualite à la une
+
+
     });
 
     route::controller(ActualiteController::class)->prefix('actualite')->group(function () {

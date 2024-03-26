@@ -45,6 +45,7 @@ class Post extends Model implements HasMedia,Viewable
         'category_id',
         'user_id',
         'published',
+        'actualite_une', // Mettre une actualité à la une ....mettre en slide
         'created_at',
         'updated_at',
         'deleted_at',

@@ -38,7 +38,7 @@ class PostController extends Controller
         //liste des articles
         $post = $post = Post::with(['category', 'commentaires', 'media', 'user', 'views'])
             ->when(
-            $category_filter,
+                $category_filter,
                 fn ($q) => $q->where('category_id', $category_filter)
             )
             ->where('category_id', '!=', $category_sondage['id'])
@@ -55,13 +55,26 @@ class PostController extends Controller
 
     public function published(Request $request)
     {
-
+        //mettre en privé ou public
         $status = request('status');
-        $post = request('post');
+        $post = request('post'); //ID du post..article
+
+
 
         if ($status & $post) {
             $published = Post::whereId($post)->update(['published' => $status]);
             $post = Post::with(['category', 'commentaires', 'media', 'user'])->orderBy('created_at', 'desc')->get();
+            Alert::Success('Status modifié avec success');
+
+            return back();
+        }
+        // mettre l'actualité a la une
+        $actualite_une = request('actualite_une');
+        $actualite = request('actualite'); //ID de l'actualité
+
+        if ($actualite_une && $actualite) {
+            $published = Post::whereId($actualite)->update(['actualite_une' => $actualite_une]);
+
             Alert::Success('Status modifié avec success');
 
             return back();
@@ -71,6 +84,22 @@ class PostController extends Controller
 
     }
 
+
+    public function actualite_une(Request $request)
+    {
+        // mettre l'actualité a la une
+        $actualite_une = request('actualite_une');
+        $actualite = request('actualite'); //ID de l'actualité
+
+        $published = Post::whereId($actualite)->update(['actualite_une' => $actualite_une]);
+
+        Alert::Success('Status modifié avec success');
+
+        return back();
+
+        //
+
+    }
 
 
     /**
