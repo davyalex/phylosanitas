@@ -65,7 +65,7 @@
    
                  <div class="d-flex justify-content-center py-4">
                    <a href="index.html" class="logo d-flex align-items-center w-auto">
-                     <img src="{{asset('assets_admin/img/logo.png')}}" alt="">
+                     <img src="{{asset('assets_site/img/logo/logo_fb.png')}}" alt="">
                      <span class="d-none d-lg-block">PhyloSanitas</span>
                    </a>
                  </div><!-- End Logo -->
@@ -89,7 +89,7 @@
                        </div>
    
                        <div class="col-12">
-                         <label for="yourPassword" class="form-label">Password</label>
+                         <label for="yourPassword" class="form-label">Mot de passe</label>
                          <input type="password" name="password" class="form-control" id="password" required>
                          @include('admin.partials.hideShowPwd')
                          <div class="invalid-feedback">Entrez votre mot de passe!</div>
