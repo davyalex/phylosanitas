@@ -15,6 +15,9 @@ use RealRashid\SweetAlert\Facades\Alert;
 
 class PostController extends Controller
 {
+
+
+
     /**
      * Display a listing of the resource.
      *
@@ -53,32 +56,29 @@ class PostController extends Controller
     }
 
 
-    public function published(Request $request)
+    public function published($id)
     {
-        //mettre en privé ou public
-        $status = request('status');
-        $post = request('post'); //ID du post..article
+        //mettre le post en prive ou public
+       $post = Post::find($id);
+       $statutPublished = $post->published =='prive' ? 'public' : 'prive';
+        $published = Post::whereId($id)->update(['published' => $statutPublished]);
+        // $post = Post::with(['category', 'commentaires', 'media', 'user'])->orderBy('created_at', 'desc')->get();
+
+      
 
 
-
-        if ($status & $post) {
-            $published = Post::whereId($post)->update(['published' => $status]);
-            $post = Post::with(['category', 'commentaires', 'media', 'user'])->orderBy('created_at', 'desc')->get();
-            Alert::Success('Status modifié avec success');
-
-            return back();
-        }
         // mettre l'actualité a la une
         $actualite_une = request('actualite_une');
         $actualite = request('actualite'); //ID de l'actualité
 
         if ($actualite_une && $actualite) {
             $published = Post::whereId($actualite)->update(['actualite_une' => $actualite_une]);
-
-            Alert::Success('Status modifié avec success');
-
-            return back();
         }
+
+
+        Alert::Success('Status modifié avec success');
+
+        return back();
 
         //
 
@@ -184,7 +184,6 @@ class PostController extends Controller
                 'published' => 'prive',
                 'user_id' => Auth::user()->id,
             ]);
-
             if ($request->file('image')) {
                 $post->addMediaFromRequest('image')
                     ->toMediaCollection('image');
@@ -194,6 +193,25 @@ class PostController extends Controller
             Alert::toast('post inseré avec success', 'success');
             return back();
         }
+    }
+
+
+    public function uploadTinyMCEImage(Request $request)
+    {
+       
+        $post = Post::latest()->first();
+
+        // Ajout de l'image via Spatie Media Library
+        if ($request->hasFile('file')) {
+            $media = $post->addMediaFromRequest('file')
+                ->toMediaCollection('tinyMceImages');  // Ajout à la collection 'images'
+
+            // Retourner l'URL publique de l'image pour l'afficher dans TinyMCE
+            return response()->json(['location' => $media->getUrl()]);
+            
+        }
+
+        return response()->json(['error' => 'Image upload failed'], 400);
     }
 
     /**

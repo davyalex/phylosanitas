@@ -3,6 +3,7 @@
 namespace App\Models;
 // use App\Models\Visits;
 use Awssat\Visits\Visits;
+use Spatie\Image\Manipulations;
 use Spatie\MediaLibrary\HasMedia;
 use CyrildeWit\EloquentViewable\View;
 use Spatie\Permission\Traits\HasRoles;
@@ -11,20 +12,21 @@ use CyrildeWit\EloquentViewable\Visitor;
 use Cviebrock\EloquentSluggable\Sluggable;
 use Spatie\MediaLibrary\InteractsWithMedia;
 use Spatie\Permission\Traits\HasPermissions;
-use Illuminate\Database\Eloquent\SoftDeletes;
 // use CyrildeWit\EloquentViewable\Contracts\Visitor;
 
+use Illuminate\Database\Eloquent\SoftDeletes;
 use CyrildeWit\EloquentViewable\Contracts\Viewable;
 use CyrildeWit\EloquentViewable\InteractsWithViews;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 // use CyrildeWit\EloquentViewable\Visitor;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
 
 
 
-class Post extends Model implements HasMedia,Viewable
+class Post extends Model implements HasMedia, Viewable
 {
     use HasFactory,
         SoftDeletes,
@@ -90,7 +92,7 @@ class Post extends Model implements HasMedia,Viewable
     }
 
 
-   /**
+    /**
      * Get the instance of the user visits
      *
      * @return Visits
@@ -108,5 +110,15 @@ class Post extends Model implements HasMedia,Viewable
     public function visits()
     {
         return visits($this)->relation();
+    }
+
+
+    public function registerMediaConversions(Media $media = null): void
+    {
+        $this->addMediaConversion('optimized')
+            ->optimize()
+            ->format(Manipulations::FORMAT_JPG);  // Optionnel: changer le format si nécessaire
+            // ->quality(85);  // Ajuster la qualité
+
     }
 }

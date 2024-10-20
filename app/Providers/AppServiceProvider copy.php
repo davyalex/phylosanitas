@@ -4,32 +4,36 @@ namespace App\Providers;
 
 use App\Models\Post;
 use App\Models\Category;
+use Spatie\Permission\Models\Role;
+use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Facades\View;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
 class AppServiceProvider extends ServiceProvider
 {
+    /**
+     * Register any application services.
+     *
+     * @return void
+     */
     public function register()
     {
         //
     }
 
+    /**
+     * Bootstrap any application services.
+     *
+     * @return void
+     */
     public function boot()
     {
-        $this->loadCategories();
-        $this->loadRecentPosts();
-        $this->loadSurveys();
-        $this->loadExternalNews();
 
-        $this->shareDataWithAllViews();
-        $this->convertirImage();
 
-        // $this->nettoyerDescriptionsDesPosts();
-    }
-//convertir les image base 64 en lien 
-    private function convertirImage(){
+
         // Récupérer les posts qui contiennent des images en base64
         $posts = Post::all(); // ou utilisez DB::table('posts')->get() selon votre besoin
 
@@ -70,9 +74,9 @@ class AppServiceProvider extends ServiceProvider
                     'manipulations' => json_encode([]),
                     'custom_properties' => json_encode([]),
                     'responsive_images' => json_encode([]),
-                    'generated_conversions' => json_encode(['optimized' => true]),
+                    'generated_conversions' => json_encode(['optimized'=>true]),
 
-
+                    
                 ]);
 
                 // Remplacer le base64 dans la description par l'URL du fichier
@@ -84,83 +88,66 @@ class AppServiceProvider extends ServiceProvider
             $post->description = $updatedDescription;
             $post->save();
         }
-    }
-// listes des categories
-    private function loadCategories()
-    {
+
+        // $category = Category::with('posts')->get();
+
         $request = request('type');
-        $this->category = Category::with('posts')
-            ->when($request == 'sondage', fn($q) => $q->whereTitle('sondage'))
+        $category = Category::with('posts')
+            ->when(
+                $request == 'sondage',
+                fn($q) => $q->whereTitle('sondage')
+            )
             ->get();
-    }
 
-    /**
-     * Load recent posts from categories that are not surveys or external news.
-     *
-     * @return void
-     */
-    private function loadRecentPosts()
-    {
-        $excludedCategories = Category::whereIn('title', ['sondage', 'actualites'])->pluck('id');
+        //Liste des articles recents
+        $category_sondage = Category::whereTitle('sondage')->first();
+        $category_sondage = $category_sondage['id'];
 
-        $this->post_last = Post::with(['category', 'commentaires', 'media', 'user'])
-            ->whereNotIn('category_id', $excludedCategories)
+        $category_actualite = Category::whereSlug('actualites')->first();
+        $category_actualite = $category_actualite['id'];
+
+        $post_last = Post::with(['category', 'commentaires', 'media', 'user'])->orderBy('created_at', 'desc')
+            ->whereNotIn('category_id', [$category_sondage, $category_actualite])
             ->where('published', 'public')
-            ->latest()
-            ->take(4)
-            ->get();
-    }
+            ->get()->take(4);
 
-    /**
-     * Nettoie la description des posts en supprimant les attributs src et leur contenu.
-     *
-     * @return void
-     */
-    // private function nettoyerDescriptionsDesPosts()
-    // {
-    //     Post::chunk(100, function ($posts) {
-    //         foreach ($posts as $post) {
-    //             $descriptionNettoyee = preg_replace('/src\s*=\s*"[^"]*"/', '', $post->description);
-    //             $post->update(['description' => $descriptionNettoyee]);
-    //         }
-    //     });
-    // }
-
-
-
-    private function loadSurveys() //recuperer les sondages
-    {
-        $surveyCategory = Category::whereTitle('sondage')->first();
-
-        $this->sondage = Post::with(['category', 'commentaires', 'media', 'user'])
-            ->where('category_id', $surveyCategory->id)
+        //Liste des sondages pour le front
+        $sondage = Post::with([
+            'category',
+            'commentaires',
+            'media',
+            'user'
+        ])->orderBy('created_at', 'desc')
+            ->where('category_id', $category_sondage)
             ->where('published', 'public')
-            ->latest()
-            ->take(4)
-            ->get();
-    }
+            ->get()->take(4);
 
-    private function loadExternalNews() // recuperer les actualités ---les post en actualité a la une
-    {
-        $newsCategory = Category::whereSlug('actualites')->first();
+        //Liste des actualites externes
+        $category_actualite = Category::whereSlug('actualites')->first();
 
-        $this->actualite_externe = Post::with(['category', 'commentaires', 'media', 'user'])
-            ->where('category_id', $newsCategory->id)
+        $actualite_externe = Post::with(['category', 'commentaires', 'media', 'user'])->orderBy('created_at', 'desc')
+            ->where('category_id', $category_actualite['id'])
             ->where('published', 'public')
             ->where('actualite_une', 1)
-            ->latest()
-            ->paginate(10);
-    }
+            ->orderBy('created_at', 'desc')->paginate(10);
+        // dd($category_actualite->toArray());
 
-    private function shareDataWithAllViews()
-    {
-        View::composer('*', function ($view) {
+        View::composer('*', function ($view) use ($category, $post_last, $sondage, $actualite_externe) {
             $view->with([
-                'category' => $this->category,
-                'post_last' => $this->post_last,
-                'sondage_front' => $this->sondage,
-                'actualite_externe' => $this->actualite_externe,
+                'category' => $category,
+                'post_last' => $post_last,
+                'sondage_front' => $sondage,
+                'actualite_externe' => $actualite_externe,
+
             ]);
         });
+
+
+        // Paginator::defaultView('view-name');
+        // Paginator::defaultSimpleView('view-name');
     }
+
+
+
+    
 }

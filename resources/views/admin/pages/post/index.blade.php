@@ -67,7 +67,7 @@
                                         <tr>
                                             <th scope="row">{{ ++$key }}</th>
                                             <td>
-                                              <!-- ========== Start mettre le post en privé ou public ========== -->
+                                                <!-- ========== Start mettre le post en privé ou public ========== -->
                                                 @if ($item['published'] == 'prive')
                                                     <br><span class=""> <i class="bi bi-circle-fill text-warning"></i>
                                                         non publié</span>
@@ -75,21 +75,22 @@
                                                     <br> <span class=""> <i
                                                             class="bi bi-circle-fill text-success"></i> en ligne</span>
                                                 @endif
-                                              <!-- ========== End mettre le post en privé ou public ========== -->
-                                              
+                                                <!-- ========== End mettre le post en privé ou public ========== -->
+
 
 
 
                                                 <!-- ========== Start status actualité Une ========== -->
-                                               @if ($item->category->slug == 'actualites')
+                                                @if ($item->category->slug == 'actualites')
                                                     @if ($item['actualite_une'] == 0)
-                                                    <br><span class=""> <i class="bi bi-circle-fill text-warning"></i>
-                                                        Pas à la Une</span>
-                                                @elseif ($item['actualite_une'] == 1)
-                                                    <br> <span class=""> <i
-                                                            class="bi bi-circle-fill text-success"></i> A la Une</span>
+                                                        <br><span class=""> <i
+                                                                class="bi bi-circle-fill text-warning"></i>
+                                                            Pas à la Une</span>
+                                                    @elseif ($item['actualite_une'] == 1)
+                                                        <br> <span class=""> <i
+                                                                class="bi bi-circle-fill text-success"></i> A la Une</span>
+                                                    @endif
                                                 @endif
-                                               @endif
                                                 <!-- ========== End status actualité Une ========== -->
 
                                             </td>
@@ -114,19 +115,10 @@
                                                                 class="bi bi-globe"></i></button>
                                                         <div class="dropdown-menu">
                                                             <!-- ========== Start published status ========== -->
-                                                            @if ($item['published'] == 'public')
-                                                                <a href="/admin/post/published?status=prive&post={{ $item['id'] }}"
-                                                                    class="dropdown-item "
-                                                                    style="font-weight:700; font-size:1em" href="#"><i
-                                                                        class="bi bi-lock-fill"></i> Privé</a>
-                                                            @else
-                                                                <div class="dropdown-divider"></div>
-
-                                                                <a href="/admin/post/published?status=public&post={{ $item['id'] }}"
-                                                                    class="dropdown-item "
-                                                                    style="font-weight:700; font-size:1em" href="#"><i
-                                                                        class="bi bi-globe2"></i> Public</a>
-                                                            @endif
+                                                            <a href="{{ route('post.published', $item->id) }}"
+                                                                class="dropdown-item "
+                                                                style="font-weight:700; font-size:1em"><i
+                                                                    class="bi bi-lock-fill"></i>  {{$item->published =='public' ? 'Privé' : 'Public'}} </a>
                                                             <!-- ========== End published status ========== -->
 
                                                             <!-- ========== Start mettre une actualit& à la une ========== -->
