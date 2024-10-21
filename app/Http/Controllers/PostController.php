@@ -26,45 +26,49 @@ class PostController extends Controller
     public function index()
     {
         //
-        $category_title = request('type');
-        $category_sondage = Category::whereTitle('sondage')->first();
+        try {
+            $category_title = request('type');
+            $category_sondage = Category::whereTitle('sondage')->first();
 
-        $sondage = Post::with(['category', 'commentaires', 'media', 'user'])
-            ->when(
-                $category_title == 'sondage',
-                fn ($q) => $q->with('optionSondages')->where('category_id', $category_sondage['id'])
-            )
-            ->orderBy('created_at', 'desc')->get();
-
-        //request filtre des articles par categorie
-        $category_filter = request('category_filter');
-        //liste des articles
-        $post = $post = Post::with(['category', 'commentaires', 'media', 'user', 'views'])
-            ->when(
-                $category_filter,
-                fn ($q) => $q->where('category_id', $category_filter)
-            )
-            ->where('category_id', '!=', $category_sondage['id'])
-            ->orderBy('created_at', 'desc')->get();
-
-        // $actualite = Actualite::with('media')->orderBy('created_at', 'desc')->get();
+            $sondage = Post::with(['category', 'commentaires', 'media', 'user'])
+                ->when($category_title == 'sondage')
+                ->where('category_id', $category_sondage['id'])
+                ->orderBy('created_at', 'desc')->get();
 
 
-        // dd($post->toArray());
 
-        return view('admin.pages.post.index', compact('post', 'sondage'));
+            //request filtre des articles par categorie
+            $category_filter = request('category_filter');
+            //liste des articles
+            $post = $post = Post::with(['category', 'commentaires', 'media', 'user', 'views'])
+                ->when(
+                    $category_filter,
+                    fn($q) => $q->where('category_id', $category_filter)
+                )
+                ->where('category_id', '!=', $category_sondage['id'])
+                ->orderBy('created_at', 'desc')->get();
+
+            // $actualite = Actualite::with('media')->orderBy('created_at', 'desc')->get();
+
+
+            // dd($sondage->toArray());
+
+            return view('admin.pages.post.index', compact('post', 'sondage'));
+        } catch (\Throwable $e) {
+            return $e->getMessage();
+        }
     }
 
 
     public function published($id)
     {
         //mettre le post en prive ou public
-       $post = Post::find($id);
-       $statutPublished = $post->published =='prive' ? 'public' : 'prive';
+        $post = Post::find($id);
+        $statutPublished = $post->published == 'prive' ? 'public' : 'prive';
         $published = Post::whereId($id)->update(['published' => $statutPublished]);
         // $post = Post::with(['category', 'commentaires', 'media', 'user'])->orderBy('created_at', 'desc')->get();
 
-      
+
 
 
         // mettre l'actualité a la une
@@ -114,7 +118,7 @@ class PostController extends Controller
         $category = Category::with('posts')
             ->when(
                 $request == 'sondage',
-                fn ($q) => $q->whereTitle('sondage')
+                fn($q) => $q->whereTitle('sondage')
             )
             ->get();
         return view('admin.pages.post.add', compact('category'));
@@ -160,7 +164,9 @@ class PostController extends Controller
 
 
             Alert::toast('Sondage inséré avec success', 'success');
-            return back();
+            return redirect()->route('post',  ['type' => 'sondage']);
+
+            // return back();
 
 
 
@@ -191,6 +197,7 @@ class PostController extends Controller
 
 
             Alert::toast('post inseré avec success', 'success');
+            return redirect()->route('post');
             return back();
         }
     }
@@ -198,7 +205,7 @@ class PostController extends Controller
 
     public function uploadTinyMCEImage(Request $request)
     {
-       
+
         $post = Post::latest()->first();
 
         // Ajout de l'image via Spatie Media Library
@@ -208,7 +215,6 @@ class PostController extends Controller
 
             // Retourner l'URL publique de l'image pour l'afficher dans TinyMCE
             return response()->json(['location' => $media->getUrl()]);
-            
         }
 
         return response()->json(['error' => 'Image upload failed'], 400);
@@ -240,6 +246,64 @@ class PostController extends Controller
             ->first();
         return view('admin.pages.post.edit', compact(['post', 'category']));
     }
+
+
+
+    public function editSondage(Post $post, $slug)
+    {
+        //
+        $category = Category::with('posts')->get();
+        $post = Post::with(['category', 'commentaires', 'media', 'user', 'optionSondages'])
+            ->whereSlug($slug)
+            ->first();
+
+        $reponseSondage =   $post->optionSondages;
+        // dd($post->toArray());
+        return view('admin.pages.sondage.edit', compact('post', 'category', 'reponseSondage'));
+    }
+
+
+    public function updateSondage(Request $request, $id)
+    {
+        // dd($request->all());
+        $post = Post::find($id);
+        $request->validate([
+            'description' => 'required',
+            'category' => 'required',
+            'option.*.title' => 'required',
+        ]);
+
+        $post = tap($post)->update([
+            'description' => $request['description'],
+            // 'category_id' => $request['category'],
+            // 'published' => 'prive',
+            'user_id' => Auth::user()->id,
+        ]);
+
+        if ($request->hasFile('image')) {
+            $post->clearMediaCollection('image');
+            $post->addMediaFromRequest('image')
+                ->toMediaCollection('image');
+        }
+        DB::table('option_sondages')->where('post_id', $id)->delete();
+
+        foreach ($request['option'] as $key => $value) {
+            $option = OptionSondage::create([
+                'post_id' => $post['id'],
+                'title' => $value['title'],
+            ]);
+        }
+
+
+        Alert::toast('Sondage inséré avec success', 'success');
+        return redirect()->route('post',  ['type' => 'sondage']);
+
+        // return back();
+    }
+
+
+
+
 
     /**
      * Update the specified resource in storage.
@@ -277,6 +341,7 @@ class PostController extends Controller
 
         Alert::toast('post modifié avec success', 'success');
         return redirect()->route('post');
+        
         // return view('admin.pages.post.index', compact('post'));
     }
 

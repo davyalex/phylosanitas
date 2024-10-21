@@ -118,7 +118,8 @@
                                                             <a href="{{ route('post.published', $item->id) }}"
                                                                 class="dropdown-item "
                                                                 style="font-weight:700; font-size:1em"><i
-                                                                    class="bi bi-lock-fill"></i>  {{$item->published =='public' ? 'Privé' : 'Public'}} </a>
+                                                                    class="bi bi-lock-fill"></i>
+                                                                {{ $item->published == 'public' ? 'Privé' : 'Public' }} </a>
                                                             <!-- ========== End published status ========== -->
 
                                                             <!-- ========== Start mettre une actualit& à la une ========== -->

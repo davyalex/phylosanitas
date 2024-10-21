@@ -198,7 +198,7 @@
       <h1>Dashboard</h1>
       <nav>
         <ol class="breadcrumb">
-          <li class="breadcrumb-item"><a href="index.html">@yield('title')</a></li>
+          <li class="breadcrumb-item"><a href="#">@yield('title')</a></li>
           <li class="breadcrumb-item active">Dashboard</li>
         </ol>
       </nav>
@@ -213,7 +213,7 @@
   <!-- ======= Footer ======= -->
   <footer id="footer" class="footer">
     <div class="copyright">
-      &copy; Copyright <strong><span>{{ config('app.name') }}</span></strong>. Tous droits reservés
+      &copy; {{date('Y')}} Copyright <strong><span>{{ config('app.name') }}</span></strong>. Tous droits reservés
     </div>
     <div class="credits">
       Développé par<a href="https://dolubux.com" target="_blank"> dolubux.com</a>
