@@ -80,7 +80,7 @@
 
        
 
-          <div class="col-xxl-4 col-md-12">
+          <div class="col-xxl-12 col-md-12">
                <!-- News & Updates Traffic -->
               <div class="card">
                   <div class="filter">
