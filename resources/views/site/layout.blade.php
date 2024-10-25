@@ -9,7 +9,7 @@
     <meta property="og:image" content="@yield('image')">
     <meta name="title" content="@yield('title')">
     <meta name="url" content="@yield('url')">
-
+    <meta name="google-adsense-account" content="ca-pub-6925205610540207">
 
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title> {{ config('app.name') }}-@yield('title') </title>
@@ -54,7 +54,7 @@
     </style>
 
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6925205610540207"
-     crossorigin="anonymous"></script>
+        crossorigin="anonymous"></script>
 
 </head>
 
@@ -185,8 +185,8 @@
                         <ul class="footer-links list-unstyled">
                             <li><a href="{{ route('accueil') }}"><i class="bi bi-chevron-right"></i> Accueil</a></li>
                             @foreach ($category as $item)
-                                <li><a href="/post/?category={{ $item['slug'] }}"><i
-                                            class="bi bi-chevron-right"></i> {{ $item['title'] }}</a></li>
+                                <li><a href="/post/?category={{ $item['slug'] }}"><i class="bi bi-chevron-right"></i>
+                                        {{ $item['title'] }}</a></li>
                             @endforeach
                             <li><a href=""><i class="{{ route('contact') }}"></i> Contact</a></li>
                         </ul>
