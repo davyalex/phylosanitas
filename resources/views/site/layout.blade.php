@@ -3,6 +3,19 @@
 
 <head>
 
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-MTG6JQ5MNP"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+
+        function gtag() {
+            dataLayer.push(arguments);
+        }
+        gtag('js', new Date());
+
+        gtag('config', 'G-MTG6JQ5MNP');
+    </script>
+
     <!-- Google Tag Manager -->
     <script>
         (function(w, d, s, l, i) {
@@ -20,6 +33,8 @@
             f.parentNode.insertBefore(j, f);
         })(window, document, 'script', 'dataLayer', 'GTM-P2HGDT42');
     </script>
+
+
     <!-- End Google Tag Manager -->
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
