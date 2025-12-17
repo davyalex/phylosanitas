@@ -36,23 +36,23 @@
   --color-links: #212529;
   --color-links-hover: #15171a;
 
-  /* Primay colors */
-  --color-primary: #212529;
-  --color-primary-light: #26282c;
-  --color-primary-dark: #0b0c0e;
+  /* Primay colors - MÉDICAL THEME */
+  --color-primary: #0066CC;
+  --color-primary-light: #3399FF;
+  --color-primary-dark: #004A99;
 
-  --color-primary-rgb: 33, 37, 41;
-  --color-primary-light-rgb: 38, 40, 44;
-  --color-primary-dark-rgb: 11, 12, 14;
+  --color-primary-rgb: 0, 102, 204;
+  --color-primary-light-rgb: 51, 153, 255;
+  --color-primary-dark-rgb: 0, 74, 153;
 
-  /* Secondary colors */
-  --color-secondary: #596d80;
-  --color-secondary-light: #8498aa;
-  --color-secondary-dark: #404f5c;
+  /* Secondary colors - SANTÉ THEME */
+  --color-secondary: #00A86B;
+  --color-secondary-light: #2ECC71;
+  --color-secondary-dark: #008855;
 
-  --color-secondary-rgb: 89, 109, 128;
-  --color-secondary-light-rgb: 132, 152, 170;
-  --color-secondary-dark-rgb: 64, 79, 92;
+  --color-secondary-rgb: 0, 168, 107;
+  --color-secondary-light-rgb: 46, 204, 113;
+  --color-secondary-dark-rgb: 0, 136, 85;
 
   /* General colors */
   --color-blue: #0d6efd;

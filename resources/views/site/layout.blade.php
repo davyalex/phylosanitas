@@ -78,6 +78,7 @@
     <!-- Template Main CSS Files -->
     <link href="{{ asset('assets_site/css/variables.css') }}" rel="stylesheet">
     <link href="{{ asset('assets_site/css/main.css') }}" rel="stylesheet">
+    <link href="{{ asset('assets_site/css/phylosanitas-theme.css') }}" rel="stylesheet">
 
     <style>
         /* body{
@@ -105,7 +106,7 @@
 </div> --}}
     <!-- ======= Header ======= -->
     <header id="header" class="header d-flex align-items-center fixed-top">
-        <div class="container-fluid fixed-top bg-info mb-2">
+        <div class="container-fluid fixed-top header-top-medical mb-2">
             <div class="row">
                 <div class="col-md-12 text-center">
                     <a href="https://www.facebook.com/drake2077/?paipv=0&eav=Afa2MjwEAZ7eHsVKSa0CympZ6o2CGCLDfcnHnjIt6rXIQxYRT2kjE5NbUEDCpPwpp7I&_rdr"
@@ -114,16 +115,16 @@
                     <a href="#" class="mx-2 text-white"><span class="bi-instagram"></span></a>
 
                     @auth
-                        <a href="{{ route('dashboard') }}"> <i class="bi bi-grid"></i> Dashboard</a>
+                        <a href="{{ route('dashboard') }}" class="text-white"> <i class="bi bi-grid"></i> Dashboard</a>
                     @endauth
                 </div>
             </div>
         </div>
-        <div class="container-fluid container-xl d-flex align-items-center justify-content-between">
+        <div class="container-fluid container-xl d-flex align-items-center justify-content-between" style="margin-top: 45px; padding-top: 25px; padding-bottom: 20px;">
 
             <!-- logo -->
 
-            <a href="{{ route('accueil') }}" class="logo d-flex align-items-center mt-3">
+            <a href="{{ route('accueil') }}" class="logo d-flex align-items-center" style="margin-left: 20px;">
                 <!-- Uncomment the line below if you also wish to use an image logo -->
                 <img src="{{ asset('assets_site/img/logo/logo_tp.png') }}" alt="">
                 {{-- <h1 class="text-info">Φ</h1> <h3 class="text-danger m-1">S</h3>
@@ -132,47 +133,29 @@
             </a>
 
             <!-- menu -->
-            <nav id="navbar" class="navbar mt-3">
+            <nav id="navbar" class="navbar">
                 <ul>
-                    <li><a href="{{ route('accueil') }}">Accueil</a></li>
+                    <li><a href="{{ route('accueil') }}" class="{{ request()->routeIs('accueil') ? 'active' : '' }}">
+                        <i class="bi bi-house-door me-1"></i>Accueil
+                    </a></li>
+                    
                     @foreach ($category as $item)
-                        <li><a class="text-capitalize"
-                                href="/post?category={{ $item['slug'] }}">{{ $item['title'] }}</a></li>
+                        <li>
+                            <a class="text-capitalize {{ request('category') == $item['slug'] ? 'active' : '' }}"
+                               href="/post?category={{ $item['slug'] }}">
+                                {{ $item['title'] }}
+                            </a>
+                        </li>
                     @endforeach
 
-
-
-
-
-
-                    <!-- <li><a href="single-post.html">Single Post</a></li> -->
-                    <!-- <li class="dropdown"><a href="category.html"><span>Categories</span> <i class="bi bi-chevron-down dropdown-indicator"></i></a>
-            <ul>
-              <li><a href="search-result.html">Search Result</a></li>
-              <li><a href="#">Drop Down 1</a></li>
-              <li class="dropdown"><a href="#"><span>Deep Drop Down</span> <i class="bi bi-chevron-down dropdown-indicator"></i></a>
-                <ul>
-                  <li><a href="#">Deep Drop Down 1</a></li>
-                  <li><a href="#">Deep Drop Down 2</a></li>
-                  <li><a href="#">Deep Drop Down 3</a></li>
-                  <li><a href="#">Deep Drop Down 4</a></li>
-                  <li><a href="#">Deep Drop Down 5</a></li>
-                </ul>
-              </li>
-              <li><a href="#">Drop Down 2</a></li>
-              <li><a href="#">Drop Down 3</a></li>
-              <li><a href="#">Drop Down 4</a></li>
-            </ul>
-          </li>
-
-          <li><a href="about.html">About</a></li> -->
-                    <li><a href="{{ route('contact') }}">Contact</a></li>
-
+                    <li><a href="{{ route('contact') }}" class="{{ request()->routeIs('contact') ? 'active' : '' }}">
+                        <i class="bi bi-envelope me-1"></i>Contact
+                    </a></li>
                 </ul>
             </nav><!-- .navbar -->
 
             <!-- lien reseaux sociaux -->
-            <div class="position-relative mt-3">
+            <div class="position-relative">
                 <!-- <a href="#" class="mx-2"><span class="bi-facebook"></span></a>
         <a href="#" class="mx-2"><span class="bi-twitter"></span></a>
         <a href="#" class="mx-2"><span class="bi-instagram"></span></a> -->

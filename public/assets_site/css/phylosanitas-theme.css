@@ -1,0 +1,879 @@
+/**
+* Phylosanitas Custom Theme
+* Thème médical/hospitalier optimisé
+* Couleurs: Bleu médical, Vert santé, Blanc propre
+*/
+
+:root {
+  /* Couleurs principales - Thème médical */
+  --medical-blue: #0066CC;
+  --medical-blue-light: #3399FF;
+  --medical-blue-dark: #004A99;
+  
+  --health-green: #00A86B;
+  --health-green-light: #2ECC71;
+  --health-green-dark: #008855;
+  
+  --medical-teal: #17a2b8;
+  --medical-teal-light: #20c9e0;
+  --medical-teal-dark: #117a8b;
+  
+  --trust-blue: #1E88E5;
+  --care-green: #43A047;
+  --wellness-purple: #8E24AA;
+  
+  /* Couleurs neutres médicales */
+  --white-pure: #FFFFFF;
+  --gray-light: #F8F9FA;
+  --gray-medium: #E9ECEF;
+  --gray-text: #6C757D;
+  --gray-dark: #343A40;
+  
+  /* Couleurs d'accentuation */
+  --accent-orange: #FF6B35;
+  --accent-red: #E53935;
+  --accent-yellow: #FFC107;
+  
+  /* Ombres et effets */
+  --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.1);
+  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
+  --shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.15);
+  
+  /* Transitions */
+  --transition-fast: 0.2s ease-in-out;
+  --transition-normal: 0.3s ease-in-out;
+  --transition-slow: 0.5s ease-in-out;
+}
+
+/* ========================================
+   HEADER OPTIMISÉ
+======================================== */
+
+/* Barre supérieure médical */
+.header-top-medical {
+  background: linear-gradient(135deg, var(--medical-blue) 0%, var(--medical-teal) 100%);
+  padding: 10px 0;
+  padding-bottom: 15px;
+  box-shadow: var(--shadow-sm);
+}
+
+.header-top-medical a {
+  color: var(--white-pure) !important;
+  transition: var(--transition-fast);
+  padding: 5px 10px;
+  border-radius: 20px;
+}
+
+.header-top-medical a:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: translateY(-2px);
+}
+
+/* Header principal */
+#header {
+  background: var(--white-pure);
+  box-shadow: var(--shadow-md);
+  border-bottom: 3px solid var(--medical-blue);
+  padding: 25px 0;
+  transition: padding 0.3s ease;
+}
+
+#header.header-scrolled {
+  padding: 15px 0;
+}
+
+#header.header-scrolled .header-top-medical {
+  display: none;
+}
+
+#header.header-scrolled .container-fluid.container-xl {
+  margin-top: 0 !important;
+  padding-top: 15px !important;
+  padding-bottom: 15px !important;
+}
+
+#header .container-fluid {
+  padding-top: 10px;
+  padding-bottom: 10px;
+}
+
+/* Logo optimisé */
+.logo img {
+  transition: var(--transition-normal);
+  filter: drop-shadow(var(--shadow-sm));
+}
+
+.logo:hover img {
+  transform: scale(1.05);
+}
+
+/* Navigation améliorée */
+.navbar ul {
+  display: flex;
+  align-items: center;
+  gap: 0;
+}
+
+.navbar ul li {
+  list-style: none;
+}
+
+.navbar ul li a {
+  color: var(--gray-dark);
+  font-weight: 500;
+  padding: 12px 16px;
+  border-radius: 25px;
+  transition: var(--transition-fast);
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  text-decoration: none;
+}
+
+.navbar ul li a i {
+  font-size: 1rem;
+  transition: var(--transition-fast);
+}
+
+.navbar ul li a:hover,
+.navbar ul li a.active {
+  color: var(--medical-blue);
+}
+
+.navbar ul li a:hover i,
+.navbar ul li a.active i {
+  transform: scale(1.1);
+}
+
+/* Effet de ligne au survol */
+.navbar ul li a::before {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  width: 0;
+  height: 3px;
+  background: var(--medical-blue);
+  transition: var(--transition-fast);
+  transform: translateX(-50%);
+  border-radius: 2px;
+}
+
+.navbar ul li a:hover::before {
+  width: 80%;
+}
+
+.navbar ul li a.active::before {
+  width: 100%;
+}
+
+/* Dropdown styles */
+.navbar .dropdown-indicator {
+  margin-left: 5px;
+  transition: var(--transition-fast);
+}
+
+.navbar .dropdown:hover .dropdown-indicator {
+  transform: rotate(180deg);
+}
+
+.navbar .dropdown ul {
+  position: absolute;
+  left: 0;
+  top: calc(100% + 10px);
+  background: var(--white-pure);
+  border-radius: 15px;
+  box-shadow: var(--shadow-lg);
+  padding: 15px;
+  min-width: 220px;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-10px);
+  transition: var(--transition-normal);
+  z-index: 1000;
+  display: block !important;
+  flex-direction: column;
+}
+
+.navbar .dropdown:hover ul {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+.navbar .dropdown ul li {
+  width: 100%;
+  margin: 5px 0;
+}
+
+.navbar .dropdown ul li a {
+  width: 100%;
+  padding: 10px 15px;
+  border-radius: 10px;
+  color: var(--gray-dark);
+  background: transparent;
+  justify-content: flex-start;
+}
+
+.navbar .dropdown ul li a:hover {
+  background: linear-gradient(135deg, var(--medical-blue) 0%, var(--medical-teal) 100%);
+  color: var(--white-pure);
+  transform: translateX(5px);
+}
+
+.navbar .dropdown ul li a::before {
+  display: none;
+}
+
+/* Menu mobile optimisé */
+@media (max-width: 1279px) {
+  .navbar ul {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+    padding: 20px;
+  }
+  
+  .navbar ul li {
+    width: 100%;
+  }
+  
+  .navbar ul li a {
+    width: 100%;
+    padding: 12px 20px;
+    justify-content: flex-start;
+  }
+  
+  .navbar .dropdown ul {
+    position: static;
+    opacity: 1;
+    visibility: visible;
+    transform: none;
+    box-shadow: none;
+    background: var(--gray-light);
+    margin-top: 10px;
+    display: none !important;
+  }
+  
+  .navbar .dropdown.show ul {
+    display: block !important;
+  }
+}
+
+/* ========================================
+   BOUTONS ET INTERACTIONS
+======================================== */
+
+.btn-medical {
+  background: linear-gradient(135deg, var(--medical-blue) 0%, var(--medical-blue-light) 100%);
+  color: var(--white-pure);
+  border: none;
+  padding: 12px 30px;
+  border-radius: 50px;
+  font-weight: 600;
+  box-shadow: var(--shadow-md);
+  transition: var(--transition-normal);
+}
+
+.btn-medical:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-lg);
+  background: linear-gradient(135deg, var(--medical-blue-dark) 0%, var(--medical-blue) 100%);
+}
+
+.btn-health {
+  background: linear-gradient(135deg, var(--health-green) 0%, var(--health-green-light) 100%);
+  color: var(--white-pure);
+  border: none;
+  padding: 12px 30px;
+  border-radius: 50px;
+  font-weight: 600;
+  box-shadow: var(--shadow-md);
+  transition: var(--transition-normal);
+}
+
+.btn-health:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-lg);
+}
+
+/* ========================================
+   CARDS ET POSTS
+======================================== */
+
+.card-medical {
+  border: none;
+  border-radius: 15px;
+  overflow: hidden;
+  box-shadow: var(--shadow-md);
+  transition: var(--transition-normal);
+  background: var(--white-pure);
+}
+
+.card-medical:hover {
+  transform: translateY(-5px);
+  box-shadow: var(--shadow-xl);
+}
+
+.card-medical .card-img-top {
+  transition: var(--transition-slow);
+}
+
+.card-medical:hover .card-img-top {
+  transform: scale(1.1);
+}
+
+.post-entry {
+  border-radius: 15px;
+  overflow: hidden;
+  box-shadow: var(--shadow-md);
+  transition: var(--transition-normal);
+  background: var(--white-pure);
+  border: 2px solid transparent;
+}
+
+.post-entry:hover {
+  border-color: var(--medical-blue);
+  box-shadow: var(--shadow-lg);
+  transform: translateY(-3px);
+}
+
+/* ========================================
+   BADGES ET LABELS
+======================================== */
+
+.badge-medical {
+  background: linear-gradient(135deg, var(--medical-blue) 0%, var(--medical-teal) 100%);
+  color: var(--white-pure);
+  padding: 6px 15px;
+  border-radius: 20px;
+  font-weight: 600;
+  font-size: 0.85rem;
+  box-shadow: var(--shadow-sm);
+}
+
+.badge-health {
+  background: linear-gradient(135deg, var(--health-green) 0%, var(--care-green) 100%);
+  color: var(--white-pure);
+  padding: 6px 15px;
+  border-radius: 20px;
+  font-weight: 600;
+  font-size: 0.85rem;
+  box-shadow: var(--shadow-sm);
+}
+
+.badge-category {
+  background: var(--medical-teal);
+  color: var(--white-pure);
+  padding: 5px 12px;
+  border-radius: 15px;
+  font-weight: 500;
+  font-size: 0.8rem;
+  transition: var(--transition-fast);
+}
+
+.badge-category:hover {
+  background: var(--medical-teal-dark);
+  transform: scale(1.05);
+}
+
+/* ========================================
+   FOOTER OPTIMISÉ
+======================================== */
+
+.footer {
+  background: linear-gradient(180deg, var(--gray-dark) 0%, #1a1d20 100%);
+  color: var(--gray-light);
+}
+
+.footer-heading {
+  color: var(--medical-blue-light);
+  font-weight: 700;
+  margin-bottom: 20px;
+  position: relative;
+  padding-bottom: 10px;
+}
+
+.footer-heading::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 50px;
+  height: 3px;
+  background: var(--medical-blue);
+  border-radius: 2px;
+}
+
+.footer-links li a {
+  color: var(--gray-medium);
+  transition: var(--transition-fast);
+  padding: 5px 0;
+  display: inline-block;
+}
+
+.footer-links li a:hover {
+  color: var(--medical-blue-light);
+  padding-left: 10px;
+}
+
+.social-links a {
+  background: rgba(255, 255, 255, 0.1);
+  padding: 10px;
+  border-radius: 50%;
+  transition: var(--transition-fast);
+}
+
+.social-links a:hover {
+  background: var(--medical-blue);
+  transform: translateY(-3px);
+}
+
+/* ========================================
+   SECTIONS SPÉCIALES
+======================================== */
+
+.section-medical-bg {
+  background: linear-gradient(135deg, rgba(0, 102, 204, 0.05) 0%, rgba(23, 162, 184, 0.05) 100%);
+  padding: 60px 0;
+}
+
+.section-health-accent {
+  border-left: 4px solid var(--health-green);
+  padding-left: 20px;
+  margin: 30px 0;
+  background: var(--gray-light);
+  padding: 20px;
+  border-radius: 10px;
+}
+
+/* ========================================
+   SEARCH BAR
+======================================== */
+
+.search-form-wrap {
+  background: rgba(255, 255, 255, 0.98);
+  backdrop-filter: blur(10px);
+  box-shadow: var(--shadow-xl);
+}
+
+.search-form {
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.search-form input {
+  border: 2px solid var(--medical-blue);
+  border-radius: 50px;
+  padding: 15px 30px;
+  font-size: 1.1rem;
+  transition: var(--transition-fast);
+  background: var(--white-pure);
+}
+
+.search-form input:focus {
+  box-shadow: 0 0 0 4px rgba(0, 102, 204, 0.1);
+  border-color: var(--medical-blue-dark);
+  outline: none;
+}
+
+.search-form input::placeholder {
+  color: var(--gray-text);
+  font-weight: 400;
+}
+
+.search-form .btn {
+  transition: var(--transition-fast);
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.search-form .btn:hover {
+  background: var(--gray-light);
+  transform: scale(1.1);
+}
+
+.js-search-open {
+  transition: var(--transition-fast);
+  padding: 8px;
+  border-radius: 50%;
+}
+
+.js-search-open:hover {
+  background: var(--medical-blue);
+  color: var(--white-pure) !important;
+  transform: scale(1.1);
+}
+
+/* ========================================
+   SEARCH RESULTS PAGE
+======================================== */
+
+.search-header .card {
+  border-left: 4px solid var(--health-green);
+}
+
+.search-results-empty {
+  min-height: 400px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.search-suggestion-list {
+  list-style: none;
+  padding-left: 0;
+}
+
+.search-suggestion-list li {
+  padding: 8px 0;
+  padding-left: 30px;
+  position: relative;
+}
+
+.search-suggestion-list li::before {
+  content: "✓";
+  position: absolute;
+  left: 0;
+  color: var(--health-green);
+  font-weight: bold;
+  font-size: 1.2rem;
+}
+
+.search-highlight {
+  background: rgba(0, 102, 204, 0.1);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-weight: 600;
+  color: var(--medical-blue);
+}
+
+/* ========================================
+   SCROLL TO TOP
+======================================== */
+
+.scroll-top {
+  background: var(--medical-blue);
+  box-shadow: var(--shadow-lg);
+  transition: var(--transition-normal);
+}
+
+.scroll-top:hover {
+  background: var(--medical-blue-dark);
+  transform: translateY(-5px);
+}
+
+/* ========================================
+   ANIMATIONS
+======================================== */
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in-up {
+  animation: fadeInUp 0.6s ease-out;
+}
+
+@keyframes pulse-medical {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(0, 102, 204, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 0 10px rgba(0, 102, 204, 0);
+  }
+}
+
+.pulse-medical {
+  animation: pulse-medical 2s infinite;
+}
+
+/* ========================================
+   RESPONSIVE OPTIMIZATIONS
+======================================== */
+
+@media (max-width: 768px) {
+  .header-top-medical {
+    font-size: 0.85rem;
+  }
+  
+  .navbar ul li a {
+    padding: 8px 15px;
+  }
+  
+  .card-medical {
+    margin-bottom: 20px;
+  }
+}
+
+/* ========================================
+   UTILITAIRES
+======================================== */
+
+.text-medical-blue { color: var(--medical-blue) !important; }
+.text-health-green { color: var(--health-green) !important; }
+.text-medical-teal { color: var(--medical-teal) !important; }
+
+.bg-medical-blue { background-color: var(--medical-blue) !important; }
+.bg-health-green { background-color: var(--health-green) !important; }
+.bg-medical-teal { background-color: var(--medical-teal) !important; }
+.bg-medical-light { background-color: var(--gray-light) !important; }
+
+.border-medical { border-color: var(--medical-blue) !important; }
+.border-health { border-color: var(--health-green) !important; }
+
+.shadow-medical { box-shadow: var(--shadow-md) !important; }
+.shadow-medical-lg { box-shadow: var(--shadow-lg) !important; }
+
+/* ========================================
+   POST CONTENT STYLING
+======================================== */
+
+.post-description {
+  color: var(--gray-dark);
+  line-height: 1.8;
+}
+
+.post-description h1,
+.post-description h2,
+.post-description h3,
+.post-description h4,
+.post-description h5,
+.post-description h6 {
+  color: var(--medical-blue);
+  margin-top: 2rem;
+  margin-bottom: 1rem;
+  font-weight: 700;
+}
+
+.post-description p {
+  margin-bottom: 1.5rem;
+  text-align: justify;
+}
+
+.post-description img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 10px;
+  margin: 2rem 0;
+  box-shadow: var(--shadow-md);
+}
+
+.post-description ul,
+.post-description ol {
+  margin-bottom: 1.5rem;
+  padding-left: 2rem;
+}
+
+.post-description li {
+  margin-bottom: 0.5rem;
+}
+
+.post-description blockquote {
+  border-left: 4px solid var(--health-green);
+  padding-left: 1.5rem;
+  margin: 2rem 0;
+  font-style: italic;
+  color: var(--gray-text);
+  background: var(--gray-light);
+  padding: 1.5rem;
+  border-radius: 8px;
+}
+
+.post-description a {
+  color: var(--medical-blue);
+  text-decoration: underline;
+  transition: var(--transition-fast);
+}
+
+.post-description a:hover {
+  color: var(--medical-blue-dark);
+}
+
+.post-description code {
+  background: var(--gray-medium);
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-family: 'Courier New', monospace;
+  color: var(--accent-red);
+}
+
+.post-description pre {
+  background: var(--gray-dark);
+  color: var(--white-pure);
+  padding: 1.5rem;
+  border-radius: 8px;
+  overflow-x: auto;
+  margin: 2rem 0;
+}
+
+.post-description table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 2rem 0;
+}
+
+.post-description th,
+.post-description td {
+  border: 1px solid var(--gray-medium);
+  padding: 0.75rem;
+  text-align: left;
+}
+
+.post-description th {
+  background: var(--medical-blue);
+  color: var(--white-pure);
+  font-weight: 600;
+}
+
+.post-description tr:nth-child(even) {
+  background: var(--gray-light);
+}
+
+/* ========================================
+   BREADCRUMB CUSTOM
+======================================== */
+
+.breadcrumb {
+  background: transparent;
+}
+
+.breadcrumb-item + .breadcrumb-item::before {
+  content: "›";
+  color: var(--medical-blue);
+  font-size: 1.2rem;
+}
+
+.breadcrumb-item.active {
+  color: var(--gray-text);
+}
+
+/* ========================================
+   STATISTICS & PROGRESS BARS
+======================================== */
+
+.statistics-container {
+  padding: 1rem 0;
+}
+
+.progress {
+  border-radius: 50px;
+  background-color: var(--gray-light);
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.progress-bar {
+  border-radius: 50px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: width 1s ease-in-out;
+}
+
+/* ========================================
+   FORM STYLING
+======================================== */
+
+.form-control:focus {
+  border-color: var(--medical-blue);
+  box-shadow: 0 0 0 0.25rem rgba(0, 102, 204, 0.15);
+}
+
+.form-check-input:checked {
+  background-color: var(--health-green);
+  border-color: var(--health-green);
+}
+
+.form-check-input:focus {
+  border-color: var(--medical-blue);
+  box-shadow: 0 0 0 0.25rem rgba(0, 102, 204, 0.15);
+}
+
+.form-label {
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+/* ========================================
+   CARD HOVER EFFECTS
+======================================== */
+
+.card-medical .card-title a {
+  transition: var(--transition-fast);
+}
+
+.card-medical:hover .card-title a {
+  color: var(--medical-blue) !important;
+}
+
+.card-header {
+  border-bottom: 2px solid var(--medical-blue);
+}
+
+/* ========================================
+   COMMENT SECTION
+======================================== */
+
+.comment {
+  transition: var(--transition-fast);
+}
+
+.comment:hover {
+  transform: translateX(5px);
+}
+
+.avatar {
+  box-shadow: var(--shadow-sm);
+}
+
+/* ========================================
+   CATEGORY TITLE
+======================================== */
+
+.category-title {
+  color: var(--medical-blue);
+  font-weight: 700;
+  padding-bottom: 1rem;
+  border-bottom: 3px solid var(--health-green);
+  margin-bottom: 2rem;
+}
+
+.category-title i {
+  color: var(--health-green);
+}
+
+.category-title a {
+  color: var(--medical-blue);
+  text-decoration: none;
+  transition: var(--transition-fast);
+}
+
+.category-title a:hover {
+  color: var(--medical-blue-light);
+}
+
+/* ========================================
+   SIDEBAR
+======================================== */
+
+/* Espacement entre les widgets de la sidebar */
+.sidebar-wrapper > div {
+  margin-bottom: 1.5rem;
+}
+
+.sidebar-wrapper > div:last-child {
+  margin-bottom: 0;
+}

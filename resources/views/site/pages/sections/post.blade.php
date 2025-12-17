@@ -1,101 +1,90 @@
-  <!-- =======  Liste des Post recent limit ? sur la page d'accueil======= -->
-  <section id="posts" class="posts">
+  <!-- =======  Liste des Post récents sur la page d'accueil======= -->
+  <section id="posts" class="posts section-medical-bg py-5">
       <div class="container" data-aos="fade-up">
-          <div class="row g-5">
+          <div class="row g-4">
 
-              {{-- First post --}}
-              {{-- <div class="col-lg-4">
-          <div class="post-entry-1 lg">
-            <a href="single-post.html"><img src="{{ asset($post_recent->getFirstMediaUrl('image'))}}" alt="" class="img-fluid"></a>
-            <div class="post-meta"><span class="date">{{ $post_recent['category']['title'] }}</span> <span class="mx-1">&bullet;</span> <span>{{ \Carbon\Carbon::parse($post_recent['created_at'])->diffForHumans() }}</span> &bullet; <i class="bi bi-eye-fill w-100" >2000</i></div>
-            <h2><a href="single-post.html">{{ $post_recent['title'] }}</a></h2> --}}
-              {{-- <p class="mb-4 d-block">{!! Str::words($post_recent['description'],3,'....') !!}</p> --}}
-
-              {{-- <div class="d-flex align-items-center author">
-              <div class="photo"><img src="{{ asset('assets_admin/img/avatar.jpg') }}" alt="" class="img-fluid"></div>
-              <div class="name">
-                <h3 class="m-0 p-0">{{ $post_recent['user']['roles'][0]['name'] }}</h3>
-              </div>
-            </div> --}}
-              {{-- </div>
-        </div> --}}
-
-
-              {{-- First post --}}
-              <div class="col-md-9 col-lg-9 ">
-                  <div class="row">
-
-
+              <div class="col-md-9 col-lg-9">
+                  <div class="mb-4">
+                      <h2 class="text-medical-blue fw-bold mb-2">
+                          <i class="bi bi-newspaper me-2"></i>
+                          Dernières Publications
+                      </h2>
+                      <p class="text-muted">Découvrez nos derniers articles et actualités santé</p>
+                  </div>
+                  
+                  <div class="row g-4">
                       @foreach ($post as $item)
-                          <div class="col-lg-4 col-md-9  ">
-                              <div class="post-entry-1 border mw-100 mh-300 bg-white">
-                                  @if ($item->getFirstMediaUrl('image'))
-                                      <a href="/post/detail?slug={{ $item['slug'] }}"><img
-                                              src="{{ asset($item->getFirstMediaUrl('image')) }}" loading="lazy"
-                                              alt=""
-                                              class="img-fluid"style=" width:100%; height:200px; object-fit:cover"></a>
-                                  @else
-                                      <a href="/post/detail?slug={{ $item['slug'] }}">
-                                          <img src="{{ asset('assets_site/img/medc.jpg') }}" loading="lazy"
-                                              alt="" class="img-fluid"
-                                              style=" width:100%; height:200px; object-fit:cover"></a>
-                                  @endif
-                                  <div class="post-meta text-center "><span
-                                          class="date text-capitalize text-white bg-danger p-1 rounded-pill ">
-                                          {{ $item['category']['title'] }}</span>
-                                      <span class="mx-1">&bullet;</span> <i
-                                          class="bi bi-eye-fill w-100">{{ views($item)->count() }}</i>
-                                      <span class="mx-1">&bullet;</span> <i
-                                          class="bi bi-chat-left-quote w-100">{{ $item->commentaires->count() }}</i>
-                                      <br>
-                                      <span class="text-lowercase">publié
-                                          {{ \Carbon\Carbon::parse($item['created_at'])->diffForHumans() }}</span>
-                                      &bullet;
-
+                          <div class="col-lg-4 col-md-6">
+                              <div class="card card-medical h-100">
+                                  <div class="position-relative overflow-hidden">
+                                      @if ($item->getFirstMediaUrl('image'))
+                                          <a href="/post/detail?slug={{ $item['slug'] }}">
+                                              <img src="{{ asset($item->getFirstMediaUrl('image')) }}" 
+                                                   loading="lazy" 
+                                                   alt="{{ $item['title'] }}"
+                                                   class="card-img-top" 
+                                                   style="width:100%; height:220px; object-fit:cover;">
+                                          </a>
+                                      @else
+                                          <a href="/post/detail?slug={{ $item['slug'] }}">
+                                              <img src="{{ asset('assets_site/img/medc.jpg') }}" 
+                                                   loading="lazy" 
+                                                   alt="{{ $item['title'] }}"
+                                                   class="card-img-top"
+                                                   style="width:100%; height:220px; object-fit:cover;">
+                                          </a>
+                                      @endif
+                                      
+                                      <span class="badge position-absolute top-0 start-0 m-3 {{ $item['category']['title'] == 'Sondage' ? 'badge-health' : 'badge-medical' }}">
+                                          <i class="bi bi-{{ $item['category']['title'] == 'Sondage' ? 'bar-chart-fill' : 'newspaper' }} me-1"></i>
+                                          {{ $item['category']['title'] }}
+                                      </span>
                                   </div>
-                                  @if ($item['category']['title'] == 'Sondage')
-                                      {{-- @php
-                        $question_sondage = substr($item['description'], 3, -3)
-                    @endphp --}}
-                                      <h2 class="text-center text-justify"><a
-                                              href="/post/detail?slug={{ $item['slug'] }}">{!! Str::words($item->description, 15, '...') !!} </a>
-                                      </h2>
-                                  @else
-                                      <h2 class="text-center text-justify"><a
-                                              href="/post/detail?slug={{ $item['slug'] }}">{{ Str::limit($item['title'], 30, '...') }}</a>
-                                      </h2>
-                                  @endif
+                                  
+                                  <div class="card-body d-flex flex-column">
+                                      @if ($item['category']['title'] == 'Sondage')
+                                          <h5 class="card-title mb-3" style="min-height: 60px;">
+                                              <a href="/post/detail?slug={{ $item['slug'] }}" 
+                                                 class="text-decoration-none text-dark">
+                                                  {!! Str::words($item->description, 12, '...') !!}
+                                              </a>
+                                          </h5>
+                                      @else
+                                          <h5 class="card-title mb-3" style="min-height: 60px;">
+                                              <a href="/post/detail?slug={{ $item['slug'] }}" 
+                                                 class="text-decoration-none text-dark">
+                                                  {{ Str::limit($item['title'], 60, '...') }}
+                                              </a>
+                                          </h5>
+                                      @endif
+                                      
+                                      <div class="post-meta d-flex flex-wrap gap-3 align-items-center text-muted small mt-auto">
+                                          <span title="Date de publication">
+                                              <i class="bi bi-calendar3 text-medical-blue"></i>
+                                              {{ \Carbon\Carbon::parse($item['created_at'])->diffForHumans() }}
+                                          </span>
+                                          <span title="Nombre de vues">
+                                              <i class="bi bi-eye-fill text-health-green"></i>
+                                              {{ views($item)->count() }}
+                                          </span>
+                                          <span title="Nombre de commentaires">
+                                              <i class="bi bi-chat-left-quote-fill text-medical-teal"></i>
+                                              {{ $item->commentaires->count() }}
+                                          </span>
+                                      </div>
+                                  </div>
                               </div>
-
                           </div>
                       @endforeach
-
-
-
-                      <!-- End Trending Section -->
                   </div>
               </div>
 
-              <!--  Section right  -->
-              <div class="col-md-3 py-2" style="background-color: #f2f2f2">
-
-                  @include('site.pages.sections.sidebar')
-
-                  {{-- @include('site.pages.components.sondage') --}}
+              <!--  Section Sidebar  -->
+              <div class="col-md-3 col-lg-3">
+                  <div class="sidebar-wrapper">
+                      @include('site.pages.sections.sidebar')
+                  </div>
               </div>
-
-              {{-- <div class="col-lg-3">
-              
-
-
-            </div> --}}
-
-
-
-
-
-
-
 
           </div> <!-- End .row -->
       </div>

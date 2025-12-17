@@ -4,13 +4,25 @@ namespace App\Providers;
 
 use App\Models\Post;
 use App\Models\Category;
+use App\Observers\PostObserver;
+use App\Observers\CategoryObserver;
 use Illuminate\Support\Facades\View;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\ServiceProvider;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
 class AppServiceProvider extends ServiceProvider
 {
+    /**
+     * Variables pour partager les données avec les vues
+     */
+    protected $category;
+    protected $post_last;
+    protected $sondage;
+    protected $actualite_externe;
+
     public function register()
     {
         //
@@ -18,15 +30,35 @@ class AppServiceProvider extends ServiceProvider
 
     public function boot()
     {
-        $this->loadCategories();
-        $this->loadRecentPosts();
-        $this->loadSurveys();
-        $this->loadExternalNews();
+        // Enregistrer les observers
+        Category::observe(CategoryObserver::class);
+        Post::observe(PostObserver::class);
+        
+        // Vérifier si les tables existent avant d'exécuter les requêtes
+        if ($this->tablesExist()) {
+            $this->loadCategories();
+            $this->loadRecentPosts();
+            $this->loadSurveys();
+            $this->loadExternalNews();
 
-        $this->shareDataWithAllViews();
-        $this->convertirImage();
+            $this->shareDataWithAllViews();
+        }
 
+        // $this->convertirImage();
         // $this->nettoyerDescriptionsDesPosts();
+    }
+
+    /**
+     * Vérifier si les tables nécessaires existent
+     */
+    private function tablesExist(): bool
+    {
+        try {
+            return Schema::hasTable('categories') && 
+                   Schema::hasTable('posts');
+        } catch (\Exception $e) {
+            return false;
+        }
     }
 //convertir les image base 64 en lien 
     private function convertirImage(){
@@ -85,30 +117,47 @@ class AppServiceProvider extends ServiceProvider
             $post->save();
         }
     }
-// listes des categories
+/**
+     * Listes des catégories (avec cache)
+     */
     private function loadCategories()
     {
-        $request = request('type');
-        $this->category = Category::with('posts')
-            ->when($request == 'sondage', fn($q) => $q->whereTitle('sondage'))
-            ->get();
+        try {
+            $request = request('type');
+            
+            // Cache les catégories pour 60 minutes
+            $cacheKey = 'categories_list_' . ($request ?? 'all');
+            
+            $this->category = Cache::remember($cacheKey, 3600, function () use ($request) {
+                return Category::with('posts')
+                    ->when($request == 'sondage', fn($q) => $q->whereTitle('sondage'))
+                    ->get();
+            });
+        } catch (\Exception $e) {
+            $this->category = collect();
+        }
     }
 
     /**
-     * Load recent posts from categories that are not surveys or external news.
-     *
-     * @return void
+     * Load recent posts from categories that are not surveys or external news (avec cache)
      */
     private function loadRecentPosts()
     {
-        $excludedCategories = Category::whereIn('title', ['sondage', 'actualites'])->pluck('id');
+        try {
+            // Cache les posts récents pour 30 minutes
+            $this->post_last = Cache::remember('recent_posts', 1800, function () {
+                $excludedCategories = Category::whereIn('title', ['sondage', 'actualites'])->pluck('id');
 
-        $this->post_last = Post::with(['category', 'commentaires', 'media', 'user'])
-            ->whereNotIn('category_id', $excludedCategories)
-            ->where('published', 'public')
-            ->latest()
-            ->take(4)
-            ->get();
+                return Post::with(['category', 'commentaires', 'media', 'user'])
+                    ->whereNotIn('category_id', $excludedCategories)
+                    ->where('published', 'public')
+                    ->latest()
+                    ->take(4)
+                    ->get();
+            });
+        } catch (\Exception $e) {
+            $this->post_last = collect();
+        }
     }
 
     /**
@@ -128,38 +177,69 @@ class AppServiceProvider extends ServiceProvider
 
 
 
-    private function loadSurveys() //recuperer les sondages
+    /**
+     * Récupérer les sondages (avec cache)
+     */
+    private function loadSurveys()
     {
-        $surveyCategory = Category::whereTitle('sondage')->first();
+        try {
+            // Cache les sondages pour 30 minutes
+            $this->sondage = Cache::remember('surveys_list', 1800, function () {
+                $surveyCategory = Category::whereTitle('sondage')->first();
 
-        $this->sondage = Post::with(['category', 'commentaires', 'media', 'user'])
-            ->where('category_id', $surveyCategory->id)
-            ->where('published', 'public')
-            ->latest()
-            ->take(4)
-            ->get();
+                if ($surveyCategory) {
+                    return Post::with(['category', 'commentaires', 'media', 'user'])
+                        ->where('category_id', $surveyCategory->id)
+                        ->where('published', 'public')
+                        ->latest()
+                        ->take(4)
+                        ->get();
+                }
+                
+                return collect();
+            });
+        } catch (\Exception $e) {
+            $this->sondage = collect();
+        }
     }
 
-    private function loadExternalNews() // recuperer les actualités ---les post en actualité a la une
+    /**
+     * Récupérer les actualités externes (actualités à la une) (avec cache)
+     */
+    private function loadExternalNews()
     {
-        $newsCategory = Category::whereSlug('actualites')->first();
+        try {
+            // Cache les actualités pour 15 minutes (car elles changent plus souvent)
+            $this->actualite_externe = Cache::remember('external_news', 900, function () {
+                $newsCategory = Category::whereSlug('actualites')->first();
 
-        $this->actualite_externe = Post::with(['category', 'commentaires', 'media', 'user'])
-            ->where('category_id', $newsCategory->id)
-            ->where('published', 'public')
-            ->where('actualite_une', 1)
-            ->latest()
-            ->paginate(10);
+                if ($newsCategory) {
+                    return Post::with(['category', 'commentaires', 'media', 'user'])
+                        ->where('category_id', $newsCategory->id)
+                        ->where('published', 'public')
+                        ->where('actualite_une', 1)
+                        ->latest()
+                        ->paginate(10);
+                }
+                
+                return collect();
+            });
+        } catch (\Exception $e) {
+            $this->actualite_externe = collect();
+        }
     }
 
+    /**
+     * Partager les données avec toutes les vues
+     */
     private function shareDataWithAllViews()
     {
         View::composer('*', function ($view) {
             $view->with([
-                'category' => $this->category,
-                'post_last' => $this->post_last,
-                'sondage_front' => $this->sondage,
-                'actualite_externe' => $this->actualite_externe,
+                'category' => $this->category ?? collect(),
+                'post_last' => $this->post_last ?? collect(),
+                'sondage_front' => $this->sondage ?? collect(),
+                'actualite_externe' => $this->actualite_externe ?? collect(),
             ]);
         });
     }

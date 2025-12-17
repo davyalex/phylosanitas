@@ -1,97 +1,159 @@
 @extends('site.layout')
-@section('title', 'Liste des articles')
+@section('title', 'Recherche d\'articles')
 
 @section('content')
-    <!-- =======  Liste des Post recent limit ? sur la page d'accueil======= -->
-    <section id="posts" class="posts">
+    <!-- =======  Résultats de recherche ======= -->
+    <section id="posts" class="posts section-medical-bg py-5">
         <div class="container" data-aos="fade-up">
-            <div class="row g-5">
+            <div class="row g-4">
 
-
-                {{-- First post --}}
                 <div class="col-lg-9">
-                    <div class="row">
-
-                        @if (count($post) < 1)
-                            <div class="text-center mt-4">
-                                <h2>Aucun résultat pour votre recherche</h2>
-                                <span>Mot recherché: {{ request('query') }} </span>
+                    
+                    @if (count($post) < 1)
+                        <!-- Aucun résultat -->
+                        <div class="card card-medical text-center p-5">
+                            <div class="card-body">
+                                <div class="mb-4">
+                                    <i class="bi bi-search text-medical-blue" style="font-size: 4rem;"></i>
+                                </div>
+                                <h2 class="text-medical-blue fw-bold mb-3">
+                                    Aucun résultat trouvé
+                                </h2>
+                                <p class="text-muted mb-4">
+                                    Aucun article ne correspond à votre recherche : 
+                                    <strong class="text-medical-blue">"{{ request('query') }}"</strong>
+                                </p>
+                                <div class="section-health-accent p-4 rounded">
+                                    <h5 class="text-health-green mb-3">
+                                        <i class="bi bi-lightbulb-fill me-2"></i>
+                                        Suggestions
+                                    </h5>
+                                    <ul class="text-start">
+                                        <li>Vérifiez l'orthographe des mots-clés</li>
+                                        <li>Essayez des termes plus généraux</li>
+                                        <li>Utilisez moins de mots-clés</li>
+                                        <li>Parcourez nos catégories dans la barre latérale</li>
+                                    </ul>
+                                </div>
+                                <div class="mt-4">
+                                    <a href="/" class="btn btn-medical me-2">
+                                        <i class="bi bi-house-fill me-2"></i>
+                                        Retour à l'accueil
+                                    </a>
+                                    <a href="javascript:history.back()" class="btn btn-health">
+                                        <i class="bi bi-arrow-left me-2"></i>
+                                        Page précédente
+                                    </a>
+                                </div>
                             </div>
-                        @else
-                            <div class="my-3">
-                                <h2>{{ count($post) }} résultat(s) trouvés</h2>
-                                <span>Mot recherché: {{ request('query') }} </span>
-                            </div>
-                            @foreach ($post as $item)
-                                <div class="col-lg-4  ">
-                                    <div class="post-entry-1 border mw-100 mh-300 bg-white">
-                                        @if ($item->getFirstMediaUrl('image'))
-                                            <a href="/post/detail?slug={{ $item['slug'] }}"><img
-                                                    src="{{ asset($item->getFirstMediaUrl('image')) }}" loading="lazy"
-                                                    alt=""
-                                                    class="img-fluid"style=" width:100%; height:200px; object-fit:cover"></a>
-                                        @else
-                                            <a href="/post/detail?slug={{ $item['slug'] }}">
-                                                <img src="{{ asset('assets_site/img/medc.jpg') }}" loading="lazy"
-                                                    alt="" class="img-fluid"
-                                                    style=" width:100%; height:200px; object-fit:cover"></a>
-                                        @endif
-                                        <div class="post-meta text-center "><span
-                                                class="date text-capitalize bg-danger text-white p-1 rounded-pill ">
-                                                {{ $item['category']['title'] }}</span>
-                                            <span class="mx-1">&bullet;</span> <i
-                                                class="bi bi-eye-fill w-100">{{ views($item)->count() }}</i>
-                                            <span class="mx-1">&bullet;</span> <i
-                                                class="bi bi-chat-left-quote w-100">{{ $item->commentaires->count() }}</i>
-                                            <br>
-                                            <span class="text-lowercase">publié
-                                                {{ \Carbon\Carbon::parse($item['created_at'])->diffForHumans() }}</span>
-                                            &bullet;
-
+                        </div>
+                    @else
+                        <!-- Résultats trouvés -->
+                        <div class="search-header mb-4">
+                            <div class="card card-medical">
+                                <div class="card-body p-4">
+                                    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+                                        <div>
+                                            <h2 class="text-medical-blue fw-bold mb-2">
+                                                <i class="bi bi-search me-2"></i>
+                                                Résultats de recherche
+                                            </h2>
+                                            <p class="text-muted mb-0">
+                                                <strong class="text-health-green">{{ count($post) }}</strong> 
+                                                {{ count($post) > 1 ? 'articles trouvés' : 'article trouvé' }} pour 
+                                                <strong class="text-medical-blue">"{{ request('query') }}"</strong>
+                                            </p>
                                         </div>
-                                        @if ($item['category']['title'] == 'Sondage')
-                                            <h2 class="text-center text-justify"><a
-                                                    href="/post/detail?slug={{ $item['slug'] }}">{!! Str::words($item->description, 15, '...') !!}
-                                                </a>
-                                            </h2>
-                                        @else
-                                            <h2 class="text-center text-justify"><a
-                                                    href="/post/detail?slug={{ $item['slug'] }}">{{ Str::limit($item['title'], 30, '...') }}</a>
-                                            </h2>
-                                        @endif
+                                        <div>
+                                            <a href="javascript:history.back()" class="btn btn-health">
+                                                <i class="bi bi-arrow-left me-2"></i>
+                                                Retour
+                                            </a>
+                                        </div>
                                     </div>
+                                </div>
+                            </div>
+                        </div>
 
+                        <!-- Grille des résultats -->
+                        <div class="row g-4">
+                            @foreach ($post as $item)
+                                <div class="col-lg-4 col-md-6">
+                                    <div class="card card-medical h-100">
+                                        <div class="position-relative overflow-hidden">
+                                            @if ($item->getFirstMediaUrl('image'))
+                                                <a href="/post/detail?slug={{ $item['slug'] }}">
+                                                    <img src="{{ asset($item->getFirstMediaUrl('image')) }}" 
+                                                         loading="lazy" 
+                                                         alt="{{ $item['title'] }}"
+                                                         class="card-img-top" 
+                                                         style="width:100%; height:220px; object-fit:cover;">
+                                                </a>
+                                            @else
+                                                <a href="/post/detail?slug={{ $item['slug'] }}">
+                                                    <img src="{{ asset('assets_site/img/medc.jpg') }}" 
+                                                         loading="lazy" 
+                                                         alt="{{ $item['title'] }}"
+                                                         class="card-img-top"
+                                                         style="width:100%; height:220px; object-fit:cover;">
+                                                </a>
+                                            @endif
+                                            
+                                            <span class="badge position-absolute top-0 start-0 m-3 {{ $item['category']['title'] == 'Sondage' ? 'badge-health' : 'badge-medical' }}">
+                                                <i class="bi bi-{{ $item['category']['title'] == 'Sondage' ? 'bar-chart-fill' : 'newspaper' }} me-1"></i>
+                                                {{ $item['category']['title'] }}
+                                            </span>
+                                        </div>
+                                        
+                                        <div class="card-body d-flex flex-column">
+                                            @if ($item['category']['title'] == 'Sondage')
+                                                <h5 class="card-title mb-3" style="min-height: 60px;">
+                                                    <a href="/post/detail?slug={{ $item['slug'] }}" 
+                                                       class="text-decoration-none text-dark">
+                                                        {!! Str::words($item->description, 12, '...') !!}
+                                                    </a>
+                                                </h5>
+                                            @else
+                                                <h5 class="card-title mb-3" style="min-height: 60px;">
+                                                    <a href="/post/detail?slug={{ $item['slug'] }}" 
+                                                       class="text-decoration-none text-dark">
+                                                        {{ Str::limit($item['title'], 60, '...') }}
+                                                    </a>
+                                                </h5>
+                                            @endif
+                                            
+                                            <div class="post-meta d-flex flex-wrap gap-3 align-items-center text-muted small mt-auto">
+                                                <span title="Date de publication">
+                                                    <i class="bi bi-calendar3 text-medical-blue"></i>
+                                                    {{ \Carbon\Carbon::parse($item['created_at'])->diffForHumans() }}
+                                                </span>
+                                                <span title="Nombre de vues">
+                                                    <i class="bi bi-eye-fill text-health-green"></i>
+                                                    {{ views($item)->count() }}
+                                                </span>
+                                                <span title="Nombre de commentaires">
+                                                    <i class="bi bi-chat-left-quote-fill text-medical-teal"></i>
+                                                    {{ $item->commentaires->count() }}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             @endforeach
-                        @endif
+                        </div>
+                    @endif
 
-                        <!-- End Trending Section -->
+                </div>
 
+                <!--  Section Sidebar -->
+                <div class="col-lg-3">
+                    <div class="sidebar-wrapper">
+                        @include('site.pages.sections.sidebar')
                     </div>
                 </div>
 
-                <!--  Section right categorie -->
-                <div class="col-md-3 py-2" style="background-color: #f2f2f2">
-
-
-                    @include('site.pages.sections.sidebar')
-                </div>
-
-                {{-- <div class="col-lg-3">
-              
-
-
-            </div> --}}
-
-
-
-
-
-
-
-
             </div> <!-- End .row -->
         </div>
-    </section> <!-- End Post Grid Section -->
+    </section> <!-- End Search Results Section -->
 
 @endsection

@@ -1,17 +1,56 @@
-<div class="aside-block back-to-top mt-4 bg-white p-2">
-    <h3 class="aside-title">Les recents posts</h3>
+<div class="card card-medical p-3 mb-3">
+    <h3 class="aside-title text-medical-blue fw-bold mb-3">
+        <i class="bi bi-clock-history me-2"></i>
+        Posts Récents
+    </h3>
     @foreach ($post_last as $item)
-        <div class="post-entry-1 border-bottom">
-            <div class="post-meta">
-                <span class="date">{{ $item['category']['title'] }}</span> <span class="mx-1">&bullet;</span>
-                <span>publié {{ \Carbon\Carbon::parse($item['created_at'])->diffForHumans() }}</span>
+        <div class="post-entry-sidebar border-bottom pb-3 mb-3">
+            <div class="d-flex gap-3">
+                <div class="flex-shrink-0">
+                    @if ($item->getFirstMediaUrl('image'))
+                        <img src="{{ asset($item->getFirstMediaUrl('image')) }}" 
+                             class="rounded shadow-sm" 
+                             style="width: 70px; height: 70px; object-fit: cover;" 
+                             loading="lazy" 
+                             alt="{{ $item['title'] }}">
+                    @else
+                        <img src="{{ asset('assets_site/img/medc.jpg') }}" 
+                             class="rounded shadow-sm" 
+                             style="width: 70px; height: 70px; object-fit: cover;" 
+                             loading="lazy" 
+                             alt="{{ $item['title'] }}">
+                    @endif
+                </div>
+                <div class="flex-grow-1">
+                    <span class="badge badge-category mb-2">
+                        {{ $item['category']['title'] }}
+                    </span>
+                    <h6 class="mb-2">
+                        <a href="/post/detail?slug={{ $item['slug'] }}" 
+                           class="text-decoration-none text-dark hover-link">
+                            {{ Str::limit($item['title'], 60, '...') }}
+                        </a>
+                    </h6>
+                    <small class="text-muted">
+                        <i class="bi bi-calendar3 text-medical-blue"></i>
+                        {{ \Carbon\Carbon::parse($item['created_at'])->diffForHumans() }}
+                    </small>
+                </div>
             </div>
-            <div class="d-flex align-items-center">
-                <img src="{{ asset($item->getFirstMediaUrl('image')) }}" height="50px" width="50px" loading="lazy" alt="">
-                <h2 class="mb-2 mx-2"><a href="/post/detail?slug={{ $item['slug'] }}">{{ $item['title'] }}</a></h2>
-            </div>
-            {{-- <span class="author mb-3 d-block">Jenny Wilson</span> --}}
         </div>
     @endforeach
-
 </div>
+
+<style>
+.hover-link {
+    transition: var(--transition-fast);
+}
+.hover-link:hover {
+    color: var(--medical-blue) !important;
+}
+.post-entry-sidebar:last-child {
+    border-bottom: none !important;
+    padding-bottom: 0 !important;
+    margin-bottom: 0 !important;
+}
+</style>

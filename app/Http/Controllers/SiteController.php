@@ -58,10 +58,12 @@ class SiteController extends Controller
         // $category = Category::with('posts')->get()->sortBy('title');
 
         //actualite sous forme de slider //publicite
-        $actualite = Actualite::with('media')->orderBy('created_at', 'desc')->get();
+        $slide = Actualite::with('media')->orderBy('created_at', 'desc')->get();
+
+        // dd($slide->toArray());
 
 
-        return view('site.pages.accueil', compact(['post', 'actualite']));
+        return view('site.pages.accueil', compact(['post', 'slide']));
     }
 
 

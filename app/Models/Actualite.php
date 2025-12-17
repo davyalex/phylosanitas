@@ -11,14 +11,14 @@ use Spatie\MediaLibrary\HasMedia;
 class Actualite extends Model implements HasMedia
 {
     use HasFactory,
-    SoftDeletes,
+        SoftDeletes,
         InteractsWithMedia;
 
-        protected $fillable = [
-            'title',
-            'description',
-            'created_at',
-            'updated_at',
-            'deleted_at',
-        ];
+    protected $fillable = [
+        'title',
+        'description',
+        'created_at',
+        'updated_at',
+        'deleted_at',
+    ];
 }

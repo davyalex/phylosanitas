@@ -1,118 +1,156 @@
+<div class="card card-medical p-3 mb-3">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h3 class="aside-title text-medical-blue fw-bold mb-0">
+            <i class="bi bi-bar-chart-fill me-2"></i>
+            Sondages
+        </h3>
+        <a href="/post?category=sondage" class="btn btn-sm btn-health">
+            <i class="bi bi-arrow-right"></i>
+        </a>
+    </div>
+    
+    <div class="sondage-carousel position-relative">
+        @foreach ($sondage_front as $item)
+            <div class="sondage-item position-absolute w-100" style="display: none; opacity: 0;">
+                <div class="sondage-content p-3 rounded section-health-accent">
+                    <div class="sondage-icon text-center mb-3">
+                        <i class="bi bi-question-circle-fill text-medical-blue" style="font-size: 2.5rem;"></i>
+                    </div>
+                    <p class="text-dark mb-3" style="font-size: 0.95rem; line-height: 1.5;">
+                        {!! Str::limit(strip_tags($item->description), 120, '...') !!}
+                    </p>
+                    <div class="text-center">
+                        <a href="/post/detail?slug={{ $item['slug'] }}" class="btn btn-medical btn-sm w-100">
+                            <i class="bi bi-hand-thumbs-up-fill me-2"></i>
+                            Participer au sondage
+                        </a>
+                    </div>
+                    <div class="text-center mt-2">
+                        <small class="text-muted">
+                            <i class="bi bi-clock-history"></i>
+                            {{ \Carbon\Carbon::parse($item['created_at'])->diffForHumans() }}
+                        </small>
+                    </div>
+                </div>
+            </div>
+        @endforeach
+    </div>
+    
+    <!-- Indicateurs de pagination -->
+    @if(count($sondage_front) > 1)
+        <div class="text-center mt-2">
+            <div class="sondage-dots">
+                @foreach ($sondage_front as $index => $item)
+                    <span class="dot" data-index="{{ $index }}"></span>
+                @endforeach
+            </div>
+        </div>
+    @endif
+</div>
+
 <style>
-    .messages-wrap {
-        margin: 10px auto;
+    .sondage-carousel {
+        position: relative;
+        min-height: 280px;
+        overflow: hidden;
+    }
+    
+    .sondage-item {
+        position: absolute;
+        top: 0;
+        left: 0;
         width: 100%;
-        padding: 10px 0;
-        text-align: center;
-        /* background: #ffffff; */
-        /* border: 2px solid #ddd; */
+        transition: opacity 0.5s ease-in-out;
     }
-
-    .message {
-        display: none;
+    
+    .sondage-item.active {
+        display: block !important;
+        opacity: 1 !important;
+        z-index: 2;
     }
-
-    .message:first-child {
-        display: block;
+    
+    .sondage-content {
+        animation: fadeInDown 0.5s ease-in-out;
     }
-
-    .animated {
-        -webkit-animation-duration: 1s;
-        animation-duration: 1s;
-        -webkit-animation-fill-mode: both;
-        animation-fill-mode: both;
+    
+    .sondage-dots {
+        display: inline-flex;
+        gap: 8px;
     }
-
-    @-webkit-keyframes fadeInDown {
-        from {
-            opacity: 0;
-            -webkit-transform: translate3d(0, -100%, 0);
-            transform: translate3d(0, -100%, 0);
-        }
-
-        100% {
-            opacity: 1;
-            -webkit-transform: none;
-            transform: none;
-        }
+    
+    .dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: var(--gray-medium);
+        cursor: pointer;
+        transition: var(--transition-fast);
     }
-
+    
+    .dot.active {
+        background: var(--medical-blue);
+        width: 24px;
+        border-radius: 5px;
+    }
+    
+    .dot:hover {
+        background: var(--medical-blue-light);
+    }
+    
     @keyframes fadeInDown {
         from {
             opacity: 0;
-            -webkit-transform: translate3d(0, -100%, 0);
-            transform: translate3d(0, -100%, 0);
+            transform: translateY(-20px);
         }
-
-        100% {
+        to {
             opacity: 1;
-            -webkit-transform: none;
-            transform: none;
+            transform: translateY(0);
         }
-    }
-
-    .fadeInDown {
-        -webkit-animation-name: fadeInDown;
-        animation-name: fadeInDown;
     }
 </style>
-
-
-
-<div class="aside-block bg-white p-2">
-    <div class="d-flex justify-content-between">
-         <h3 class="aside-title">Sondages
-        </h3>
-        <a href="/post?category=sondage" class="text-capitalize" href="">Tous voir <i class="bi bi-arrow-bar-right text-bold"></i> </a>
-    </div>
-    <div class="messages-wrap">
-        @foreach ($sondage_front as $item)
-            <h6 class="message animated fadeInDown">{!! substr(strip_tags($item->description), 0, 150) !!}.... 
-            <a href="/post/detail?slug={{ $item['slug'] }}" class="btn btn-dark mt-3">Participer</a>
-            </h6>
-        @endforeach
-    </div>
-</div>
-
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
 <script>
     $(document).ready(function() {
-
-        //Elements to loop through
-        var elem = $('.message');
-        //Start at 0
-        i = 0;
-
-        function getMessage() {
-
-            //Loop through elements
-            $(elem).each(function(index) {
-
-                if (i == index) {
-                    //Show active element
-                    $(this).show();
-                } else if (i == $(elem).length) {
-                    //Show message
-                    $(this).show();
-                    //Reset i lst number is reached
-                    i = 0;
-                } else {
-                    //Hide all non active elements
-                    $(this).hide();
-                }
-
-            });
-
-            i++;
-
+        var sondageItems = $('.sondage-item');
+        var dots = $('.dot');
+        var currentIndex = 0;
+        
+        if (sondageItems.length <= 1) {
+            sondageItems.first().addClass('active').css({display: 'block', opacity: 1});
+            return;
         }
-
-        //Run once the first time
-        getMessage();
-
-        //Repeat
-        window.setInterval(getMessage, 7000);
-
+        
+        // Mettre à jour l'affichage
+        function showSondage(index) {
+            // Cacher tous les items
+            sondageItems.removeClass('active').css('opacity', 0);
+            
+            // Afficher l'item actuel avec transition
+            setTimeout(function() {
+                sondageItems.eq(index).addClass('active');
+            }, 100);
+            
+            // Mettre à jour les dots
+            dots.removeClass('active').eq(index).addClass('active');
+        }
+        
+        // Auto-rotation
+        function nextSondage() {
+            currentIndex = (currentIndex + 1) % sondageItems.length;
+            showSondage(currentIndex);
+        }
+        
+        // Initialiser
+        showSondage(0);
+        
+        // Click sur les dots
+        dots.click(function() {
+            currentIndex = $(this).data('index');
+            showSondage(currentIndex);
+        });
+        
+        // Rotation automatique toutes les 7 secondes
+        setInterval(nextSondage, 7000);
     });
 </script>

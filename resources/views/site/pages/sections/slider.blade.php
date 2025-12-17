@@ -5,20 +5,16 @@
                 <div class="col-12">
                     <div class="swiper sliderFeaturedPosts">
                         <div class="swiper-wrapper">
-
-
-                            @foreach ($actualite as $item)
+                            @foreach ($slide as $item)
                                 <div class="swiper-slide">
-                                    <a href="#" class="img-bg d-flex align-items-end"
-                                        style="background-image: url('{{ $item->getFirstMediaUrl('image') }}');">
+                                    <a href="/post/detail?slug={{ $item['slug'] }}" class="img-bg d-flex align-items-end"
+                                        style="background-image: url('{{ $item->getFirstMediaUrl('image') }}'); min-height: 400px;">
                                         <div class="img-bg-inner">
                                             <h1 class="text-white">{{ $item['title'] }}</h1>
-                                            {{-- <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Quidem neque est mollitia! Beatae minima assumenda repellat harum vero, officiis ipsam magnam obcaecati cumque maxime inventore repudiandae quidem necessitatibus rem atque.</p> --}}
                                         </div>
                                     </a>
                                 </div>
                             @endforeach
-
                         </div>
                         <div class="custom-swiper-button-next">
                             <span class="bi-chevron-right"></span>
