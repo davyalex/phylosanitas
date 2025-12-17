@@ -74,28 +74,30 @@
 #header {
   background: var(--white-pure);
   box-shadow: var(--shadow-md);
-  border-bottom: 3px solid var(--medical-blue);
-  padding: 25px 0;
-  transition: padding 0.3s ease;
+  border-bottom: 3px solid #a2ccf5;
+  padding: 60px 0;
+  transition: all 0.3s ease;
 }
 
 #header.header-scrolled {
-  padding: 15px 0;
+  padding: 8px 0;
 }
 
+/* Cacher la topbar au scroll pour éviter chevauchement */
 #header.header-scrolled .header-top-medical {
   display: none;
 }
 
 #header.header-scrolled .container-fluid.container-xl {
   margin-top: 0 !important;
-  padding-top: 15px !important;
-  padding-bottom: 15px !important;
+  padding-top: 12px !important;
+  padding-bottom: 12px !important;
 }
 
 #header .container-fluid {
   padding-top: 10px;
   padding-bottom: 10px;
+  transition: all 0.3s ease;
 }
 
 /* Logo optimisé */
@@ -113,6 +115,8 @@
   display: flex;
   align-items: center;
   gap: 0;
+  padding-top: 10px;
+  padding-bottom: 10px;
 }
 
 .navbar ul li {
@@ -150,22 +154,23 @@
 .navbar ul li a::before {
   content: '';
   position: absolute;
-  bottom: 0;
+  bottom: 8px;
   left: 50%;
   width: 0;
-  height: 3px;
+  height: 2px;
   background: var(--medical-blue);
   transition: var(--transition-fast);
   transform: translateX(-50%);
   border-radius: 2px;
+  margin-top: 4px;
 }
 
 .navbar ul li a:hover::before {
-  width: 80%;
+  width: 70%;
 }
 
 .navbar ul li a.active::before {
-  width: 100%;
+  width: 80%;
 }
 
 /* Dropdown styles */
@@ -228,21 +233,14 @@
 
 /* Menu mobile optimisé */
 @media (max-width: 1279px) {
+  /* Désactive les styles desktop qui interfèrent avec le menu mobile */
   .navbar ul {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 8px;
-    padding: 20px;
+    padding: 10px 0 !important;
+    gap: 0 !important;
   }
   
-  .navbar ul li {
-    width: 100%;
-  }
-  
-  .navbar ul li a {
-    width: 100%;
-    padding: 12px 20px;
-    justify-content: flex-start;
+  .navbar ul li a::before {
+    display: none !important;
   }
   
   .navbar .dropdown ul {
