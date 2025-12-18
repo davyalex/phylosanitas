@@ -44,10 +44,10 @@
 ======================================== */
 .festive-garland {
     position: fixed;
-    top: 0;
+    top: 45px;
     left: 0;
     width: 100%;
-    height: 40px;
+    height: 30px;
     background: linear-gradient(135deg, #d4af37 0%, #f1c40f 25%, #e74c3c 50%, #27ae60 75%, #d4af37 100%);
     background-size: 200% 100%;
     animation: shimmer 3s linear infinite;
@@ -57,15 +57,16 @@
 }
 
 .festive-garland::before {
-    content: '🎄 ❄️ 🎅 ⭐ 🎁 🔔 ❄️ 🎄 ⭐ 🎅 🎁 ❄️ 🔔 🎄 ⭐ 🎅 ❄️ 🎁 🔔 🎄';
+    content: '🎄 ❄️ 🎅 ⭐ 🎁 🔔 ❄️ 🎄 ⭐ 🎅 🎁 ❄️ 🔔 🎄 ⭐ 🎅 ❄️ 🎁 🔔 🎄 ❄️ 🎅 ⭐ 🎁 🔔 ❄️ 🎄 ⭐ 🎅 🎁 ❄️ 🔔 🎄 ⭐ 🎅 ❄️ 🎁 🔔 🎄❄️ 🎁 🔔 🎄 ❄️ 🎅 ⭐ 🎁 🔔 ❄️ 🎄 ⭐ 🎅 🎁 ❄️ 🔔 🎄 ⭐ 🎅 ❄️ 🎁 🔔 🎄❄️ 🎁 🔔 🎄 ❄️ 🎅 ⭐ 🎁 🔔 ❄️ 🎄 ⭐ 🎅 🎁 ❄️ 🔔 🎄 ⭐ 🎅 ❄️ 🎁 🔔 🎄❄️ 🎁 🔔 🎄 ❄️ 🎅 ⭐ 🎁 🔔 ❄️ 🎄 ⭐ 🎅 🎁 ❄️ 🔔 🎄 ⭐ 🎅 ❄️ 🎁 🔔 🎄❄️ 🎁 🔔 🎄 ❄️ 🎅 ⭐ 🎁 🔔 ❄️ 🎄 ⭐ 🎅 🎁 ❄️ 🔔 🎄 ⭐ 🎅 ❄️ 🎁 🔔 🎄';
     position: absolute;
     width: 200%;
     height: 100%;
     display: flex;
     align-items: center;
-    font-size: 20px;
-    animation: scroll-garland 30s linear infinite;
+    font-size: 16px;
+    animation: scroll-garland 20s linear infinite;
     padding: 0 20px;
+    white-space: nowrap;
 }
 
 @keyframes shimmer {
@@ -91,7 +92,7 @@
 ======================================== */
 .festive-badge {
     position: fixed;
-    top: 60px;
+    top: 85px;
     right: 20px;
     background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
     color: white;
@@ -224,15 +225,16 @@
 ======================================== */
 @media (max-width: 768px) {
     .festive-garland {
-        height: 30px;
+        height: 25px;
+        top: 38px;
     }
     
     .festive-garland::before {
-        font-size: 16px;
+        font-size: 14px;
     }
     
     .festive-badge {
-        top: 45px;
+        top: 70px;
         right: 10px;
         padding: 8px 15px;
         font-size: 12px;
@@ -261,12 +263,21 @@
    THÈME FESTIF - AJUSTEMENTS HEADER
 ======================================== */
 #header {
-    margin-top: 40px;
+    margin-top: 30px;
     transition: all 0.3s ease;
+}
+
+#header.header-scrolled ~ .festive-garland {
+    top: 0;
+    transition: top 0.3s ease;
 }
 
 @media (max-width: 768px) {
     #header {
-        margin-top: 30px;
+        margin-top: 25px;
+    }
+    
+    #header.header-scrolled ~ .festive-garland {
+        top: 0;
     }
 }

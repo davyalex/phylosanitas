@@ -43,14 +43,14 @@
                                   
                                   <div class="card-body d-flex flex-column">
                                       @if ($item['category']['title'] == 'Sondage')
-                                          <h5 class="card-title mb-3" style="min-height: 60px;">
+                                          <h5 class="card-title mb-2">
                                               <a href="/post/detail?slug={{ $item['slug'] }}" 
                                                  class="text-decoration-none text-dark">
                                                   {!! Str::words($item->description, 12, '...') !!}
                                               </a>
                                           </h5>
                                       @else
-                                          <h5 class="card-title mb-3" style="min-height: 60px;">
+                                          <h5 class="card-title mb-2">
                                               <a href="/post/detail?slug={{ $item['slug'] }}" 
                                                  class="text-decoration-none text-dark">
                                                   {{ Str::limit($item['title'], 60, '...') }}
@@ -59,7 +59,7 @@
                                       @endif
                                       
                                       <div class="post-meta d-flex flex-wrap gap-3 align-items-center text-muted small mt-auto">
-                                          <span title="Date de publication">
+                                          <span title="Date de publication " style="text-transform: lowercase">
                                               <i class="bi bi-calendar3 text-medical-blue"></i>
                                               {{ \Carbon\Carbon::parse($item['created_at'])->diffForHumans() }}
                                           </span>
