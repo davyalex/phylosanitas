@@ -165,97 +165,97 @@
                             </div>
                         </div>
                         {{-- End formulaire du sondage --}}
-                    @else
-                </div>
+                    @endif
 
-                <!-- ======= Comments ======= -->
-                <div class="comments mt-5">
-                    <div class="card card-medical">
-                        <div class="card-header bg-medical-light">
-                            <h5 class="mb-0 text-medical-blue">
-                                <i class="bi bi-chat-left-quote-fill me-2"></i>
-                                {{ $post->commentaires->count() }}
-                                Commentaire{{ $post->commentaires->count() > 1 ? 's' : '' }}
-                            </h5>
-                        </div>
-                        <div class="card-body">
-                            @foreach ($post->commentaires as $item)
-                                <div class="comment d-flex mb-4 p-3 rounded section-health-accent">
-                                    <div class="flex-shrink-0">
-                                        <div class="avatar rounded-circle bg-medical-blue d-flex align-items-center justify-content-center"
-                                            style="width: 50px; height: 50px;">
-                                            <i class="bi bi-person-fill text-white fs-4"></i>
+                    <!-- ======= Comments ======= -->
+                    <div class="comments mt-5">
+                        <div class="card card-medical">
+                            <div class="card-header bg-medical-light">
+                                <h5 class="mb-0 text-medical-blue">
+                                    <i class="bi bi-chat-left-quote-fill me-2"></i>
+                                    {{ $post->commentaires->count() }}
+                                    Commentaire{{ $post->commentaires->count() > 1 ? 's' : '' }}
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                @foreach ($post->commentaires as $item)
+                                    <div class="comment d-flex mb-4 p-3 rounded section-health-accent">
+                                        <div class="flex-shrink-0">
+                                            <div class="avatar rounded-circle bg-medical-blue d-flex align-items-center justify-content-center"
+                                                style="width: 50px; height: 50px;">
+                                                <i class="bi bi-person-fill text-white fs-4"></i>
+                                            </div>
+                                        </div>
+                                        <div class="flex-grow-1 ms-3">
+                                            <div class="comment-meta d-flex align-items-center mb-2">
+                                                <h6 class="mb-0 text-medical-blue fw-bold me-2">{{ $item['user_name'] }}
+                                                </h6>
+                                                <span class="text-muted small">
+                                                    <i class="bi bi-clock me-1"></i>
+                                                    {{ \Carbon\Carbon::parse($item['created_at'])->diffForHumans() }}
+                                                </span>
+                                            </div>
+                                            <div class="comment-body">
+                                                {{ $item['message'] }}
+                                            </div>
                                         </div>
                                     </div>
-                                    <div class="flex-grow-1 ms-3">
-                                        <div class="comment-meta d-flex align-items-center mb-2">
-                                            <h6 class="mb-0 text-medical-blue fw-bold me-2">{{ $item['user_name'] }}</h6>
-                                            <span class="text-muted small">
-                                                <i class="bi bi-clock me-1"></i>
-                                                {{ \Carbon\Carbon::parse($item['created_at'])->diffForHumans() }}
-                                            </span>
-                                        </div>
-                                        <div class="comment-body">
-                                            {{ $item['message'] }}
-                                        </div>
-                                    </div>
-                                </div>
-                            @endforeach
+                                @endforeach
+                            </div>
                         </div>
-                    </div>
-                </div><!-- End Comments -->
+                    </div><!-- End Comments -->
 
-                <!-- ======= Comments Form ======= -->
-                <div class="row justify-content-center mt-5">
-                    <div class="card card-medical">
-                        <div class="card-header bg-medical-light">
-                            <h5 class="mb-0 text-medical-blue">
-                                <i class="bi bi-pencil-square me-2"></i>
-                                Laisser un commentaire
-                            </h5>
-                        </div>
-                        <div class="card-body p-4">
-                            <form action="{{ route('post.comment') }}" method="POST">
-                                @csrf
-                                <input type="hidden" name="post_id" value="{{ $post['id'] }}">
+                    <!-- ======= Comments Form ======= -->
+                    <div class="row justify-content-center mt-5">
+                        <div class="card card-medical">
+                            <div class="card-header bg-medical-light">
+                                <h5 class="mb-0 text-medical-blue">
+                                    <i class="bi bi-pencil-square me-2"></i>
+                                    Laisser un commentaire
+                                </h5>
+                            </div>
+                            <div class="card-body p-4">
+                                <form action="{{ route('post.comment') }}" method="POST">
+                                    @csrf
+                                    <input type="hidden" name="post_id" value="{{ $post['id'] }}">
 
-                                @guest
+                                    @guest
+                                        <div class="mb-4">
+                                            <label for="comment-name" class="form-label text-medical-blue fw-bold">
+                                                <i class="bi bi-person-fill me-2"></i>Votre nom
+                                            </label>
+                                            <input type="text" name="name" class="form-control form-control-lg"
+                                                id="comment-name" placeholder="Entrez votre nom" required>
+                                        </div>
+                                    @endguest
+
                                     <div class="mb-4">
-                                        <label for="comment-name" class="form-label text-medical-blue fw-bold">
-                                            <i class="bi bi-person-fill me-2"></i>Votre nom
+                                        <label for="comment-message" class="form-label text-medical-blue fw-bold">
+                                            <i class="bi bi-chat-left-text-fill me-2"></i>Votre message
                                         </label>
-                                        <input type="text" name="name" class="form-control form-control-lg"
-                                            id="comment-name" placeholder="Entrez votre nom" required>
+                                        <textarea class="form-control form-control-lg" id="comment-message" name="message"
+                                            placeholder="Partagez votre avis..." required cols="30" rows="6"></textarea>
                                     </div>
-                                @endguest
 
-                                <div class="mb-4">
-                                    <label for="comment-message" class="form-label text-medical-blue fw-bold">
-                                        <i class="bi bi-chat-left-text-fill me-2"></i>Votre message
-                                    </label>
-                                    <textarea class="form-control form-control-lg" id="comment-message" name="message"
-                                        placeholder="Partagez votre avis..." required cols="30" rows="6"></textarea>
-                                </div>
-
-                                <div class="text-center">
-                                    <button type="submit" class="btn btn-medical btn-lg px-5">
-                                        <i class="bi bi-send-fill me-2"></i>
-                                        Envoyer le commentaire
-                                    </button>
-                                </div>
-                            </form>
+                                    <div class="text-center">
+                                        <button type="submit" class="btn btn-medical btn-lg px-5">
+                                            <i class="bi bi-send-fill me-2"></i>
+                                            Envoyer le commentaire
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
                         </div>
-                    </div>
-                </div><!-- End Comments Form -->
-                @endif
-            </div>
+                    </div><!-- End Comments Form -->
 
-            <div class="col-md-3">
-                <div class="sidebar-wrapper">
-                    @include('site.pages.sections.sidebar')
+                </div><!-- End col-md-9 -->
+
+                <div class="col-md-3">
+                    <div class="sidebar-wrapper">
+                        @include('site.pages.sections.sidebar')
+                    </div>
                 </div>
             </div>
-        </div>
         </div>
     </section>
 
