@@ -53,7 +53,7 @@
         <div class="container">
             <div class="row g-4">
                 <div class="col-md-9" data-aos="fade-up">
-                    <h3 class="category-title"><i class="bi bi-arrow-left"></i><a href="javascript:history.go(-1)">Retour</a>
+                    <h3 class="category-title mt-5"><i class="bi bi-arrow-left"></i><a href="javascript:history.go(-1)">Retour</a>
                         <i class="bi bi-chevron-double-right "></i> Categorie: {{ $category_req['title'] }}
                     </h3>
                     <div class="col-lg-12">
