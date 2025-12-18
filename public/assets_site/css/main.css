@@ -645,8 +645,8 @@ section {
 
 @media (max-width: 576px) {
   .img-bg {
-    min-height: 160px !important;
-    height: 160px !important;
+    min-height: 220px !important;
+    height: 220px !important;
   }
 }
 
