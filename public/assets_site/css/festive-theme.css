@@ -92,8 +92,9 @@
 ======================================== */
 .festive-badge {
     position: fixed;
-    top: 85px;
-    right: 20px;
+    bottom: 130px;
+    left: 50%;
+    transform: translateX(-50%);
     background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
     color: white;
     padding: 12px 20px;
@@ -104,11 +105,11 @@
     z-index: 9997;
     animation: pulse-festive 2s ease-in-out infinite;
     cursor: pointer;
-    transition: transform 0.3s ease;
+    transition: all 0.3s ease;
 }
 
 .festive-badge:hover {
-    transform: scale(1.1) rotate(5deg);
+    transform: translateX(-50%) scale(1.1) rotate(5deg);
 }
 
 .festive-badge i {
@@ -234,8 +235,8 @@
     }
     
     .festive-badge {
-        top: 70px;
-        right: 10px;
+        bottom: 110px;
+        left: 50%;
         padding: 8px 15px;
         font-size: 12px;
     }

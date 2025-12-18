@@ -14,9 +14,13 @@
 :root {
   scroll-behavior: smooth;
 }
+html {
+  overflow-x: hidden;
+}
 
 body {
   color: rgba(var(--color-primary-rgb), 1);
+  overflow-x: hidden;
 }
 
 a {
