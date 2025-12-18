@@ -118,8 +118,12 @@ function addFestiveSounds() {
     // Badge festif avec message
     const festiveBadge = document.createElement('div');
     festiveBadge.className = 'festive-badge';
-    festiveBadge.innerHTML = '<i class="bi bi-star-fill"></i> Joyeuses Fêtes!';
-    festiveBadge.title = 'Cliquez pour afficher un message festif';
+    festiveBadge.innerHTML = '<i class="bi bi-star-fill"></i> 🎁 Cliquez ici pour une surprise! 🎄';
+    festiveBadge.title = 'Cliquez pour découvrir votre message festif';
+    festiveBadge.style.cursor = 'pointer';
+    
+    // Animation pour attirer l'attention
+    festiveBadge.style.animation = 'pulse-festive 2s ease-in-out infinite, shake-badge 3s ease-in-out infinite';
     
     festiveBadge.addEventListener('click', function() {
         showFestiveMessage();
@@ -127,6 +131,17 @@ function addFestiveSounds() {
     
     document.body.appendChild(festiveBadge);
 }
+
+// Ajouter l'animation shake
+const shakeStyle = document.createElement('style');
+shakeStyle.textContent = `
+    @keyframes shake-badge {
+        0%, 100% { transform: translateX(-50%) rotate(0deg); }
+        10%, 30%, 50%, 70%, 90% { transform: translateX(-50%) rotate(-5deg); }
+        20%, 40%, 60%, 80% { transform: translateX(-50%) rotate(5deg); }
+    }
+`;
+document.head.appendChild(shakeStyle);
 
 /**
  * Afficher un message festif
