@@ -20,6 +20,7 @@ class AppServiceProvider extends ServiceProvider
      */
     protected $category;
     protected $post_last;
+    protected $post_popular;
     protected $sondage;
     protected $actualite_externe;
 
@@ -38,6 +39,7 @@ class AppServiceProvider extends ServiceProvider
         if ($this->tablesExist()) {
             $this->loadCategories();
             $this->loadRecentPosts();
+            $this->loadPopularPosts();
             $this->loadSurveys();
             $this->loadExternalNews();
 
@@ -161,6 +163,29 @@ class AppServiceProvider extends ServiceProvider
     }
 
     /**
+     * Load most viewed/popular posts (avec cache)
+     */
+    private function loadPopularPosts()
+    {
+        try {
+            // Cache les posts populaires pour 60 minutes
+            $this->post_popular = Cache::remember('popular_posts', 3600, function () {
+                $excludedCategories = Category::whereIn('title', ['sondage', 'actualites'])->pluck('id');
+
+                // Récupérer les posts avec le plus de vues
+                return Post::with(['category', 'commentaires', 'media', 'user'])
+                    ->whereNotIn('category_id', $excludedCategories)
+                    ->where('published', 'public')
+                    ->orderByViews('desc')
+                    ->take(5)
+                    ->get();
+            });
+        } catch (\Exception $e) {
+            $this->post_popular = collect();
+        }
+    }
+
+    /**
      * Nettoie la description des posts en supprimant les attributs src et leur contenu.
      *
      * @return void
@@ -238,6 +263,7 @@ class AppServiceProvider extends ServiceProvider
             $view->with([
                 'category' => $this->category ?? collect(),
                 'post_last' => $this->post_last ?? collect(),
+                'post_popular' => $this->post_popular ?? collect(),
                 'sondage_front' => $this->sondage ?? collect(),
                 'actualite_externe' => $this->actualite_externe ?? collect(),
             ]);

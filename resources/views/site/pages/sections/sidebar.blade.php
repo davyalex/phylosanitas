@@ -15,6 +15,11 @@
     @include('site.pages.components.recent_post')
 </div>
 
+<!--  posts populaires / plus visités -->
+<div class="mb-3">
+    @include('site.pages.components.popular_post')
+</div>
+
 <!--  Categories -->
 <div class="mb-3">
     @include('site.pages.components.categorie')

@@ -634,14 +634,14 @@ section {
 
 @media (max-width: 768px) {
   .img-bg {
-    height: 250px;
+    height: 200px;
   }
 }
 
 @media (max-width: 576px) {
   .img-bg {
-    min-height: 200px !important;
-    height: 200px !important;
+    min-height: 160px !important;
+    height: 160px !important;
   }
 }
 

@@ -79,6 +79,9 @@
     <link href="{{ asset('assets_site/css/variables.css') }}" rel="stylesheet">
     <link href="{{ asset('assets_site/css/main.css') }}" rel="stylesheet">
     <link href="{{ asset('assets_site/css/phylosanitas-theme.css') }}" rel="stylesheet">
+    
+    <!-- Thème Festif Noël & Nouvel An -->
+    <link href="{{ asset('assets_site/css/festive-theme.css') }}" rel="stylesheet">
 
     <style>
         /* body{
@@ -306,6 +309,12 @@
 
     <!-- Template Main JS File -->
     <script src="{{ asset('assets_site/js/main.js') }}"></script>
+    
+    <!-- Script Thème Festif -->
+    <script src="{{ asset('assets_site/js/festive-theme.js') }}"></script>
+    
+    <!-- Guirlande Festive -->
+    <div class="festive-garland"></div>
 
 </body>
 
