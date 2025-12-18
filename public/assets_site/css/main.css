@@ -102,6 +102,40 @@ section {
 }
 
 /*--------------------------------------------------------------
+# Home button
+--------------------------------------------------------------*/
+.home-button {
+  position: fixed;
+  visibility: visible;
+  opacity: 1;
+  right: 15px;
+  bottom: 65px;
+  z-index: 99999;
+  background: #00A86B;
+  width: 40px;
+  height: 40px;
+  border-radius: 4px;
+  transition: all 0.4s;
+}
+
+.home-button i {
+  font-size: 20px;
+  color: #fff;
+  line-height: 0;
+}
+
+.home-button:hover {
+  background: rgba(0, 168, 107, 0.8);
+  color: #fff;
+}
+
+@media (min-width: 769px) {
+  .home-button {
+    display: none;
+  }
+}
+
+/*--------------------------------------------------------------
 # Page title
 --------------------------------------------------------------*/
 .page-title {
