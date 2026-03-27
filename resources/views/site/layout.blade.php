@@ -80,8 +80,8 @@
     <link href="{{ asset('assets_site/css/main.css') }}" rel="stylesheet">
     <link href="{{ asset('assets_site/css/phylosanitas-theme.css') }}" rel="stylesheet">
     
-    <!-- Thème Festif Noël & Nouvel An -->
-    <link href="{{ asset('assets_site/css/festive-theme.css') }}" rel="stylesheet">
+    <!-- Thème Festif Pâques -->
+    <link href="{{ asset('assets_site/css/easter-theme.css') }}" rel="stylesheet">
 
     <style>
         /* body{
@@ -313,11 +313,11 @@
     <!-- Template Main JS File -->
     <script src="{{ asset('assets_site/js/main.js') }}"></script>
     
-    <!-- Script Thème Festif -->
-    <script src="{{ asset('assets_site/js/festive-theme.js') }}"></script>
+    <!-- Script Thème Pâques -->
+    {{-- <script src="{{ asset('assets_site/js/easter-theme.js') }}"></script> --}}
     
-    <!-- Guirlande Festive -->
-    <div class="festive-garland"></div>
+    <!-- Guirlande Pâques -->
+    {{-- <div class="easter-garland"></div> --}}
 
 </body>
 
