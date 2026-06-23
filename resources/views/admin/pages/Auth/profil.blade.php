@@ -1,229 +1,196 @@
 @extends('admin.layout')
-@section('title', 'Profil')
+@section('title', 'Mon profil')
 
 @section('content')
-<section class="section profile">
-    <div class="row">
-      <div class="col-xl-4">
+<section class="section">
+<div class="row g-4">
 
-        <div class="card">
-          <div class="card-body profile-card pt-4 d-flex flex-column align-items-center">
+    {{-- Carte profil --}}
+    <div class="col-xl-4">
+        <div class="card text-center">
+            <div class="card-body pt-5 pb-4">
+                <div class="profile-avatar mx-auto mb-3">
+                    {{ strtoupper(substr($user->name, 0, 2)) }}
+                </div>
+                <h4 class="fw-bold mb-1">{{ $user->name }}</h4>
+                <p class="text-muted mb-2">
+                    @if($user->roles->isNotEmpty())
+                        @php
+                            $roleName  = $user->roles->first()->name;
+                            $roleColor = match(strtolower($roleName)) {
+                                'administrateur' => 'danger',
+                                'webmaster'      => 'warning',
+                                default          => 'primary',
+                            };
+                        @endphp
+                        <span class="badge bg-{{ $roleColor }} px-3">{{ $roleName }}</span>
+                    @else
+                        <span class="badge bg-secondary">Aucun rôle</span>
+                    @endif
+                </p>
+                <p class="text-muted small mb-0">
+                    <i class="bi bi-telephone me-1"></i>{{ $user->phone }}
+                </p>
+                @if($user->email)
+                    <p class="text-muted small mb-0">
+                        <i class="bi bi-envelope me-1"></i>{{ $user->email }}
+                    </p>
+                @endif
 
-            <img src="{{ asset('assets_admin/img/avatar.jpg') }}" alt="Profile" class="rounded-circle">
-            <h2>{{ $user['name'] }}</h2>
-            <h3>{{ $user['roles'][0]['name'] }}</h3>
-            <h4>{{ $user['phone'] }}</h4>
-            {{-- <div class="social-links mt-2">
-              <a href="#" class="twitter"><i class="bi bi-twitter"></i></a>
-              <a href="#" class="facebook"><i class="bi bi-facebook"></i></a>
-              <a href="#" class="instagram"><i class="bi bi-instagram"></i></a>
-              <a href="#" class="linkedin"><i class="bi bi-linkedin"></i></a>
-            </div> --}}
-          </div>
+                <div class="row g-0 mt-4 pt-3 border-top text-center">
+                    <div class="col-6 border-end">
+                        <p class="mb-0 fw-bold fs-5">{{ $user->posts_count }}</p>
+                        <small class="text-muted">Articles</small>
+                    </div>
+                    <div class="col-6">
+                        <p class="mb-0 fw-bold fs-5">{{ $user->roles->count() }}</p>
+                        <small class="text-muted">Rôle(s)</small>
+                    </div>
+                </div>
+            </div>
         </div>
-
-      </div>
-
-      <div class="col-xl-8">
-
-        <div class="card">
-          <div class="card-body pt-3">
-            <!-- Bordered Tabs -->
-            <ul class="nav nav-tabs nav-tabs-bordered">
-
-              <li class="nav-item">
-                <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#profile-overview">Mes infos</button>
-              </li>
-
-              <li class="nav-item">
-                <button class="nav-link" data-bs-toggle="tab" data-bs-target="#profile-edit">Editer mon Profil</button>
-              </li>
-
-              <li class="nav-item">
-                <button class="nav-link" data-bs-toggle="tab" data-bs-target="#profile-change-password">Changer Mon mot de passe</button>
-              </li>
-
-            </ul>
-            <div class="tab-content pt-2">
-
-              <div class="tab-pane fade show active profile-overview" id="profile-overview">
-                
-                <h5 class="card-title">Profil Details</h5>
-
-                <div class="row">
-                  <div class="col-lg-3 col-md-4 label ">Nom complet</div>
-                  <div class="col-lg-9 col-md-8">{{ $user['name'] }}</div>
-                </div>
-
-                <div class="row">
-                  <div class="col-lg-3 col-md-4 label">Entreprise</div>
-                  <div class="col-lg-9 col-md-8">Pas defini</div>
-                </div>
-
-                <div class="row">
-                  <div class="col-lg-3 col-md-4 label">Metier</div>
-                  <div class="col-lg-9 col-md-8">Pas defini</div>
-                </div>
-
-                <div class="row">
-                  <div class="col-lg-3 col-md-4 label">Pays</div>
-                  <div class="col-lg-9 col-md-8">Pas defini</div>
-                </div>
-
-                <div class="row">
-                  <div class="col-lg-3 col-md-4 label">Address</div>
-                  <div class="col-lg-9 col-md-8">Pas defini</div>
-                </div>
-
-                <div class="row">
-                  <div class="col-lg-3 col-md-4 label">Telephone</div>
-                  <div class="col-lg-9 col-md-8">{{ $user['phone'] }}</div>
-                </div>
-
-                <div class="row">
-                  <div class="col-lg-3 col-md-4 label">Email</div>
-                  <div class="col-lg-9 col-md-8">{{ $user['email'] }}</div>
-                </div>
-
-              </div>
-
-              <div class="tab-pane fade profile-edit pt-3" id="profile-edit">
-
-                <!-- Profile Edit Form -->
-                <form method="POST" action="{{ route('user.update',$user['id']) }}">
-                 @csrf
-                  <div class="row mb-3">
-                    <label for="fullName" class="col-md-4 col-lg-3 col-form-label">Nom</label>
-                    <div class="col-md-8 col-lg-9">
-                      <input name="name" type="text"  value="{{ $user['name'] }}" class="form-control" id="fullName">
-                    </div>
-                  </div>
-
-                  
-
-                  {{-- <div class="row mb-3">
-                    <label for="company" class="col-md-4 col-lg-3 col-form-label">Company</label>
-                    <div class="col-md-8 col-lg-9">
-                      <input name="company" type="text" class="form-control" id="company" value="Lueilwitz, Wisoky and Leuschke">
-                    </div>
-                  </div>
-
-                  <div class="row mb-3">
-                    <label for="Job" class="col-md-4 col-lg-3 col-form-label">Job</label>
-                    <div class="col-md-8 col-lg-9">
-                      <input name="job" type="text" class="form-control" id="Job" value="Web Designer">
-                    </div>
-                  </div> --}}
-
-                  {{-- <div class="row mb-3">
-                    <label for="Country" class="col-md-4 col-lg-3 col-form-label">Country</label>
-                    <div class="col-md-8 col-lg-9">
-                      <input name="country" type="text" class="form-control" id="Country" value="USA">
-                    </div>
-                  </div> --}}
-
-                  {{-- <div class="row mb-3">
-                    <label for="Address" class="col-md-4 col-lg-3 col-form-label">Address</label>
-                    <div class="col-md-8 col-lg-9">
-                      <input name="address" type="text" class="form-control" id="Address" value="A108 Adam Street, New York, NY 535022">
-                    </div>
-                  </div> --}}
-
-                  <div class="row mb-3">
-                    <label for="Phone" class="col-md-4 col-lg-3 col-form-label">Telephone</label>
-                    <div class="col-md-8 col-lg-9">
-                      <input name="phone" type="number" class="form-control" id="Phone" value="{{ $user['phone'] }}">
-                    </div>
-                  </div>
-
-                  <div class="row mb-3">
-                    <label for="Email" class="col-md-4 col-lg-3 col-form-label">Email</label>
-                    <div class="col-md-8 col-lg-9">
-                      <input name="email" type="email" class="form-control" id="Email" value="{{ $user['email'] }}">
-                    </div>
-                  </div>
-
-                  {{-- <div class="row mb-3">
-                    <label for="currentPassword" class="col-md-4 col-lg-3 col-form-label">Mot de passe</label>
-                    <div class="col-md-8 col-lg-9">
-                      <span> Si vous entré nouveau mot de passe</span>
-                      <input name="password" type="password" class="form-control" id="currentPassword">
-                    </div>
-                  </div> --}}
-
-                  {{-- <div class="row mb-3">
-                    <label for="Twitter" class="col-md-4 col-lg-3 col-form-label">Twitter Profile</label>
-                    <div class="col-md-8 col-lg-9">
-                      <input name="twitter" type="text" class="form-control" id="Twitter" value="https://twitter.com/#">
-                    </div>
-                  </div> --}}
-
-                  {{-- <div class="row mb-3">
-                    <label for="Facebook" class="col-md-4 col-lg-3 col-form-label">Facebook Profile</label>
-                    <div class="col-md-8 col-lg-9">
-                      <input name="facebook" type="text" class="form-control" id="Facebook" value="https://facebook.com/#">
-                    </div>
-                  </div>
-
-                  <div class="row mb-3">
-                    <label for="Instagram" class="col-md-4 col-lg-3 col-form-label">Instagram Profile</label>
-                    <div class="col-md-8 col-lg-9">
-                      <input name="instagram" type="text" class="form-control" id="Instagram" value="https://instagram.com/#">
-                    </div>
-                  </div>
-
-                  <div class="row mb-3">
-                    <label for="Linkedin" class="col-md-4 col-lg-3 col-form-label">Linkedin Profile</label>
-                    <div class="col-md-8 col-lg-9">
-                      <input name="linkedin" type="text" class="form-control" id="Linkedin" value="https://linkedin.com/#">
-                    </div>
-                  </div> --}}
-
-                  <div class="text-center">
-                    <button type="submit" class="btn btn-primary">Update</button>
-                  </div>
-                </form><!-- End Profile Edit Form -->
-
-              </div>
-
-             
-
-              <div class="tab-pane fade pt-3" id="profile-change-password">
-                <!-- Change Password Form -->
-                <form class="needs-validation" method="POST" action="{{ route('user.newpassword',$user['id']) }}" novalidate>
-                  @csrf
-
-                  <div class="row mb-3">
-                    <label for="currentPassword" class="col-md-4 col-lg-3 col-form-label">Ancien mot de passe</label>
-                    <div class="col-md-8 col-lg-9">
-                      <input name="password" type="password" class="form-control" id="password" required>
-                      <div class="invalid-feedback">Entrez votre ancien mot de passe</div>
-                   @include('admin.partials.hideShowPwd')
-                    </div>
-                  </div>
-
-                  <div class="row mb-3">
-                    <label for="newPassword" class="col-md-4 col-lg-3 col-form-label">Nouveau mot de passe</label>
-                    <div class="col-md-8 col-lg-9">
-                      <input name="newpassword" type="password" class="form-control" id="password2" required>
-                      <div class="invalid-feedback">Entrez votre nouveau mot de passe</div>
-@include('admin.partials.hideShowPwd2')
-                    </div>
-                  </div>
-
-                  <div class="text-center">
-                    <button type="submit" class="btn btn-primary">Change Password</button>
-                  </div>
-                </form><!-- End Change Password Form -->
-
-              </div>
-
-            </div><!-- End Bordered Tabs -->
-
-          </div>
-        </div>
-
-      </div>
     </div>
-  </section>
+
+    {{-- Formulaires --}}
+    <div class="col-xl-8">
+        <div class="card">
+            <div class="card-body pt-3">
+                <ul class="nav nav-tabs nav-tabs-bordered mb-3">
+                    <li class="nav-item">
+                        <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tab-info">
+                            <i class="bi bi-person me-1"></i>Informations
+                        </button>
+                    </li>
+                    <li class="nav-item">
+                        <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-edit">
+                            <i class="bi bi-pencil me-1"></i>Modifier
+                        </button>
+                    </li>
+                    <li class="nav-item">
+                        <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-password">
+                            <i class="bi bi-key me-1"></i>Mot de passe
+                        </button>
+                    </li>
+                </ul>
+
+                <div class="tab-content">
+
+                    {{-- Onglet infos --}}
+                    <div class="tab-pane fade show active" id="tab-info">
+                        <table class="table table-borderless">
+                            <tbody>
+                                <tr>
+                                    <th class="text-muted fw-normal" style="width:35%">Nom complet</th>
+                                    <td class="fw-semibold">{{ $user->name }}</td>
+                                </tr>
+                                <tr>
+                                    <th class="text-muted fw-normal">Téléphone</th>
+                                    <td>{{ $user->phone }}</td>
+                                </tr>
+                                <tr>
+                                    <th class="text-muted fw-normal">Email</th>
+                                    <td>{{ $user->email ?: '—' }}</td>
+                                </tr>
+                                <tr>
+                                    <th class="text-muted fw-normal">Rôle</th>
+                                    <td>{{ $user->roles->first()?->name ?? '—' }}</td>
+                                </tr>
+                                <tr>
+                                    <th class="text-muted fw-normal">Statut</th>
+                                    <td>
+                                        @if($user->active === 'yes')
+                                            <span class="badge bg-success">Actif</span>
+                                        @else
+                                            <span class="badge bg-danger">Bloqué</span>
+                                        @endif
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th class="text-muted fw-normal">Membre depuis</th>
+                                    <td>{{ \Carbon\Carbon::parse($user->created_at)->format('d/m/Y') }}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    {{-- Onglet modifier --}}
+                    <div class="tab-pane fade" id="tab-edit">
+                        <form method="POST" action="{{ route('user.update', $user->id) }}" novalidate>
+                            @csrf
+                            {{-- Champ rôle caché pour conserver le rôle actuel --}}
+                            <input type="hidden" name="role" value="{{ $user->roles->first()?->name }}">
+
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold">Nom complet <span class="text-danger">*</span></label>
+                                    <input type="text" name="name" value="{{ old('name', $user->name) }}"
+                                           class="form-control @error('name') is-invalid @enderror" required>
+                                    @error('name')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold">Téléphone <span class="text-danger">*</span></label>
+                                    <input type="tel" name="phone" value="{{ old('phone', $user->phone) }}"
+                                           class="form-control @error('phone') is-invalid @enderror" required>
+                                    @error('phone')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                                </div>
+                                <div class="col-12">
+                                    <label class="form-label fw-semibold">Email</label>
+                                    <input type="email" name="email" value="{{ old('email', $user->email) }}"
+                                           class="form-control @error('email') is-invalid @enderror">
+                                    @error('email')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                                </div>
+                                <div class="col-12 text-end">
+                                    <button type="submit" class="btn btn-primary px-4">
+                                        <i class="bi bi-check-lg me-1"></i>Mettre à jour
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+
+                    {{-- Onglet mot de passe --}}
+                    <div class="tab-pane fade" id="tab-password">
+                        <form method="POST" action="{{ route('user.newpassword', $user->id) }}" novalidate>
+                            @csrf
+                            <div class="row g-3">
+                                <div class="col-12">
+                                    <label class="form-label fw-semibold">Ancien mot de passe <span class="text-danger">*</span></label>
+                                    <input type="password" name="password"
+                                           class="form-control @error('password') is-invalid @enderror" required>
+                                    @error('password')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                                </div>
+                                <div class="col-12">
+                                    <label class="form-label fw-semibold">Nouveau mot de passe <span class="text-danger">*</span></label>
+                                    <input type="password" name="newpassword"
+                                           class="form-control @error('newpassword') is-invalid @enderror"
+                                           minlength="6" required>
+                                    @error('newpassword')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                                </div>
+                                <div class="col-12 text-end">
+                                    <button type="submit" class="btn btn-primary px-4">
+                                        <i class="bi bi-key me-1"></i>Changer le mot de passe
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+</section>
+
+<style>
+.profile-avatar {
+    width: 80px; height: 80px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #0066CC, #00A86B);
+    color: #fff;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.6rem; font-weight: 700;
+}
+</style>
 @endsection

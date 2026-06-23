@@ -7,8 +7,10 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\SondageController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\ActualiteController;
+use App\Http\Controllers\CarouselController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\CommentaireController;
+use App\Http\Controllers\NewsletterController;
 
 /*
 |--------------------------------------------------------------------------
@@ -76,12 +78,14 @@ Route::middleware('auth')->prefix('admin')->group(function () {
 
     });
 
-    route::controller(ActualiteController::class)->prefix('actualite')->group(function () {
-        route::get('index', 'index')->name('actualite.index');
-        route::post('store', 'store')->name('actualite.store');
-        Route::get('edit/{id}', 'edit')->name('actualite.edit');
-        Route::post('update/{id}', 'update')->name('actualite.update');
-        Route::post('destroy/{id}', 'destroy')->name('actualite.delete');
+    Route::controller(CarouselController::class)->prefix('carousel')->group(function () {
+        Route::get('/',              'index')->name('actualite.index');
+        Route::post('store',         'store')->name('actualite.store');
+        Route::post('update/{id}',   'update')->name('actualite.update');
+        Route::post('destroy/{id}',  'destroy')->name('actualite.delete');
+        Route::get('toggle/{id}',    'toggleActive')->name('actualite.toggle');
+        Route::get('up/{id}',        'moveUp')->name('actualite.up');
+        Route::get('down/{id}',      'moveDown')->name('actualite.down');
     });
 });
 
@@ -102,8 +106,11 @@ route::controller(SiteController::class)->group(function () {
     route::get('post', 'post')->name('post.list');
     route::get('post/detail', 'detail')->name('post.detail');
     route::get('contact', 'contact')->name('contact');
+    route::post('contact', 'contact')->name('contact.store');
     route::post('post/search', 'search')->name('search');
 });
+
+route::post('newsletter/subscribe', [NewsletterController::class, 'store'])->name('newsletter.store');
 
 
 route::controller(CommentaireController::class)->group(function () {

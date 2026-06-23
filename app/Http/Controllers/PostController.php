@@ -9,354 +9,235 @@ use Illuminate\Http\Request;
 use App\Models\OptionSondage;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
-use App\Http\Requests\StorePostRequest;
-use App\Http\Requests\UpdatePostRequest;
 use RealRashid\SweetAlert\Facades\Alert;
 
 class PostController extends Controller
 {
-
-
-
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
     public function index()
     {
-        //
         try {
-            $category_title = request('type');
             $category_sondage = Category::whereTitle('sondage')->first();
 
-            $sondage = Post::with(['category', 'commentaires', 'media', 'user'])
-                ->when($category_title == 'sondage')
-                ->where('category_id', $category_sondage['id'])
-                ->orderBy('created_at', 'desc')->get();
+            if (!$category_sondage) {
+                return view('admin.pages.post.index', ['post' => collect(), 'sondage' => collect()]);
+            }
 
-
-
-            //request filtre des articles par categorie
             $category_filter = request('category_filter');
-            //liste des articles
-            $post = $post = Post::with(['category', 'commentaires', 'media', 'user', 'views'])
-                ->when(
-                    $category_filter,
-                    fn($q) => $q->where('category_id', $category_filter)
-                )
-                ->where('category_id', '!=', $category_sondage['id'])
-                ->orderBy('created_at', 'desc')->get();
 
-            // $actualite = Actualite::with('media')->orderBy('created_at', 'desc')->get();
+            $sondage = Post::with(['category', 'commentaires', 'media', 'user'])
+                ->where('category_id', $category_sondage->id)
+                ->orderBy('created_at', 'desc')
+                ->get();
 
-
-            // dd($sondage->toArray());
+            $post = Post::with(['category', 'commentaires', 'media', 'user', 'views'])
+                ->when($category_filter, fn($q) => $q->where('category_id', $category_filter))
+                ->where('category_id', '!=', $category_sondage->id)
+                ->orderBy('created_at', 'desc')
+                ->get();
 
             return view('admin.pages.post.index', compact('post', 'sondage'));
         } catch (\Throwable $e) {
-            return $e->getMessage();
+            Alert::error('Erreur', 'Impossible de charger les articles.');
+            return redirect()->route('dashboard');
         }
     }
-
 
     public function published($id)
     {
-        //mettre le post en prive ou public
-        $post = Post::find($id);
-        $statutPublished = $post->published == 'prive' ? 'public' : 'prive';
-        $published = Post::whereId($id)->update(['published' => $statutPublished]);
-        // $post = Post::with(['category', 'commentaires', 'media', 'user'])->orderBy('created_at', 'desc')->get();
+        $post = Post::findOrFail($id);
+        $nouveauStatut = $post->published === 'prive' ? 'public' : 'prive';
+        $post->update(['published' => $nouveauStatut]);
 
-
-
-
-        // mettre l'actualité a la une
-        $actualite_une = request('actualite_une');
-        $actualite = request('actualite'); //ID de l'actualité
-
-        if ($actualite_une && $actualite) {
-            $published = Post::whereId($actualite)->update(['actualite_une' => $actualite_une]);
-        }
-
-
-        Alert::Success('Status modifié avec success');
-
+        Alert::success('Statut modifié avec succès');
         return back();
-
-        //
-
     }
-
 
     public function actualite_une(Request $request)
     {
-        // mettre l'actualité a la une
-        $actualite_une = request('actualite_une');
-        $actualite = request('actualite'); //ID de l'actualité
+        $request->validate([
+            'actualite_une' => 'required',
+            'actualite'     => 'required|exists:posts,id',
+        ]);
 
-        $published = Post::whereId($actualite)->update(['actualite_une' => $actualite_une]);
+        Post::whereId($request->actualite)->update(['actualite_une' => $request->actualite_une]);
 
-        Alert::Success('Status modifié avec success');
-
+        Alert::success('Statut modifié avec succès');
         return back();
-
-        //
-
     }
 
-
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
     public function create()
     {
-        //
-        $request = request('type');
+        $type = request('type');
         $category = Category::with('posts')
-            ->when(
-                $request == 'sondage',
-                fn($q) => $q->whereTitle('sondage')
-            )
+            ->when($type === 'sondage', fn($q) => $q->whereTitle('sondage'))
             ->get();
+
         return view('admin.pages.post.add', compact('category'));
     }
 
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \App\Http\Requests\StorePostRequest  $request
-     * @return \Illuminate\Http\Response
-     */
     public function store(Request $request)
     {
-        //insertion des sondages
-        if ($request['sondage'] == 'sondage') {
-            // dd($request->toArray());
-            $generate = Str::random(5);
+        if ($request->input('sondage') === 'sondage') {
             $request->validate([
-                'description' => 'required',
-                'category' => 'required',
-                'option.*.title' => 'required',
+                'description'      => 'required',
+                'category'         => 'required|exists:categories,id',
+                'option.*.title'   => 'required|string|max:255',
             ]);
 
-            $post = Post::firstOrCreate([
-                'slug' => 'sondage' . $generate,
-                'description' => $request['description'],
-                'category_id' => $request['category'],
-                'published' => 'prive',
-                // 'user_id' => Auth::user()->id,
+            $post = Post::create([
+                'slug'        => 'sondage-' . Str::random(6),
+                'description' => $request->description,
+                'category_id' => $request->category,
+                'published'   => 'prive',
             ]);
 
-            if ($request->file('image')) {
-                $post->addMediaFromRequest('image')
-                    ->toMediaCollection('image');
+            if ($request->hasFile('image')) {
+                $post->addMediaFromRequest('image')->toMediaCollection('image');
             }
 
-            foreach ($request['option'] as $key => $value) {
-                $option = OptionSondage::create([
-                    'post_id' => $post['id'],
-                    'title' => $value['title'],
+            foreach ($request->input('option', []) as $option) {
+                OptionSondage::create([
+                    'post_id' => $post->id,
+                    'title'   => $option['title'],
                 ]);
             }
 
-
-            Alert::toast('Sondage inséré avec success', 'success');
-            return redirect()->route('post',  ['type' => 'sondage']);
-
-            // return back();
-
-
-
-            //insertion des posts
-
-        } else {
-
-
-            $request->validate([
-                'title' => 'required',
-                'description' => '',
-                'category' => 'required',
-                'lien' => '',
-            ]);
-
-            $post = Post::firstOrCreate([
-                'title' => $request['title'],
-                'description' => $request['description'],
-                'category_id' => $request['category'],
-                'lien' => $request['lien'],
-                'published' => 'prive',
-                'user_id' => Auth::user()->id,
-            ]);
-            if ($request->file('image')) {
-                $post->addMediaFromRequest('image')
-                    ->toMediaCollection('image');
-            }
-
-
-            Alert::toast('post inseré avec success', 'success');
-            return redirect()->route('post');
-            return back();
+            Alert::toast('Sondage créé avec succès', 'success');
+            return redirect()->route('post', ['type' => 'sondage']);
         }
-    }
 
+        $request->validate([
+            'title'    => 'required|string|max:500',
+            'category' => 'required|exists:categories,id',
+            'lien'     => 'nullable|url',
+        ]);
+
+        $post = Post::create([
+            'title'       => $request->title,
+            'description' => $request->description,
+            'category_id' => $request->category,
+            'lien'        => $request->lien,
+            'published'   => 'prive',
+            'user_id'     => Auth::id(),
+        ]);
+
+        if ($request->hasFile('image')) {
+            $post->addMediaFromRequest('image')->toMediaCollection('image');
+        }
+
+        Alert::toast('Article créé avec succès', 'success');
+        return redirect()->route('post');
+    }
 
     public function uploadTinyMCEImage(Request $request)
     {
-
-        $post = Post::latest()->first();
-
-        // Ajout de l'image via Spatie Media Library
-        if ($request->hasFile('file')) {
-            $media = $post->addMediaFromRequest('file')
-                ->toMediaCollection('tinyMceImages');  // Ajout à la collection 'images'
-
-            // Retourner l'URL publique de l'image pour l'afficher dans TinyMCE
-            return response()->json(['location' => $media->getUrl()]);
+        if (!$request->hasFile('file')) {
+            return response()->json(['error' => 'Aucun fichier fourni'], 400);
         }
 
-        return response()->json(['error' => 'Image upload failed'], 400);
+        $postId = $request->input('post_id');
+        $post = $postId
+            ? Post::find($postId)
+            : Post::where('user_id', Auth::id())->latest()->first();
+
+        if (!$post) {
+            return response()->json(['error' => 'Article introuvable'], 404);
+        }
+
+        $media = $post->addMediaFromRequest('file')
+            ->toMediaCollection('tinyMceImages');
+
+        return response()->json(['location' => $media->getUrl()]);
     }
 
-    /**
-     * Display the specified resource.
-     *
-     * @param  \App\Models\Post  $post
-     * @return \Illuminate\Http\Response
-     */
-    public function show(Post $post)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  \App\Models\Post  $post
-     * @return \Illuminate\Http\Response
-     */
     public function edit(Post $post, $slug)
     {
-        //
         $category = Category::with('posts')->get();
         $post = Post::with(['category', 'commentaires', 'media', 'user'])
             ->whereSlug($slug)
-            ->first();
-        return view('admin.pages.post.edit', compact(['post', 'category']));
+            ->firstOrFail();
+
+        return view('admin.pages.post.edit', compact('post', 'category'));
     }
 
-
-
-    public function editSondage(Post $post, $slug)
+    public function editSondage($id)
     {
-        //
         $category = Category::with('posts')->get();
         $post = Post::with(['category', 'commentaires', 'media', 'user', 'optionSondages'])
-            ->whereSlug($slug)
-            ->first();
+            ->findOrFail($id);
 
-        $reponseSondage =   $post->optionSondages;
-        // dd($post->toArray());
+        $reponseSondage = $post->optionSondages;
+
         return view('admin.pages.sondage.edit', compact('post', 'category', 'reponseSondage'));
     }
 
-
     public function updateSondage(Request $request, $id)
     {
-        // dd($request->all());
-        $post = Post::find($id);
         $request->validate([
-            'description' => 'required',
-            'category' => 'required',
-            'option.*.title' => 'required',
+            'description'    => 'required',
+            'category'       => 'required|exists:categories,id',
+            'option.*.title' => 'required|string|max:255',
         ]);
 
-        $post = tap($post)->update([
-            'description' => $request['description'],
-            // 'category_id' => $request['category'],
-            // 'published' => 'prive',
-            'user_id' => Auth::user()->id,
+        $post = Post::findOrFail($id);
+        $post->update([
+            'description' => $request->description,
+            'user_id'     => Auth::id(),
         ]);
 
         if ($request->hasFile('image')) {
             $post->clearMediaCollection('image');
-            $post->addMediaFromRequest('image')
-                ->toMediaCollection('image');
+            $post->addMediaFromRequest('image')->toMediaCollection('image');
         }
-        DB::table('option_sondages')->where('post_id', $id)->delete();
 
-        foreach ($request['option'] as $key => $value) {
-            $option = OptionSondage::create([
-                'post_id' => $post['id'],
-                'title' => $value['title'],
+        // Supprimer et recréer les options
+        OptionSondage::where('post_id', $id)->delete();
+
+        foreach ($request->input('option', []) as $option) {
+            OptionSondage::create([
+                'post_id' => $post->id,
+                'title'   => $option['title'],
             ]);
         }
 
-
-        Alert::toast('Sondage inséré avec success', 'success');
-        return redirect()->route('post',  ['type' => 'sondage']);
-
-        // return back();
+        Alert::toast('Sondage modifié avec succès', 'success');
+        return redirect()->route('post', ['type' => 'sondage']);
     }
 
-
-
-
-
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \App\Http\Requests\UpdatePostRequest  $request
-     * @param  \App\Models\Post  $post
-     * @return \Illuminate\Http\Response
-     */
     public function update(Request $request, $id)
     {
-        //
         $request->validate([
-            'title' => 'required',
-            'description' => '',
-            'category' => 'required',
-            'lien' => '',
+            'title'    => 'required|string|max:500',
+            'category' => 'required|exists:categories,id',
+            'lien'     => 'nullable|url',
         ]);
 
-        $post = tap(Post::find($id))->update([
-            'title' => $request['title'],
-            'description' => $request['description'],
-            'category_id' => $request['category'],
-            'lien' => $request['lien'],
-            'user_id' => Auth::user()->id,
-
+        $post = Post::findOrFail($id);
+        $post->update([
+            'title'       => $request->title,
+            'description' => $request->description,
+            'category_id' => $request->category,
+            'lien'        => $request->lien,
+            'user_id'     => Auth::id(),
         ]);
 
         if ($request->hasFile('image')) {
-
             $post->clearMediaCollection('image');
-            $post->addMediaFromRequest('image')
-                ->toMediaCollection('image');
+            $post->addMediaFromRequest('image')->toMediaCollection('image');
         }
-        $post = Post::with(['category', 'commentaires', 'media', 'user'])->orderBy('created_at', 'desc')->get();
 
-        Alert::toast('post modifié avec success', 'success');
+        Alert::toast('Article modifié avec succès', 'success');
         return redirect()->route('post');
-        
-        // return view('admin.pages.post.index', compact('post'));
     }
 
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  \App\Models\Post  $post
-     * @return \Illuminate\Http\Response
-     */
     public function destroy($id)
     {
-        //
-        $delete = Post::find($id)->delete();
-        $delete = DB::table('media')->where('model_id', $id)->delete();
-        Alert::toast('supprimé avec success', 'success');
+        $post = Post::findOrFail($id);
+        $post->clearMediaCollection('image');
+        $post->clearMediaCollection('tinyMceImages');
+        $post->delete();
+
+        Alert::toast('Article supprimé avec succès', 'success');
         return back();
     }
 }

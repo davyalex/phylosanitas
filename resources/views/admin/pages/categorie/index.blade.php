@@ -1,127 +1,189 @@
 @extends('admin.layout')
-@section('title', 'Categorie')
+@section('title', 'Catégories')
 
 @section('content')
 <section class="section">
-    <div class="row">
-      <div class="col-lg-12">
 
-        <div class="card">
-          <div class="card-body">
-
-             <!-- Formulaire add category -->
-            <h5 class="card-title">
-            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#basicModal"><i class="bi bi-plus"></i>
-            Ajouter une categorie
-            </button></h5>
-            <div class="modal fade" id="basicModal" tabindex="-1">
-              <div class="modal-dialog">
-                <div class="modal-content">
-                  <div class="modal-header">
-                    <h5 class="modal-title">Ajouter une categorie</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                  </div>
-                  <div class="modal-body">
-                     <!-- Vertical Form -->
-              <form class="row g-3 needs-validation" method="post" action="{{ route('category.store') }}" novalidate>
-                @csrf
-                <div class="col-12">
-                  <label for="inputNanme4" class="form-label">Title</label>
-                  <input type="text" name="title" class="form-control @error('title') is-invalid  @enderror" id="inputNanme4" required>
-                  <div class="invalid-feedback">Veuillez entrer une catégorie</div>
-
-                  @error('title')
-                  <p class="text-danger">{{ $message }}</p>
-                @enderror
-                
-                </div>
-                <div class="text-center">
-                  <button type="submit" class="btn btn-primary">Valider</button>
-                </div>
-              </form><!-- Vertical Form -->
-                  </div>
-                </div>
-              </div>
-            </div> <!-- Formulaire add category -->
-
-
-
-            <!-- Table with stripped rows -->
-            <table class="table datatable">
-              <thead>
-                <tr>
-                  <th scope="col">#</th>
-                  <th scope="col">Title</th>
-                  <th scope="col">Nombre posts</th>
-                  <th scope="col">Action</th>
-                </tr>
-              </thead>
-              <tbody>
-                @foreach ($category as $key =>$item)
-                <tr>
-                  <th scope="row">{{ ++$key }}</th>
-                  <td>{{ $item['title'] }}</td>
-                  <td>{{ $item->posts->count() }}</td>
-                
-                  <td>
-                   <div class="d-flex">
-                    <a href="/post/?category={{ $item['slug'] }}"  role="button" class="btn btn-warning rounded-circle"><i class="bi bi-eye"></i></a>
-
-                    <a href="{{ route('category.edit',$item['slug']) }}" role="button" data-id = {{ $item['slug'] }} data-bs-toggle="modal" data-bs-target="#basicModalEdit{{ $item['slug'] }}" class="btn btn-success rounded-circle mx-2 "><i class="bi bi-pencil me-1"></i></a>
-                    
-                    <form  action="{{ route('category.delete',$item->id) }}" method="POST">
-                      @csrf
-                      <a  class="btn btn-danger rounded-circle" data-id="{{ $item->id }}" data-bs-toggle="modal" data-bs-target="#confirmDelete{{ $item->id }}"><i class="bi bi-trash me-1"></i> </a>
-                     @include('admin.partials.deleteConfirm')
-                    </form>
-                   </div>
-                    
-                  </td>
-                </tr>
-                            <!-- start Formulaire edit category -->
-            <div class="modal fade" id="basicModalEdit{{ $item['slug'] }}" tabindex="-1">
-              <div class="modal-dialog">
-                <div class="modal-content">
-                  <div class="modal-header">
-                    <h5 class="modal-title">Modifier une categorie </h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                  </div>
-                  <div class="modal-body">
-                     <!-- Vertical Form -->
-              <form class="row g-3" method="post" action="{{ route('category.update',$item['slug']) }}">
-                @csrf
-                <div class="col-12">
-                  <label for="inputNanme4" class="form-label">Title</label>
-                  <input type="text" value="{{ $item['title'] }}" name="title" class="form-control @error('title') is-invalid  @enderror" id="inputNanme4">
-                  @error('title')
-                  <p class="text-danger">{{ $message }}</p>
-                @enderror
-                
-                </div>
-                <div class="text-center mt-2">
-                  <button type="submit" class="btn btn-primary">Valider</button>
-                </div>
-              </form><!-- Vertical Form -->
-                  </div>
-                </div>
-              </div>
-            </div> <!-- Formulaire edit category -->
-                @endforeach
-              </tbody>
-            </table>
-            <!-- End Table with stripped rows -->
-
-
-
-
-
-          </div>
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h4 class="fw-bold mb-1"><i class="bi bi-collection-fill me-2 text-primary"></i>Catégories</h4>
+            <p class="text-muted small mb-0">{{ $category->count() }} catégorie(s) au total</p>
         </div>
-
-      </div>
+        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalAddCategory">
+            <i class="bi bi-plus-lg me-1"></i>Nouvelle catégorie
+        </button>
     </div>
- 
-    
-    
-  </section>
+
+    <div class="card">
+        <div class="table-responsive">
+            <table class="table table-hover datatable align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th class="ps-3">#</th>
+                        <th>Catégorie</th>
+                        <th class="text-center">Articles</th>
+                        <th class="text-center">Statut</th>
+                        <th class="text-end pe-3">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @forelse($category as $key => $item)
+                        <tr>
+                            <td class="ps-3 text-muted">{{ ++$key }}</td>
+
+                            <td>
+                                <div class="d-flex align-items-center gap-2">
+                                    <div class="cat-dot" style="background: {{ ['#0066CC','#00A86B','#17a2b8','#6f42c1','#fd7e14','#e83e8c'][$key % 6] }};"></div>
+                                    <div>
+                                        <span class="fw-semibold">{{ $item->title }}</span>
+                                        <br>
+                                        <small class="text-muted">{{ $item->slug }}</small>
+                                    </div>
+                                </div>
+                            </td>
+
+                            <td class="text-center">
+                                <span class="badge rounded-pill bg-primary bg-opacity-10 text-primary px-3">
+                                    {{ $item->posts_count }} article(s)
+                                </span>
+                            </td>
+
+                            <td class="text-center">
+                                @if(in_array(strtolower($item->slug), ['sondage', 'actualites']))
+                                    <span class="badge bg-secondary">Système</span>
+                                @else
+                                    <span class="badge bg-success">Active</span>
+                                @endif
+                            </td>
+
+                            <td class="text-end pe-3">
+                                <div class="d-flex gap-1 justify-content-end">
+                                    <a href="{{ route('post.list', ['category' => $item->slug]) }}"
+                                       target="_blank"
+                                       class="btn btn-sm btn-outline-secondary"
+                                       title="Voir sur le site">
+                                        <i class="bi bi-box-arrow-up-right"></i>
+                                    </a>
+
+                                    <button class="btn btn-sm btn-primary"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#modalEdit{{ $item->slug }}"
+                                            title="Modifier">
+                                        <i class="bi bi-pencil"></i>
+                                    </button>
+
+                                    @if($item->posts_count === 0)
+                                        <form action="{{ route('category.delete', $item->id) }}" method="POST">
+                                            @csrf
+                                            <button type="button"
+                                                    class="btn btn-sm btn-danger"
+                                                    data-bs-toggle="modal"
+                                                    data-bs-target="#confirmDelete{{ $item->id }}"
+                                                    title="Supprimer">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                            @include('admin.partials.deleteConfirm')
+                                        </form>
+                                    @else
+                                        <button class="btn btn-sm btn-outline-danger" disabled
+                                                title="Impossible de supprimer : contient {{ $item->posts_count }} article(s)">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    @endif
+                                </div>
+                            </td>
+                        </tr>
+
+                        {{-- Modal édition --}}
+                        <div class="modal fade" id="modalEdit{{ $item->slug }}" tabindex="-1">
+                            <div class="modal-dialog">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title"><i class="bi bi-pencil me-2"></i>Modifier la catégorie</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                    </div>
+                                    <form method="POST" action="{{ route('category.update', $item->slug) }}">
+                                        @csrf
+                                        <div class="modal-body">
+                                            <label class="form-label fw-semibold">Nom <span class="text-danger">*</span></label>
+                                            <input type="text"
+                                                   name="title"
+                                                   value="{{ old('title', $item->title) }}"
+                                                   class="form-control form-control-lg @error('title') is-invalid @enderror"
+                                                   required>
+                                            @error('title')
+                                                <div class="invalid-feedback">{{ $message }}</div>
+                                            @enderror
+                                            <small class="text-muted mt-1 d-block">Le slug sera mis à jour automatiquement.</small>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Annuler</button>
+                                            <button type="submit" class="btn btn-primary">
+                                                <i class="bi bi-check-lg me-1"></i>Enregistrer
+                                            </button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+
+                    @empty
+                        <tr>
+                            <td colspan="5" class="text-center text-muted py-5">
+                                <i class="bi bi-collection fs-2 d-block mb-2 opacity-25"></i>
+                                Aucune catégorie trouvée.
+                            </td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</section>
+
+{{-- Modal ajout --}}
+<div class="modal fade" id="modalAddCategory" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="bi bi-plus-circle me-2"></i>Nouvelle catégorie</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="POST" action="{{ route('category.store') }}" novalidate>
+                @csrf
+                <div class="modal-body">
+                    <label class="form-label fw-semibold">Nom de la catégorie <span class="text-danger">*</span></label>
+                    <input type="text"
+                           name="title"
+                           value="{{ old('title') }}"
+                           class="form-control form-control-lg @error('title') is-invalid @enderror"
+                           placeholder="Ex : Nutrition, Oncologie..."
+                           autofocus
+                           required>
+                    @error('title')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                    @enderror
+                    <small class="text-muted mt-1 d-block">Le slug est généré automatiquement depuis le nom.</small>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Annuler</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-plus-lg me-1"></i>Créer
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+.cat-dot { width:10px; height:10px; border-radius:50%; flex-shrink:0; }
+</style>
+
+<script>
+    @if($errors->any())
+        new bootstrap.Modal(document.getElementById('modalAddCategory')).show();
+    @endif
+</script>
 @endsection

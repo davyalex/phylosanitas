@@ -3,59 +3,23 @@
 namespace App\Observers;
 
 use App\Models\Category;
+use App\Providers\AppServiceProvider;
 use Illuminate\Support\Facades\Cache;
 
 class CategoryObserver
 {
-    /**
-     * Handle the Category "created" event.
-     */
-    public function created(Category $category)
-    {
-        $this->clearCache();
-    }
+    public function created(Category $category): void  { $this->clearCache(); }
+    public function updated(Category $category): void  { $this->clearCache(); }
+    public function deleted(Category $category): void  { $this->clearCache(); }
+    public function restored(Category $category): void { $this->clearCache(); }
+    public function forceDeleted(Category $category): void { $this->clearCache(); }
 
-    /**
-     * Handle the Category "updated" event.
-     */
-    public function updated(Category $category)
+    private function clearCache(): void
     {
-        $this->clearCache();
-    }
-
-    /**
-     * Handle the Category "deleted" event.
-     */
-    public function deleted(Category $category)
-    {
-        $this->clearCache();
-    }
-
-    /**
-     * Handle the Category "restored" event.
-     */
-    public function restored(Category $category)
-    {
-        $this->clearCache();
-    }
-
-    /**
-     * Nettoyer tous les caches liés aux catégories
-     */
-    private function clearCache()
-    {
-        Cache::forget('categories_list_all');
-        Cache::forget('categories_list_sondage');
-        Cache::forget('recent_posts');
-        Cache::forget('surveys_list');
-        Cache::forget('external_news');
-    }
-
-    /**
-     * Handle the Category "force deleted" event.
-     */
-    public function forceDeleted(Category $category)
-    {
-        $this->clearCache();
+        Cache::forget(AppServiceProvider::CACHE_CATEGORIES);
+        Cache::forget(AppServiceProvider::CACHE_RECENT_POSTS);
+        Cache::forget(AppServiceProvider::CACHE_POPULAR_POSTS);
+        Cache::forget(AppServiceProvider::CACHE_SURVEYS);
+        Cache::forget(AppServiceProvider::CACHE_NEWS);
     }
 }

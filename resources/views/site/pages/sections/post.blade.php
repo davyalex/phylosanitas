@@ -1,228 +1,143 @@
-  <!-- =======  Liste des Post récents sur la page d'accueil======= -->
-  <section id="posts" class="posts section-medical-bg py-5">
-      <div class="container" data-aos="fade-up">
-          <div class="row g-4">
+{{-- Section articles récents + sidebar --}}
+<section class="articles-section py-5">
+    <div class="container-xl" data-aos="fade-up">
+        <div class="row g-4">
 
-              <div class="col-md-9 col-lg-9">
-                  <div class="mb-4">
-                      <h2 class="text-medical-blue fw-bold mb-2">
-                          <i class="bi bi-newspaper me-2"></i>
-                          Dernières Publications
-                      </h2>
-                      <p class="text-muted">Découvrez nos derniers articles et actualités santé</p>
-                  </div>
-                  
-                  <div class="row g-4">
-                      @foreach ($post as $item)
-                          <div class="col-lg-4 col-md-6">
-                              <div class="card card-medical h-100">
-                                  <div class="position-relative overflow-hidden">
-                                      @if ($item->getFirstMediaUrl('image'))
-                                          <a href="/post/detail?slug={{ $item['slug'] }}">
-                                              <img src="{{ asset($item->getFirstMediaUrl('image')) }}" 
-                                                   loading="lazy" 
-                                                   alt="{{ $item['title'] }}"
-                                                   class="card-img-top" 
-                                                   style="width:100%; height:220px; object-fit:cover;">
-                                          </a>
-                                      @else
-                                          <a href="/post/detail?slug={{ $item['slug'] }}">
-                                              <img src="{{ asset('assets_site/img/medc.jpg') }}" 
-                                                   loading="lazy" 
-                                                   alt="{{ $item['title'] }}"
-                                                   class="card-img-top"
-                                                   style="width:100%; height:220px; object-fit:cover;">
-                                          </a>
-                                      @endif
-                                      
-                                      <span class="badge position-absolute top-0 start-0 m-3 {{ $item['category']['title'] == 'Sondage' ? 'badge-health' : 'badge-medical' }}">
-                                          <i class="bi bi-{{ $item['category']['title'] == 'Sondage' ? 'bar-chart-fill' : 'newspaper' }} me-1"></i>
-                                          {{ $item['category']['title'] }}
-                                      </span>
-                                  </div>
-                                  
-                                  <div class="card-body d-flex flex-column">
-                                      @if ($item['category']['title'] == 'Sondage')
-                                          <h5 class="card-title mb-2">
-                                              <a href="/post/detail?slug={{ $item['slug'] }}" 
-                                                 class="text-decoration-none text-dark">
-                                                  {!! Str::words($item->description, 12, '...') !!}
-                                              </a>
-                                          </h5>
-                                      @else
-                                          <h5 class="card-title mb-2">
-                                              <a href="/post/detail?slug={{ $item['slug'] }}" 
-                                                 class="text-decoration-none text-dark">
-                                                  {{ Str::limit($item['title'], 60, '...') }}
-                                              </a>
-                                          </h5>
-                                      @endif
-                                      
-                                      <div class="post-meta d-flex flex-wrap gap-3 align-items-center text-muted small mt-auto">
-                                          <span title="Date de publication " style="text-transform: lowercase">
-                                              <i class="bi bi-calendar3 text-medical-blue"></i>
-                                              {{ \Carbon\Carbon::parse($item['created_at'])->diffForHumans() }}
-                                          </span>
-                                          <span title="Nombre de vues">
-                                              <i class="bi bi-eye-fill text-health-green"></i>
-                                              {{ views($item)->count() }}
-                                          </span>
-                                          <span title="Nombre de commentaires">
-                                              <i class="bi bi-chat-left-quote-fill text-medical-teal"></i>
-                                              {{ $item->commentaires->count() }}
-                                          </span>
-                                      </div>
-                                  </div>
-                              </div>
-                          </div>
-                      @endforeach
-                  </div>
-                  
-               
-                  <!-- Section Catégories & Newsletter après les posts -->
-                  <div class="row g-4 mt-4">
-                      <div class="col-12">
-                          <h3 class="fw-bold text-medical-blue mb-4 text-center">
-                              <i class="bi bi-collection-fill me-2"></i>
-                              Explorez Nos Thématiques Santé
-                          </h3>
-                      </div>
-                      
-                      @foreach($category->take(6) as $cat)
-                          <div class="col-lg-4 col-md-6">
-                              <a href="{{ route('post.list', ['category' => $cat->slug]) }}" class="text-decoration-none">
-                                  <div class="card card-medical h-100 border-0 category-card">
-                                      <div class="card-body p-3">
-                                          <div class="d-flex align-items-center">
-                                              <div class="category-icon me-3">
-                                                  @if($cat->title == 'Sondage')
-                                                      <i class="bi bi-bar-chart-fill"></i>
-                                                  @elseif(Str::contains(strtolower($cat->title), ['actualité', 'actualite']))
-                                                      <i class="bi bi-newspaper"></i>
-                                                  @elseif(Str::contains(strtolower($cat->title), ['nutrition', 'alimentation']))
-                                                      <i class="bi bi-egg-fried"></i>
-                                                  @elseif(Str::contains(strtolower($cat->title), ['sport', 'fitness']))
-                                                      <i class="bi bi-heart-pulse-fill"></i>
-                                                  @elseif(Str::contains(strtolower($cat->title), ['mental', 'psycho']))
-                                                      <i class="bi bi-brain"></i>
-                                                  @elseif(Str::contains(strtolower($cat->title), ['enfant', 'bébé']))
-                                                      <i class="bi bi-emoji-smile-fill"></i>
-                                                  @else
-                                                      <i class="bi bi-file-medical-fill"></i>
-                                                  @endif
-                                              </div>
-                                              <div class="flex-grow-1">
-                                                  <h6 class="mb-1 fw-bold">{{ $cat->title }}</h6>
-                                                  <small class="text-muted">
-                                                      <i class="bi bi-file-earmark-text"></i>
-                                                      {{ $cat->posts->where('published', 'public')->count() }} articles
-                                                  </small>
-                                              </div>
-                                              <div>
-                                                  <i class="bi bi-arrow-right-circle text-medical-blue"></i>
-                                              </div>
-                                          </div>
-                                      </div>
-                                  </div>
-                              </a>
-                          </div>
-                      @endforeach
-                  </div>
+            {{-- Colonne principale --}}
+            <div class="col-lg-9">
 
-                     <!-- Section Partenaires & Publicités -->
-                  @include('site.pages.sections.partners')
-                  
+                <div class="section-header">
+                    <h2 class="section-title">
+                        <span class="section-accent"></span>Articles récents
+                    </h2>
+                    <a href="{{ route('post.list') }}" class="section-link">
+                        Voir tout <i class="bi bi-arrow-right ms-1"></i>
+                    </a>
+                </div>
 
-                  <!-- Newsletter & Contact -->
-                  <div class="row g-4 mt-4">
-                      <div class="col-lg-6">
-                          <div class="card card-medical border-0 h-100" style="background: linear-gradient(135deg, var(--medical-blue) 0%, var(--medical-teal) 100%);">
-                              <div class="card-body p-4 text-white">
-                                  <div class="mb-3">
-                                      <i class="bi bi-envelope-heart-fill" style="font-size: 2.5rem;"></i>
-                                  </div>
-                                  <h4 class="fw-bold mb-3">Restez Informé</h4>
-                                  <p class="mb-3">
-                                      Inscrivez-vous à notre newsletter et recevez les dernières actualités santé.
-                                  </p>
-                                  <form class="newsletter-form">
-                                      <div class="input-group">
-                                          <input type="email" class="form-control" placeholder="Votre email" required>
-                                          <button class="btn btn-light" type="submit">
-                                              <i class="bi bi-send-fill"></i>
-                                          </button>
-                                      </div>
-                                  </form>
-                              </div>
-                          </div>
-                      </div>
+                {{-- Grille articles --}}
+                <div class="row g-4">
+                    @forelse($post as $item)
+                        <div class="col-md-6 col-lg-4">
+                            <article class="article-card h-100">
+                                <a href="{{ route('post.detail', ['slug' => $item->slug]) }}"
+                                   class="article-card-img-link">
+                                    <img src="{{ $item->getFirstMediaUrl('image') ?: asset('assets_site/img/medc.jpg') }}"
+                                         alt="{{ $item->title }}"
+                                         loading="lazy"
+                                         class="article-card-img">
+                                    <span class="article-card-cat">{{ $item->category->title ?? '' }}</span>
+                                </a>
+                                <div class="article-card-body">
+                                    <h3 class="article-card-title">
+                                        <a href="{{ route('post.detail', ['slug' => $item->slug]) }}"
+                                           class="text-decoration-none text-dark">
+                                            {{ Str::limit($item->title ?? strip_tags($item->description), 65) }}
+                                        </a>
+                                    </h3>
+                                    <div class="article-card-meta">
+                                        <span><i class="bi bi-calendar3"></i> {{ \Carbon\Carbon::parse($item->created_at)->diffForHumans() }}</span>
+                                        <span><i class="bi bi-chat-left-quote"></i> {{ $item->commentaires_count ?? 0 }}</span>
+                                    </div>
+                                </div>
+                            </article>
+                        </div>
+                    @empty
+                        <div class="col-12">
+                            <div class="empty-state text-center py-5">
+                                <i class="bi bi-journal-x empty-state-icon"></i>
+                                <p class="mt-3 text-muted">Aucun article disponible pour le moment.</p>
+                                <a href="{{ route('accueil') }}" class="btn btn-medical mt-2">Retour à l'accueil</a>
+                            </div>
+                        </div>
+                    @endforelse
+                </div>
 
-                      <div class="col-lg-6">
-                          <div class="card card-medical border-0 h-100" style="background: linear-gradient(135deg, var(--health-green) 0%, var(--health-green-light) 100%);">
-                              <div class="card-body p-4 text-white">
-                                  <div class="mb-3">
-                                      <i class="bi bi-chat-dots-fill" style="font-size: 2.5rem;"></i>
-                                  </div>
-                                  <h4 class="fw-bold mb-3">Besoin d'Aide ?</h4>
-                                  <p class="mb-3">
-                                      Notre équipe est à votre écoute pour répondre à vos questions.
-                                  </p>
-                                  <a href="{{ route('contact') }}" class="btn btn-light mb-3">
-                                      <i class="bi bi-envelope-fill me-2"></i>Nous Contacter
-                                  </a>
-                                  <div class="d-flex gap-3">
-                                      <a href="#" class="text-white"><i class="bi bi-facebook" style="font-size: 1.5rem;"></i></a>
-                                      <a href="#" class="text-white"><i class="bi bi-twitter" style="font-size: 1.5rem;"></i></a>
-                                      <a href="#" class="text-white"><i class="bi bi-instagram" style="font-size: 1.5rem;"></i></a>
-                                      <a href="#" class="text-white"><i class="bi bi-linkedin" style="font-size: 1.5rem;"></i></a>
-                                  </div>
-                              </div>
-                          </div>
-                      </div>
-                  </div>
-              </div>
+                {{-- Bande catégories --}}
+                @if(isset($category) && $category->count())
+                <div class="categories-block mt-5">
+                    <div class="section-header">
+                        <h2 class="section-title">
+                            <span class="section-accent"></span>Nos thématiques santé
+                        </h2>
+                    </div>
+                    <div class="row g-3">
+                        @foreach($category->filter(fn($c) => !in_array(strtolower($c->slug), ['sondage', 'actualites']))->take(6) as $cat)
+                            @php
+                                $t = strtolower($cat->title);
+                                $catColors = ['#0066CC','#00A86B','#17a2b8','#8E24AA','#E53935','#FF6B35'];
+                                $color = $catColors[$loop->index % count($catColors)];
+                                $icon = match(true) {
+                                    str_contains($t, 'public')  => 'shield-plus-fill',
+                                    str_contains($t, 'obés') || str_contains($t,'obes') => 'person-arms-up',
+                                    str_contains($t, 'thès') || str_contains($t,'thes') => 'journal-medical',
+                                    str_contains($t, 'scolaire') => 'mortarboard-fill',
+                                    default => 'file-medical-fill',
+                                };
+                            @endphp
+                            <div class="col-6 col-md-4">
+                                <a href="{{ route('post.list', ['category' => $cat->slug]) }}"
+                                   class="cat-block-card text-decoration-none">
+                                    <div class="cat-block-icon" style="background: {{ $color }}20; color: {{ $color }};">
+                                        <i class="bi bi-{{ $icon }}"></i>
+                                    </div>
+                                    <div class="cat-block-body">
+                                        <span class="cat-block-name">{{ $cat->title }}</span>
+                                        <span class="cat-block-count">{{ $cat->posts_count ?? $cat->posts->count() }} articles</span>
+                                    </div>
+                                    <i class="bi bi-arrow-right-circle cat-block-arrow" style="color: {{ $color }};"></i>
+                                </a>
+                            </div>
+                        @endforeach
+                    </div>
+                </div>
+                @endif
 
-              <!--  Section Sidebar  -->
-              <div class="col-md-3 col-lg-3">
-                  <div class="sidebar-wrapper">
-                      @include('site.pages.sections.sidebar')
-                  </div>
-              </div>
+                {{-- CTA Newsletter + Contact --}}
+                <div class="row g-4 mt-2">
+                    <div class="col-lg-6">
+                        <div class="cta-card cta-card--blue">
+                            <div class="cta-icon"><i class="bi bi-envelope-heart-fill"></i></div>
+                            <h4 class="cta-title">Restez informé</h4>
+                            <p class="cta-text">Recevez les dernières actualités santé directement dans votre boîte mail.</p>
+                            <form action="{{ route('newsletter.store') }}" method="POST">
+                                @csrf
+                                <div class="cta-input-group">
+                                    <input type="email" name="email" placeholder="Votre adresse email" required>
+                                    <button type="submit"><i class="bi bi-send-fill"></i></button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                    <div class="col-lg-6">
+                        <div class="cta-card cta-card--green">
+                            <div class="cta-icon"><i class="bi bi-chat-dots-fill"></i></div>
+                            <h4 class="cta-title">Besoin d'aide ?</h4>
+                            <p class="cta-text">Notre équipe médicale répond à toutes vos questions.</p>
+                            <a href="{{ route('contact') }}" class="cta-btn">
+                                <i class="bi bi-envelope-fill me-2"></i>Nous contacter
+                            </a>
+                            <div class="cta-socials mt-3">
+                                <a href="#"><i class="bi bi-facebook"></i></a>
+                                <a href="#"><i class="bi bi-twitter"></i></a>
+                                <a href="#"><i class="bi bi-instagram"></i></a>
+                                <a href="#"><i class="bi bi-linkedin"></i></a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
-          </div> <!-- End .row -->
-      </div>
-  </section> <!-- End Post Grid Section -->
+                @include('site.pages.sections.partners')
 
-<style>
-.category-card {
-    transition: all 0.3s ease;
-    cursor: pointer;
-}
+            </div>{{-- /col-lg-9 --}}
 
-.category-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15) !important;
-}
+            {{-- Sidebar --}}
+            <div class="col-lg-3">
+                <div class="sidebar-wrapper sticky-sidebar">
+                    @include('site.pages.sections.sidebar')
+                </div>
+            </div>
 
-.category-icon {
-    width: 50px;
-    height: 50px;
-    border-radius: 12px;
-    background: linear-gradient(135deg, var(--medical-blue-light) 0%, var(--medical-teal-light) 100%);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.5rem;
-    color: white;
-}
-
-.category-card:hover .category-icon {
-    transform: scale(1.1);
-    transition: transform 0.3s ease;
-}
-
-.newsletter-form .form-control:focus {
-    box-shadow: none;
-    border-color: white;
-}
-</style>
+        </div>
+    </div>
+</section>

@@ -1,182 +1,193 @@
 @extends('admin.layout')
-@section('title', 'Post')
+@section('title', request('type') == 'sondage' ? 'Sondages' : 'Articles')
 
 @section('content')
-    <style>
-        .dropdown-toggle::after {
-            content: none;
-        }
-    </style>
+<section class="section">
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="card">
+                <div class="card-body">
 
-    <section class="section">
-        <div class="row">
-            <div class="col-lg-12">
-
-                <div class="card">
-                    <div class="card-body">
-                        <h5 class="card-title">
-                            @if (request('type') == 'sondage')
-                                <a href="/admin/post/create?type=sondage" role="button" class="btn btn-primary"> <i
-                                        class="bi bi-plus-lg"></i> Ajouter un sondage</a>
-                            @else
-                                <div class="d-flex justify-content-between">
-                                    <a href="{{ route('post.create') }}" role="button" class="btn btn-primary"> <i
-                                            class="bi bi-plus-lg"></i> Ajouter un article</a>
-
-                                    <!-- ========== Start filtre par category ========== -->
-
-                                    <div class="btn-group text-end">
-                                        <button type="button" class="btn btn-primary dropdown-toggle"
-                                            data-bs-toggle="dropdown" aria-expanded="false">
-                                            <i class="bi bi-filter"></i> Filtre par categorie
-                                        </button>
-                                        <ul class="dropdown-menu">
-                                            @foreach ($category as $item)
-                                                <li><a class="dropdown-item"
-                                                        href="{{ route('post', 'category_filter=' . $item['id']) }}">
-                                                        {{ $item['title'] }} </a></li>
-                                            @endforeach
-
-                                        </ul>
-                                    </div>
-                                    <!-- ========== End filtre par category ========== -->
-                                </div>
-                            @endif
-                        </h5>
-
+                    {{-- Barre d'actions --}}
+                    <div class="d-flex justify-content-between align-items-center mb-3">
                         @if (request('type') == 'sondage')
-                            @include('admin.pages.sondage.index')
+                            <h5 class="card-title mb-0">
+                                <i class="bi bi-bar-chart-fill me-2"></i>Sondages
+                            </h5>
+                            <a href="{{ route('post.create', ['type' => 'sondage']) }}" class="btn btn-primary">
+                                <i class="bi bi-plus-lg"></i> Nouveau sondage
+                            </a>
                         @else
-                            <!-- Table with stripped rows -->
-                            <table class="table datatable">
-                                <thead>
+                            <h5 class="card-title mb-0">
+                                <i class="bi bi-card-text me-2"></i>Articles
+                            </h5>
+                            <div class="d-flex gap-2">
+                                <a href="{{ route('post.create') }}" class="btn btn-primary">
+                                    <i class="bi bi-plus-lg"></i> Nouvel article
+                                </a>
+                                <div class="btn-group">
+                                    <button type="button" class="btn btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown">
+                                        <i class="bi bi-filter me-1"></i>Filtrer
+                                    </button>
+                                    <ul class="dropdown-menu dropdown-menu-end">
+                                        <li>
+                                            <a class="dropdown-item {{ !request('category_filter') ? 'active' : '' }}"
+                                               href="{{ route('post') }}">
+                                                Tous les articles
+                                            </a>
+                                        </li>
+                                        <li><hr class="dropdown-divider"></li>
+                                        @foreach ($category as $cat)
+                                            <li>
+                                                <a class="dropdown-item {{ request('category_filter') == $cat->id ? 'active' : '' }}"
+                                                   href="{{ route('post', ['category_filter' => $cat->id]) }}">
+                                                    {{ $cat->title }}
+                                                </a>
+                                            </li>
+                                        @endforeach
+                                    </ul>
+                                </div>
+                            </div>
+                        @endif
+                    </div>
+
+                    {{-- Contenu --}}
+                    @if (request('type') == 'sondage')
+                        @include('admin.pages.sondage.index')
+                    @else
+                        <div class="table-responsive">
+                            <table class="table table-hover datatable align-middle">
+                                <thead class="table-light">
                                     <tr>
-                                        <th scope="col">#</th>
-                                        <th scope="col">Statut</th>
-                                        <th scope="col-2">image</th>
-                                        {{-- <th scope="col">title</th> --}}
-                                        <th scope="col">categorie</th>
-                                        <th scope="col">commentaires</th>
-                                        <th scope="col">vues</th>
-                                        <th scope="col">Date</th>
-                                        <th scope="col">Action</th>
+                                        <th>#</th>
+                                        <th>Image</th>
+                                        <th>Titre</th>
+                                        <th>Catégorie</th>
+                                        <th>Statut</th>
+                                        <th>Commentaires</th>
+                                        <th>Date</th>
+                                        <th>Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @foreach ($post as $key => $item)
+                                    @forelse ($post as $key => $item)
                                         <tr>
-                                            <th scope="row">{{ ++$key }}</th>
+                                            <td>{{ ++$key }}</td>
+
                                             <td>
-                                                <!-- ========== Start mettre le post en privé ou public ========== -->
-                                                @if ($item['published'] == 'prive')
-                                                    <br><span class=""> <i class="bi bi-circle-fill text-warning"></i>
-                                                        non publié</span>
-                                                @elseif ($item['published'] == 'public')
-                                                    <br> <span class=""> <i
-                                                            class="bi bi-circle-fill text-success"></i> en ligne</span>
+                                                <img src="{{ $item->getFirstMediaUrl('image') ?: asset('assets_site/img/medc.jpg') }}"
+                                                     alt="{{ $item->title }}"
+                                                     class="rounded-circle"
+                                                     style="width:45px; height:45px; object-fit:cover;">
+                                            </td>
+
+                                            <td>
+                                                <span class="fw-semibold">{{ Str::limit($item->title, 50, '…') }}</span>
+                                            </td>
+
+                                            <td>
+                                                <span class="badge bg-secondary">{{ $item->category->title }}</span>
+                                            </td>
+
+                                            <td>
+                                                @if ($item->published === 'public')
+                                                    <span class="badge bg-success">
+                                                        <i class="bi bi-circle-fill me-1" style="font-size:.5rem;"></i>En ligne
+                                                    </span>
+                                                @else
+                                                    <span class="badge bg-warning text-dark">
+                                                        <i class="bi bi-circle-fill me-1" style="font-size:.5rem;"></i>Brouillon
+                                                    </span>
                                                 @endif
-                                                <!-- ========== End mettre le post en privé ou public ========== -->
-
-
-
-
-                                                <!-- ========== Start status actualité Une ========== -->
-                                                @if ($item->category->slug == 'actualites')
-                                                    @if ($item['actualite_une'] == 0)
-                                                        <br><span class=""> <i
-                                                                class="bi bi-circle-fill text-warning"></i>
-                                                            Pas à la Une</span>
-                                                    @elseif ($item['actualite_une'] == 1)
-                                                        <br> <span class=""> <i
-                                                                class="bi bi-circle-fill text-success"></i> A la Une</span>
+                                                @if ($item->category->slug === 'actualites')
+                                                    <br>
+                                                    @if ($item->actualite_une)
+                                                        <span class="badge bg-info mt-1">
+                                                            <i class="bi bi-star-fill me-1"></i>À la une
+                                                        </span>
+                                                    @else
+                                                        <span class="badge bg-light text-muted mt-1">
+                                                            <i class="bi bi-star me-1"></i>Pas à la une
+                                                        </span>
                                                     @endif
                                                 @endif
-                                                <!-- ========== End status actualité Une ========== -->
-
                                             </td>
-                                            <td class="col-2"> <img src="{{ $item->getFirstMediaUrl('image') }}"
-                                                    alt="{{ $item->getFirstMediaUrl('image') }}"
-                                                    style="width: 45px; height: 45px" class="rounded-circle" />
 
+                                            <td class="text-center">
+                                                <span class="badge bg-light text-dark">
+                                                    <i class="bi bi-chat-left-quote text-muted me-1"></i>
+                                                    {{ $item->commentaires->count() }}
+                                                </span>
                                             </td>
-                                            {{-- <td> {{ Str::limit($item['title'], 20, '...') }}</td> --}}
-                                            <td><span class="badge bg-secondary">{{ $item->category->title }}</span></td>
-                                            <td>{{ $item->commentaires->count() }}</td>
-                                            <td>{{ views($item)->count() }}</td>
-                                            <td> {{ \Carbon\Carbon::parse($item['created_at'])->diffForHumans() }}</td>
+
+                                            <td class="text-muted small">
+                                                {{ \Carbon\Carbon::parse($item->created_at)->diffForHumans() }}
+                                            </td>
 
                                             <td>
-                                                <div class="d-flex">
+                                                <div class="d-flex gap-1 flex-nowrap">
+                                                    {{-- Publier / Dépublier --}}
+                                                    <a href="{{ route('post.published', $item->id) }}"
+                                                       class="btn btn-sm {{ $item->published === 'public' ? 'btn-warning' : 'btn-success' }}"
+                                                       title="{{ $item->published === 'public' ? 'Mettre en brouillon' : 'Publier' }}">
+                                                        <i class="bi bi-{{ $item->published === 'public' ? 'eye-slash' : 'eye' }}"></i>
+                                                    </a>
 
-                                                    <div class="dropdown">
-                                                        <button role="button"
-                                                            class="btn btn-primary rounded-circle dropdown-toggle"
-                                                            data-bs-toggle="dropdown" aria-haspopup="false"><i
-                                                                class="bi bi-globe"></i></button>
-                                                        <div class="dropdown-menu">
-                                                            <!-- ========== Start published status ========== -->
-                                                            <a href="{{ route('post.published', $item->id) }}"
-                                                                class="dropdown-item "
-                                                                style="font-weight:700; font-size:1em"><i
-                                                                    class="bi bi-lock-fill"></i>
-                                                                {{ $item->published == 'public' ? 'Privé' : 'Public' }} </a>
-                                                            <!-- ========== End published status ========== -->
+                                                    {{-- Mettre à la une (actualités) --}}
+                                                    @if ($item->category->slug === 'actualites')
+                                                        <a href="/admin/post/actualite?actualite_une={{ $item->actualite_une ? 0 : 1 }}&actualite={{ $item->id }}"
+                                                           class="btn btn-sm {{ $item->actualite_une ? 'btn-info' : 'btn-outline-info' }}"
+                                                           title="{{ $item->actualite_une ? 'Retirer de la une' : 'Mettre à la une' }}">
+                                                            <i class="bi bi-star{{ $item->actualite_une ? '-fill' : '' }}"></i>
+                                                        </a>
+                                                    @endif
 
-                                                            <!-- ========== Start mettre une actualit& à la une ========== -->
+                                                    {{-- Voir en ligne --}}
+                                                    <a href="{{ route('post.detail', ['slug' => $item->slug]) }}"
+                                                       target="_blank"
+                                                       class="btn btn-sm btn-outline-secondary"
+                                                       title="Voir sur le site">
+                                                        <i class="bi bi-box-arrow-up-right"></i>
+                                                    </a>
 
+                                                    {{-- Modifier --}}
+                                                    <a href="{{ route('post.edit', $item->slug) }}"
+                                                       class="btn btn-sm btn-primary"
+                                                       title="Modifier">
+                                                        <i class="bi bi-pencil"></i>
+                                                    </a>
 
-                                                            @if ($item->category->slug == 'actualites')
-                                                                @if ($item['actualite_une'] == 0)
-                                                                    <a href="/admin/post/actualite?actualite_une=1&actualite={{ $item['id'] }}"
-                                                                        class="dropdown-item "
-                                                                        style="font-weight:700; font-size:1em"><i
-                                                                            class="bi bi-image"></i> Mettre à la une</a>
-                                                                @else
-                                                                    <div class="dropdown-divider"></div>
-
-                                                                    <a href="/admin/post/actualite?actualite_une=0&actualite={{ $item['id'] }}"
-                                                                        class="dropdown-item "
-                                                                        style="font-weight:700; font-size:1em"><i
-                                                                            class="bi bi-image"></i> Retirer de la une</a>
-                                                                @endif
-                                                            @endif
-
-
-
-                                                            <!-- ========== End mettre une actualit& à la une ========== -->
-
-                                                        </div>
-                                                    </div>
-                                                    <a href="/post/detail?slug={{ $item['slug'] }}" role="button"
-                                                        class="btn btn-warning rounded-circle"><i class="bi bi-eye"></i></a>
-                                                    <a href="{{ route('post.edit', $item['slug']) }}"
-                                                        class="btn btn-success rounded-circle" role="button"
-                                                        class="btn btn-success mx-2 "><i class="bi bi-pencil"></i></a>
-
-                                                    <form action="{{ route('post.delete', $item['id']) }}" method="POST">
+                                                    {{-- Supprimer --}}
+                                                    <form action="{{ route('post.delete', $item->id) }}" method="POST">
                                                         @csrf
-                                                        <a class="btn btn-danger rounded-circle" data-bs-toggle="modal"
-                                                            data-bs-target="#confirmDelete{{ $item->id }}"><i
-                                                                class="bi bi-trash"></i> </a>
+                                                        <button type="button"
+                                                                class="btn btn-sm btn-danger"
+                                                                data-bs-toggle="modal"
+                                                                data-bs-target="#confirmDelete{{ $item->id }}"
+                                                                title="Supprimer">
+                                                            <i class="bi bi-trash"></i>
+                                                        </button>
                                                         @include('admin.partials.deleteConfirm')
                                                     </form>
                                                 </div>
-
                                             </td>
                                         </tr>
-                                    @endforeach
+                                    @empty
+                                        <tr>
+                                            <td colspan="8" class="text-center text-muted py-4">
+                                                <i class="bi bi-journal-x fs-3 d-block mb-2"></i>
+                                                Aucun article trouvé.
+                                            </td>
+                                        </tr>
+                                    @endforelse
                                 </tbody>
                             </table>
-                            <!-- End Table with stripped rows -->
-                        @endif
+                        </div>
+                    @endif
 
-
-                    </div>
                 </div>
-
             </div>
         </div>
-    </section>
-
-
+    </div>
+</section>
 @endsection

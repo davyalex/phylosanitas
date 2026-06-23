@@ -9,247 +9,158 @@ use App\Observers\CategoryObserver;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Schema;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\ServiceProvider;
-use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
 class AppServiceProvider extends ServiceProvider
 {
-    protected $category;
-    protected $post_last;
-    protected $post_popular;
-    protected $sondage;
-    protected $actualite_externe;
+    // Clés de cache — centralisées ici et dans les observers
+    public const CACHE_CATEGORIES    = 'categories_list';
+    public const CACHE_RECENT_POSTS  = 'recent_posts';
+    public const CACHE_POPULAR_POSTS = 'popular_posts';
+    public const CACHE_SURVEYS       = 'surveys_list';
+    public const CACHE_NEWS          = 'external_news';
 
-    public function register()
+    // Media optimisé : seulement l'image de couverture
+    private static function imageOnly(): \Closure
     {
-        //
+        return fn($q) => $q->where('collection_name', 'image');
     }
 
-    public function boot()
+    public function register(): void {}
+
+    public function boot(): void
     {
-        // Enregistrer les observers
         Category::observe(CategoryObserver::class);
         Post::observe(PostObserver::class);
 
-        // Vérifier si les tables existent avant d'exécuter les requêtes
         if ($this->tablesExist()) {
-            $this->loadCategories();
-            $this->loadRecentPosts();
-            $this->loadPopularPosts();
-            $this->loadSurveys();
-            $this->loadExternalNews();
-
             $this->shareDataWithAllViews();
         }
-
-        // Décommenter si besoin de convertir les images base64
-        // $this->convertirImage();
     }
 
-    /**
-     * Vérifier si les tables nécessaires existent
-     */
     private function tablesExist(): bool
     {
         try {
-            return Schema::hasTable('categories') &&
-                   Schema::hasTable('posts');
-        } catch (\Exception $e) {
+            return Schema::hasTable('categories') && Schema::hasTable('posts');
+        } catch (\Exception) {
             return false;
         }
     }
 
-    /**
-     * Convertir les images base64 en liens (à utiliser ponctuellement)
-     */
-    private function convertirImage()
+    private function shareDataWithAllViews(): void
     {
-        $posts = Post::all();
-
-        foreach ($posts as $post) {
-            preg_match_all('/data:image\/(.*?);base64,([^"]*)/', $post->description, $matches);
-
-            $updatedDescription = $post->description;
-
-            foreach ($matches[0] as $index => $base64) {
-                $imageType = $matches[1][$index];
-                $imageData = $matches[2][$index];
-
-                $fileName = 'image_' . uniqid() . '.' . $imageType;
-
-                $image = base64_decode($imageData);
-
-                Storage::disk('public')->put($fileName, $image);
-
-                $size = Storage::disk('public')->size($fileName);
-
-                $mediaItem = Media::create([
-                    'model_type'             => Post::class,
-                    'model_id'               => $post->id,
-                    'name'                   => $fileName,
-                    'file_name'              => $fileName,
-                    'mime_type'              => 'image/' . $imageType,
-                    'disk'                   => 'public',
-                    'collection_name'        => 'tinyMceImages',
-                    'size'                   => $size,
-                    'manipulations'          => json_encode([]),
-                    'custom_properties'      => json_encode([]),
-                    'responsive_images'      => json_encode([]),
-                    'generated_conversions'  => json_encode(['optimized' => true]),
-                ]);
-
-                $fileUrl = Storage::url($fileName);
-                $updatedDescription = str_replace($base64, $fileUrl, $updatedDescription);
-            }
-
-            $post->description = $updatedDescription;
-            $post->save();
-        }
+        View::composer('*', function ($view) {
+            $view->with([
+                'category'          => $this->getCategories(),
+                'post_last'         => $this->getRecentPosts(),
+                'post_popular'      => $this->getPopularPosts(),
+                'sondage_front'     => $this->getSurveys(),
+                'actualite_externe' => $this->getExternalNews(),
+            ]);
+        });
     }
 
-    /**
-     * Listes des catégories (avec cache)
-     */
-    private function loadCategories()
+    private function getCategories()
     {
-        try {
-            $this->category = Cache::remember('categories_list', 3600, function () {
+        return Cache::remember(self::CACHE_CATEGORIES, 3600, function () {
+            try {
                 return Category::select('id', 'title', 'slug')
                     ->withCount('posts')
                     ->get();
-            });
-        } catch (\Exception $e) {
-            $this->category = collect();
-        }
+            } catch (\Exception) {
+                return collect();
+            }
+        });
     }
 
-    /**
-     * Charger les posts récents (avec cache)
-     */
-    private function loadRecentPosts()
+    private function getRecentPosts()
     {
-        try {
-            $this->post_last = Cache::remember('recent_posts', 1800, function () {
-                $excludedCategories = Category::whereIn('title', ['sondage', 'actualites'])->pluck('id');
+        return Cache::remember(self::CACHE_RECENT_POSTS, 1800, function () {
+            try {
+                $excludedIds = Category::whereIn('title', ['sondage', 'actualites'])->pluck('id');
 
                 return Post::with([
                         'category:id,title,slug',
-                        'user:id,name',
-                        'media'
+                        'media' => self::imageOnly(),
                     ])
                     ->select('id', 'title', 'slug', 'category_id', 'user_id', 'created_at')
-                    ->whereNotIn('category_id', $excludedCategories)
+                    ->whereNotIn('category_id', $excludedIds)
                     ->where('published', 'public')
                     ->latest()
                     ->take(4)
                     ->get();
-            });
-        } catch (\Exception $e) {
-            $this->post_last = collect();
-        }
+            } catch (\Exception) {
+                return collect();
+            }
+        });
     }
 
-    /**
-     * Charger les posts populaires (avec cache)
-     */
-    private function loadPopularPosts()
+    private function getPopularPosts()
     {
-        try {
-            $this->post_popular = Cache::remember('popular_posts', 3600, function () {
-                $excludedCategories = Category::whereIn('title', ['sondage', 'actualites'])->pluck('id');
+        return Cache::remember(self::CACHE_POPULAR_POSTS, 3600, function () {
+            try {
+                $excludedIds = Category::whereIn('title', ['sondage', 'actualites'])->pluck('id');
 
                 return Post::with([
                         'category:id,title,slug',
-                        'user:id,name',
-                        'media'
+                        'media' => self::imageOnly(),
                     ])
-                    ->select('id', 'title', 'slug', 'category_id', 'user_id', 'views')
-                    ->whereNotIn('category_id', $excludedCategories)
+                    ->select('id', 'title', 'slug', 'category_id', 'user_id', 'created_at')
+                    ->whereNotIn('category_id', $excludedIds)
                     ->where('published', 'public')
                     ->orderByViews('desc')
                     ->take(5)
                     ->get();
-            });
-        } catch (\Exception $e) {
-            $this->post_popular = collect();
-        }
+            } catch (\Exception) {
+                return collect();
+            }
+        });
     }
 
-    /**
-     * Récupérer les sondages (avec cache)
-     */
-    private function loadSurveys()
+    private function getSurveys()
     {
-        try {
-            $this->sondage = Cache::remember('surveys_list', 1800, function () {
+        return Cache::remember(self::CACHE_SURVEYS, 1800, function () {
+            try {
                 $surveyCategory = Category::whereTitle('sondage')->first();
+                if (!$surveyCategory) return collect();
 
-                if ($surveyCategory) {
-                    return Post::with([
-                            'category:id,title,slug',
-                            'user:id,name',
-                            'media'
-                        ])
-                        ->select('id', 'title', 'slug', 'category_id', 'user_id', 'created_at')
-                        ->where('category_id', $surveyCategory->id)
-                        ->where('published', 'public')
-                        ->latest()
-                        ->take(4)
-                        ->get();
-                }
-
+                return Post::with([
+                        'category:id,title,slug',
+                        'media' => self::imageOnly(),
+                    ])
+                    ->select('id', 'title', 'slug', 'description', 'category_id', 'user_id', 'created_at')
+                    ->where('category_id', $surveyCategory->id)
+                    ->where('published', 'public')
+                    ->latest()
+                    ->take(4)
+                    ->get();
+            } catch (\Exception) {
                 return collect();
-            });
-        } catch (\Exception $e) {
-            $this->sondage = collect();
-        }
+            }
+        });
     }
 
-    /**
-     * Récupérer les actualités externes (avec cache)
-     */
-    private function loadExternalNews()
+    private function getExternalNews()
     {
-        try {
-            $this->actualite_externe = Cache::remember('external_news', 900, function () {
+        return Cache::remember(self::CACHE_NEWS, 900, function () {
+            try {
                 $newsCategory = Category::whereSlug('actualites')->first();
+                if (!$newsCategory) return collect();
 
-                if ($newsCategory) {
-                    return Post::with([
-                            'category:id,title,slug',
-                            'user:id,name',
-                            'media'
-                        ])
-                        ->select('id', 'title', 'slug', 'category_id', 'user_id', 'created_at', 'actualite_une')
-                        ->where('category_id', $newsCategory->id)
-                        ->where('published', 'public')
-                        ->where('actualite_une', 1)
-                        ->latest()
-                        ->take(10)
-                        ->get();
-                }
-
+                return Post::with([
+                        'category:id,title,slug',
+                        'media' => self::imageOnly(),
+                    ])
+                    ->select('id', 'title', 'slug', 'category_id', 'user_id', 'created_at', 'actualite_une')
+                    ->where('category_id', $newsCategory->id)
+                    ->where('published', 'public')
+                    ->where('actualite_une', 1)
+                    ->latest()
+                    ->take(10)
+                    ->get();
+            } catch (\Exception) {
                 return collect();
-            });
-        } catch (\Exception $e) {
-            $this->actualite_externe = collect();
-        }
-    }
-
-    /**
-     * Partager les données avec toutes les vues
-     */
-    private function shareDataWithAllViews()
-    {
-        View::composer('*', function ($view) {
-            $view->with([
-                'category'          => $this->category ?? collect(),
-                'post_last'         => $this->post_last ?? collect(),
-                'post_popular'      => $this->post_popular ?? collect(),
-                'sondage_front'     => $this->sondage ?? collect(),
-                'actualite_externe' => $this->actualite_externe ?? collect(),
-            ]);
+            }
         });
     }
 }

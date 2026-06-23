@@ -2,15 +2,15 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Actualite;
+use App\Models\CarouselSlide;
 use Illuminate\Http\Request;
 use RealRashid\SweetAlert\Facades\Alert;
 
-class ActualiteController extends Controller
+class CarouselController extends Controller
 {
     public function index()
     {
-        $actualite = Actualite::with('media')
+        $actualite = CarouselSlide::with('media')
             ->orderBy('ordre')
             ->orderBy('created_at', 'desc')
             ->get();
@@ -21,26 +21,25 @@ class ActualiteController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'title'        => 'required|string|max:200',
+            'title'        => 'required|string|max:250',
             'image'        => 'required|image|max:5120',
-            'sous_titre'   => 'nullable|string|max:300',
+            'sous_titre'   => 'nullable|string|max:350',
             'lien'         => 'nullable|url|max:500',
             'texte_bouton' => 'nullable|string|max:60',
         ]);
 
-        $ordre = Actualite::max('ordre') + 1;
+        $ordre = CarouselSlide::max('ordre') + 1;
 
-        $actualite = Actualite::create([
+        $slide = CarouselSlide::create([
             'title'        => $request->title,
             'sous_titre'   => $request->sous_titre,
-            'description'  => $request->sous_titre,
             'lien'         => $request->lien,
             'texte_bouton' => $request->texte_bouton ?: "Lire l'article",
             'actif'        => true,
             'ordre'        => $ordre,
         ]);
 
-        $actualite->addMediaFromRequest('image')->toMediaCollection('image');
+        $slide->addMediaFromRequest('image')->toMediaCollection('image');
 
         Alert::toast('Slide ajouté avec succès', 'success');
         return back();
@@ -49,24 +48,23 @@ class ActualiteController extends Controller
     public function update(Request $request, $id)
     {
         $request->validate([
-            'title'        => 'required|string|max:200',
-            'sous_titre'   => 'nullable|string|max:300',
+            'title'        => 'required|string|max:250',
+            'sous_titre'   => 'nullable|string|max:350',
             'lien'         => 'nullable|url|max:500',
             'texte_bouton' => 'nullable|string|max:60',
         ]);
 
-        $actualite = Actualite::findOrFail($id);
-        $actualite->update([
+        $slide = CarouselSlide::findOrFail($id);
+        $slide->update([
             'title'        => $request->title,
             'sous_titre'   => $request->sous_titre,
-            'description'  => $request->sous_titre,
             'lien'         => $request->lien,
             'texte_bouton' => $request->texte_bouton ?: "Lire l'article",
         ]);
 
         if ($request->hasFile('image')) {
-            $actualite->clearMediaCollection('image');
-            $actualite->addMediaFromRequest('image')->toMediaCollection('image');
+            $slide->clearMediaCollection('image');
+            $slide->addMediaFromRequest('image')->toMediaCollection('image');
         }
 
         Alert::toast('Slide modifié avec succès', 'success');
@@ -75,24 +73,23 @@ class ActualiteController extends Controller
 
     public function toggleActive($id)
     {
-        $actualite = Actualite::findOrFail($id);
-        $actualite->update(['actif' => !$actualite->actif]);
+        $slide = CarouselSlide::findOrFail($id);
+        $slide->update(['actif' => !$slide->actif]);
 
-        Alert::toast($actualite->actif ? 'Slide activé' : 'Slide désactivé', 'info');
+        Alert::toast($slide->actif ? 'Slide activé' : 'Slide désactivé', 'info');
         return back();
     }
 
     public function moveUp($id)
     {
-        $current = Actualite::findOrFail($id);
-        $previous = Actualite::where('ordre', '<', $current->ordre)
-            ->orderBy('ordre', 'desc')
-            ->first();
+        $current  = CarouselSlide::findOrFail($id);
+        $previous = CarouselSlide::where('ordre', '<', $current->ordre)
+            ->orderByDesc('ordre')->first();
 
         if ($previous) {
-            $tmpOrdre = $current->ordre;
-            $current->update(['ordre'   => $previous->ordre]);
-            $previous->update(['ordre'  => $tmpOrdre]);
+            [$current->ordre, $previous->ordre] = [$previous->ordre, $current->ordre];
+            $current->save();
+            $previous->save();
         }
 
         return back();
@@ -100,15 +97,14 @@ class ActualiteController extends Controller
 
     public function moveDown($id)
     {
-        $current = Actualite::findOrFail($id);
-        $next = Actualite::where('ordre', '>', $current->ordre)
-            ->orderBy('ordre')
-            ->first();
+        $current = CarouselSlide::findOrFail($id);
+        $next    = CarouselSlide::where('ordre', '>', $current->ordre)
+            ->orderBy('ordre')->first();
 
         if ($next) {
-            $tmpOrdre = $current->ordre;
-            $current->update(['ordre' => $next->ordre]);
-            $next->update(['ordre'    => $tmpOrdre]);
+            [$current->ordre, $next->ordre] = [$next->ordre, $current->ordre];
+            $current->save();
+            $next->save();
         }
 
         return back();
@@ -116,9 +112,9 @@ class ActualiteController extends Controller
 
     public function destroy($id)
     {
-        $actualite = Actualite::findOrFail($id);
-        $actualite->clearMediaCollection('image');
-        $actualite->delete();
+        $slide = CarouselSlide::findOrFail($id);
+        $slide->clearMediaCollection('image');
+        $slide->delete();
 
         Alert::toast('Slide supprimé avec succès', 'success');
         return back();

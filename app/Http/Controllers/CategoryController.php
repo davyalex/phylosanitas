@@ -1,125 +1,62 @@
 <?php
 
 namespace App\Http\Controllers;
+
 use App\Models\Category;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Cache;
 use RealRashid\SweetAlert\Facades\Alert;
+
 class CategoryController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
     public function index()
     {
-        //
-        $category = Category::with('posts')->orderBy('created_at','desc')->get();
+        $category = Category::withCount('posts')->orderBy('title')->get();
         return view('admin.pages.categorie.index', compact('category'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create() 
-    {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \App\Http\Requests\StoreCategoryRequest  $request
-     * @return \Illuminate\Http\Response
-     */
     public function store(Request $request)
     {
-        //
-        // $validator = Validator::make($request->all(), [
-        //     'title' => 'required',
-        // ]);
-
-        // if ($validator->fails()) {
-        //     return back()->with('errors', $validator->messages()->all()[0])->withInput();
-        // }
-
         $request->validate([
-            'title' => 'required',
+            'title' => 'required|string|max:100|unique:categories,title',
         ]);
-        $category = Category::firstOrCreate([
-            'title' => $request->title,
-        ]);
-        
-        Alert::toast('enregistré avec success', 'success');
 
+        Category::create(['title' => $request->title]);
+
+        Cache::forget('categories_list');
+
+        Alert::toast('Catégorie créée avec succès', 'success');
         return back();
-
     }
 
-
-    /**
-     * Display the specified resource.
-     *
-     * @param  \App\Models\Category  $category
-     * @return \Illuminate\Http\Response
-     */
-    public function show(Category $category)
+    public function update(Request $request, $slug)
     {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  \App\Models\Category  $category
-     * @return \Illuminate\Http\Response
-     */
-    public function edit(Category $category, $slug)
-    {
-        //
-     
-    }
-
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \App\Http\Requests\UpdateCategoryRequest  $request
-     * @param  \App\Models\Category  $category
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request,$slug)
-    {
-        //
         $request->validate([
-            'title' => 'required',
+            'title' => 'required|string|max:100',
         ]);
 
-        $category_update = tap(Category::whereSlug($slug))->update([
-            'title' => $request->title,
-        ]);
+        $category = Category::whereSlug($slug)->firstOrFail();
+        $category->update(['title' => $request->title]);
 
-        Alert::toast('modifié avec success', 'success');
+        Cache::forget('categories_list');
 
+        Alert::toast('Catégorie modifiée avec succès', 'success');
         return back();
-
     }
 
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  \App\Models\Category  $category
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy(Request $request,$id)
+    public function destroy($id)
     {
-        //
+        $category = Category::findOrFail($id);
 
-        $delete = Category::find($id)->delete();
-        Alert::toast('supprimé avec success', 'success');
+        if ($category->posts()->count() > 0) {
+            Alert::toast('Impossible de supprimer : cette catégorie contient des articles.', 'warning');
+            return back();
+        }
 
+        $category->delete();
+        Cache::forget('categories_list');
+
+        Alert::toast('Catégorie supprimée avec succès', 'success');
         return redirect()->route('category');
     }
 }

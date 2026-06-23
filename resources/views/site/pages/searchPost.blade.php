@@ -127,13 +127,9 @@
                                                     <i class="bi bi-calendar3 text-medical-blue"></i>
                                                     {{ \Carbon\Carbon::parse($item['created_at'])->diffForHumans() }}
                                                 </span>
-                                                <span title="Nombre de vues">
-                                                    <i class="bi bi-eye-fill text-health-green"></i>
-                                                    {{ views($item)->count() }}
-                                                </span>
                                                 <span title="Nombre de commentaires">
                                                     <i class="bi bi-chat-left-quote-fill text-medical-teal"></i>
-                                                    {{ $item->commentaires->count() }}
+                                                    {{ $item->commentaires_count ?? 0 }}
                                                 </span>
                                             </div>
                                         </div>

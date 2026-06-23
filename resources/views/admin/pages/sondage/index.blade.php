@@ -1,64 +1,101 @@
-  <!-- Table with stripped rows -->
-  <table class="table datatable">
-      <thead>
-          <tr>
-              <th scope="col">#</th>
-              <th scope="col-2">image</th>
-              <th scope="col">Question</th>
-              <th scope="col">categorie</th>
-              <th scope="col">vues</th>
-              <th scope="col">Date</th>
-              <th scope="col">Action</th>
-          </tr>
-      </thead>
-      <tbody>
-          @foreach ($sondage as $key => $item)
-              <tr>
-                  <th scope="row">{{ ++$key }}</th>
-                  <td class="col-2"> <img src="{{ $item->getFirstMediaUrl('image') }}"
-                          alt="{{ $item->getFirstMediaUrl('image') }}" style="width: 45px; height: 45px"
-                          class="rounded-circle" />
-                      @if ($item['published'] == 'prive')
-                          <br><span class=""> <i class="bi bi-circle-fill text-warning"></i> non publié</span>
-                      @elseif ($item['published'] == 'public')
-                          <br> <span class=""> <i class="bi bi-circle-fill text-success"></i> en ligne</span>
-                      @endif
-                  </td>
-                  <td> {!! substr(strip_tags($item->description), 0, 50) !!}.... </td>
-                  <td><span class="badge bg-secondary">{{ $item->category->title }}</span></td>
-                  <td>{{ views($item)->count() }}</td>
-                  <td> {{ \Carbon\Carbon::parse($item['created_at'])->diffForHumans() }}</td>
+<div class="table-responsive">
+    <table class="table table-hover datatable align-middle">
+        <thead class="table-light">
+            <tr>
+                <th>#</th>
+                <th>Image</th>
+                <th>Question</th>
+                <th>Catégorie</th>
+                <th>Statut</th>
+                <th>Date</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @forelse ($sondage as $key => $item)
+                <tr>
+                    <td>{{ ++$key }}</td>
 
-                  <td>
-                      <div class="d-flex">
+                    <td>
+                        <img src="{{ $item->getFirstMediaUrl('image') ?: asset('assets_site/img/medc.jpg') }}"
+                             alt="sondage"
+                             class="rounded-circle"
+                             style="width:45px; height:45px; object-fit:cover;">
+                    </td>
 
-                          <div class="dropdown">
-                              <button role="button" class="btn btn-primary rounded-circle dropdown-toggle"
-                                  data-bs-toggle="dropdown" aria-haspopup="false"><i class="bi bi-globe"></i></button>
-                              <div class="dropdown-menu">
-                                  <!-- ========== Start published status ========== -->
-                                  <a href="{{ route('post.published', $item->id) }}" class="dropdown-item "
-                                      style="font-weight:700; font-size:1em"><i class="bi bi-lock-fill"></i>
-                                      {{ $item->published == 'public' ? 'Privé' : 'Public' }} </a>
-                                  <!-- ========== End published status ========== -->
+                    <td>
+                        <span class="fw-semibold">
+                            {{ Str::limit(strip_tags($item->description), 60, '…') }}
+                        </span>
+                    </td>
 
-                              </div>
-                          </div>
-                          <a href="/post/detail?slug={{ $item['slug'] }}" role="button"
-                              class="btn btn-warning rounded-circle"><i class="bi bi-eye"></i></a>
-                          <a href="{{ route('post.edit-sondage',$item['slug']) }}" class="btn btn-success rounded-circle" role="button"  class="btn btn-success mx-2 "><i class="bi bi-pencil"></i></a>
+                    <td>
+                        <span class="badge bg-secondary">{{ $item->category->title }}</span>
+                    </td>
 
-                          <form action="{{ route('post.delete', $item['id']) }}" method="POST">
-                              @csrf
-                              <a class="btn btn-danger rounded-circle" data-bs-toggle="modal"
-                                  data-bs-target="#confirmDelete{{ $item->id }}"><i class="bi bi-trash"></i> </a>
-                              @include('admin.partials.deleteConfirm')
-                          </form>
-                      </div>
+                    <td>
+                        @if ($item->published === 'public')
+                            <span class="badge bg-success">
+                                <i class="bi bi-circle-fill me-1" style="font-size:.5rem;"></i>En ligne
+                            </span>
+                        @else
+                            <span class="badge bg-warning text-dark">
+                                <i class="bi bi-circle-fill me-1" style="font-size:.5rem;"></i>Brouillon
+                            </span>
+                        @endif
+                    </td>
 
-                  </td>
-              </tr>
-          @endforeach
-      </tbody>
-  </table>
-  <!-- End Table with stripped rows -->
+                    <td class="text-muted small">
+                        {{ \Carbon\Carbon::parse($item->created_at)->diffForHumans() }}
+                    </td>
+
+                    <td>
+                        <div class="d-flex gap-1 flex-nowrap">
+                            {{-- Publier / Dépublier --}}
+                            <a href="{{ route('post.published', $item->id) }}"
+                               class="btn btn-sm {{ $item->published === 'public' ? 'btn-warning' : 'btn-success' }}"
+                               title="{{ $item->published === 'public' ? 'Dépublier' : 'Publier' }}">
+                                <i class="bi bi-{{ $item->published === 'public' ? 'eye-slash' : 'eye' }}"></i>
+                            </a>
+
+                            {{-- Voir en ligne --}}
+                            <a href="{{ route('post.detail', ['slug' => $item->slug]) }}"
+                               target="_blank"
+                               class="btn btn-sm btn-outline-secondary"
+                               title="Voir sur le site">
+                                <i class="bi bi-box-arrow-up-right"></i>
+                            </a>
+
+                            {{-- Modifier — utilise l'ID (pas le slug) --}}
+                            <a href="{{ route('post.edit-sondage', $item->id) }}"
+                               class="btn btn-sm btn-primary"
+                               title="Modifier">
+                                <i class="bi bi-pencil"></i>
+                            </a>
+
+                            {{-- Supprimer --}}
+                            <form action="{{ route('post.delete', $item->id) }}" method="POST">
+                                @csrf
+                                <button type="button"
+                                        class="btn btn-sm btn-danger"
+                                        data-bs-toggle="modal"
+                                        data-bs-target="#confirmDelete{{ $item->id }}"
+                                        title="Supprimer">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                                @include('admin.partials.deleteConfirm')
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+            @empty
+                <tr>
+                    <td colspan="7" class="text-center text-muted py-4">
+                        <i class="bi bi-bar-chart fs-3 d-block mb-2"></i>
+                        Aucun sondage trouvé.
+                    </td>
+                </tr>
+            @endforelse
+        </tbody>
+    </table>
+</div>

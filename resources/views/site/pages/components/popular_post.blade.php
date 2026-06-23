@@ -20,9 +20,7 @@
                              loading="lazy" 
                              alt="{{ $item['title'] }}">
                     @endif
-                    <span class="badge bg-danger position-absolute top-0 start-0 m-1" style="font-size: 10px;">
-                        <i class="bi bi-eye-fill"></i> {{ views($item)->count() }}
-                    </span>
+                    {{-- view count omis pour éviter N+1 en listing --}}
                 </div>
                 <div class="flex-grow-1">
                     <span class="badge badge-category mb-2">
@@ -34,15 +32,9 @@
                             {{ Str::limit($item['title'], 60, '...') }}
                         </a>
                     </h6>
-                    <small class="text-muted d-flex justify-content-between">
-                        <span>
-                            <i class="bi bi-calendar3 text-medical-blue"></i>
-                            {{ \Carbon\Carbon::parse($item['created_at'])->diffForHumans() }}
-                        </span>
-                        <span class="text-health-green">
-                            <i class="bi bi-chat-left-quote-fill"></i>
-                            {{ $item->commentaires->count() }}
-                        </span>
+                    <small class="text-muted">
+                        <i class="bi bi-calendar3 text-medical-blue"></i>
+                        {{ \Carbon\Carbon::parse($item->created_at)->diffForHumans() }}
                     </small>
                 </div>
             </div>

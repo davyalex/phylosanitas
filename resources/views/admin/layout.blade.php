@@ -1,304 +1,515 @@
-
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 
 <head>
   <meta charset="utf-8">
-  <meta content="width=device-width, initial-scale=1.0" name="viewport">
-
-  <title>{{ config('app.name') }}-Dashboard-@yield('title')</title>
-  <meta charset="utf-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="description" content="@yield('title')">
-  <meta property="og:image" content="@yield('image')">
-  <meta name="title" content="@yield('title')">
-  <meta name="url" content="@yield('url')">
-
-
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="csrf-token" content="{{ csrf_token() }}">
+  <title>{{ config('app.name') }} · @yield('title', 'Dashboard')</title>
 
-  <!-- Favicons -->
   <link href="{{ asset('assets_admin/img/favicon.png') }}" rel="icon">
-  <link href="{{ asset('assets_admin/img/apple-touch-icon.png') }}" rel="apple-touch-icon">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
 
-
-  <!-- Google Fonts -->
-  <link href="https://fonts.gstatic.com" rel="preconnect">
-  <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,600i,700,700i|Nunito:300,300i,400,400i,600,600i,700,700i|Poppins:300,300i,400,400i,500,500i,600,600i,700,700i" rel="stylesheet">
-
-  <link rel="stylesheet" type="text/css" 
-  href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
- <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/js/toastr.min.js"></script>
-
-{{-- <script src="{{ asset('resources/js/app.js') }}" defer></script> --}}
-
- <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
- <!-- Vendor CSS Files -->
   <link href="{{ asset('assets_admin/vendor/bootstrap/css/bootstrap.min.css') }}" rel="stylesheet">
   <link href="{{ asset('assets_admin/vendor/bootstrap-icons/bootstrap-icons.css') }}" rel="stylesheet">
-  <link href="{{ asset('assets_admin/vendor/boxicons/css/boxicons.min.css') }}" rel="stylesheet">
-  <link href="{{ asset('assets_admin/vendor/quill/quill.snow.css') }}" rel="stylesheet">
-  <link href="{{ asset('assets_admin/vendor/quill/quill.bubble.css') }}" rel="stylesheet">
-  <link href="{{ asset('assets_admin/vendor/remixicon/remixicon.css') }}" rel="stylesheet">
   <link href="{{ asset('assets_admin/vendor/simple-datatables/style.css') }}" rel="stylesheet">
-
-  <!-- Template Main CSS File -->
   <link href="{{ asset('assets_admin/css/style.css') }}" rel="stylesheet">
-  <script src="{{ asset('assets_admin/js/jquery.min.js') }}"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert/2.1.0/sweetalert.min.js"></script>
-  <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/sweetalert/1.1.3/sweetalert.min.css">
-  
-<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6925205610540207"
-     crossorigin="anonymous"></script>
 
+  <script src="{{ asset('assets_admin/js/jquery.min.js') }}"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/js/toastr.min.js"></script>
+
+  <style>
+    /* ── Variables médicales ─────────────────────── */
+    :root {
+      --sb-bg:          #0d1f3c;
+      --sb-bg-dark:     #081526;
+      --sb-accent:      #0066CC;
+      --sb-accent-glow: rgba(0,102,204,.35);
+      --sb-text:        rgba(255,255,255,.78);
+      --sb-text-dim:    rgba(255,255,255,.42);
+      --sb-hover-bg:    rgba(255,255,255,.08);
+      --sb-active-bg:   rgba(255,255,255,.14);
+      --sb-width:       260px;
+      --header-h:       64px;
+    }
+
+    /* ── Reset body / font ───────────────────────── */
+    body { font-family: 'Inter', sans-serif; background: #f4f6fb; }
+
+    /* ══════════════════════════════════════════════
+       HEADER
+    ══════════════════════════════════════════════ */
+    #header {
+      height: var(--header-h);
+      background: #fff;
+      border-bottom: 1px solid #e8ecf1;
+      box-shadow: 0 1px 6px rgba(0,0,0,.06);
+      padding: 0 20px;
+      display: flex;
+      align-items: center;
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 997;
+      gap: 16px;
+    }
+
+    .header-logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+      width: var(--sb-width);
+      flex-shrink: 0;
+    }
+
+    .header-logo-icon {
+      width: 36px; height: 36px;
+      background: linear-gradient(135deg, #0066CC, #00A86B);
+      border-radius: 9px;
+      display: flex; align-items: center; justify-content: center;
+      color: #fff; font-size: 1.1rem; font-weight: 700;
+      flex-shrink: 0;
+    }
+
+    .header-logo-text {
+      line-height: 1.15;
+    }
+
+    .header-logo-name {
+      font-size: .9rem; font-weight: 700; color: #0d1f3c;
+      display: block;
+    }
+
+    .header-logo-sub {
+      font-size: .68rem; color: #8a99b2; text-transform: uppercase;
+      letter-spacing: .05em;
+    }
+
+    .header-toggle {
+      background: none; border: none; cursor: pointer;
+      color: #6b7c93; font-size: 1.3rem;
+      padding: 4px 8px; border-radius: 6px;
+      transition: background .2s, color .2s;
+    }
+    .header-toggle:hover { background: #f0f4ff; color: #0066CC; }
+
+    .header-spacer { flex: 1; }
+
+    /* Lien "Voir le site" */
+    .header-site-link {
+      display: flex; align-items: center; gap: 6px;
+      font-size: .82rem; font-weight: 600;
+      color: #6b7c93; text-decoration: none;
+      padding: 6px 12px; border-radius: 8px;
+      border: 1px solid #e2e8f0;
+      transition: all .2s;
+    }
+    .header-site-link:hover { color: #0066CC; border-color: #0066CC; background: #f0f6ff; }
+
+    /* Dropdown utilisateur */
+    .header-user-btn {
+      display: flex; align-items: center; gap: 10px;
+      background: none; border: none; cursor: pointer;
+      padding: 5px 8px; border-radius: 10px;
+      transition: background .2s;
+    }
+    .header-user-btn:hover { background: #f4f6fb; }
+
+    .header-avatar {
+      width: 34px; height: 34px; border-radius: 50%;
+      background: linear-gradient(135deg, #0066CC, #00A86B);
+      color: #fff; font-size: .72rem; font-weight: 700;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .header-user-name {
+      font-size: .85rem; font-weight: 600; color: #2d3748;
+      max-width: 130px; white-space: nowrap; overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .header-user-role {
+      font-size: .72rem; color: #8a99b2;
+    }
+
+    /* ══════════════════════════════════════════════
+       SIDEBAR
+    ══════════════════════════════════════════════ */
+    #sidebar {
+      position: fixed;
+      top: var(--header-h);
+      left: 0; bottom: 0;
+      width: var(--sb-width);
+      background: linear-gradient(180deg, var(--sb-bg) 0%, var(--sb-bg-dark) 100%);
+      z-index: 996;
+      overflow-y: auto;
+      overflow-x: hidden;
+      scrollbar-width: thin;
+      scrollbar-color: rgba(255,255,255,.15) transparent;
+      transition: left .3s ease, width .3s ease;
+      display: flex;
+      flex-direction: column;
+      padding-bottom: 20px;
+    }
+
+    #sidebar::-webkit-scrollbar { width: 4px; }
+    #sidebar::-webkit-scrollbar-thumb { background: rgba(255,255,255,.15); border-radius: 2px; }
+
+    @media (max-width: 1199px) {
+      #sidebar { left: calc(-1 * var(--sb-width)); }
+      .toggle-sidebar #sidebar { left: 0; }
+    }
+
+    @media (min-width: 1200px) {
+      #main, #footer { margin-left: var(--sb-width); }
+      .toggle-sidebar #main, .toggle-sidebar #footer { margin-left: 0; }
+      .toggle-sidebar #sidebar { left: calc(-1 * var(--sb-width)); }
+    }
+
+    /* Profil en haut de la sidebar */
+    .sb-profile {
+      padding: 20px 16px 16px;
+      border-bottom: 1px solid rgba(255,255,255,.08);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .sb-avatar {
+      width: 42px; height: 42px; border-radius: 50%;
+      background: linear-gradient(135deg, #0066CC, #00A86B);
+      color: #fff; font-size: .85rem; font-weight: 700;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+      border: 2px solid rgba(255,255,255,.2);
+    }
+
+    .sb-profile-name {
+      font-size: .88rem; font-weight: 600; color: #fff;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+
+    .sb-profile-role {
+      font-size: .72rem; color: var(--sb-text-dim);
+      display: block;
+    }
+
+    /* Navigation */
+    .sb-nav { padding: 12px 10px; flex: 1; }
+
+    .sb-section-label {
+      font-size: .65rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .1em;
+      color: var(--sb-text-dim);
+      padding: 14px 8px 6px;
+    }
+
+    .sb-link {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 9px 12px;
+      border-radius: 10px;
+      color: var(--sb-text);
+      text-decoration: none;
+      font-size: .86rem;
+      font-weight: 500;
+      transition: background .18s, color .18s;
+      position: relative;
+      margin-bottom: 2px;
+    }
+
+    .sb-link:hover {
+      background: var(--sb-hover-bg);
+      color: #fff;
+    }
+
+    .sb-link.active {
+      background: var(--sb-active-bg);
+      color: #fff;
+      font-weight: 600;
+      box-shadow: inset 3px 0 0 var(--sb-accent);
+    }
+
+    .sb-link .sb-icon {
+      width: 32px; height: 32px;
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: .95rem;
+      flex-shrink: 0;
+      background: rgba(255,255,255,.07);
+      color: var(--sb-text);
+      transition: background .18s, color .18s;
+    }
+
+    .sb-link:hover .sb-icon,
+    .sb-link.active .sb-icon {
+      background: var(--sb-accent);
+      color: #fff;
+    }
+
+    .sb-link .sb-badge {
+      margin-left: auto;
+      background: rgba(255,255,255,.15);
+      color: rgba(255,255,255,.8);
+      font-size: .65rem;
+      font-weight: 700;
+      padding: 2px 7px;
+      border-radius: 20px;
+    }
+
+    .sb-link.active .sb-badge {
+      background: var(--sb-accent);
+      color: #fff;
+    }
+
+    /* Séparateur bas de sidebar */
+    .sb-footer {
+      padding: 10px;
+      border-top: 1px solid rgba(255,255,255,.08);
+    }
+
+    .sb-footer .sb-link { color: rgba(255,255,255,.5); }
+    .sb-footer .sb-link:hover { color: #fff; }
+
+    /* ══════════════════════════════════════════════
+       MAIN CONTENT
+    ══════════════════════════════════════════════ */
+    #main {
+      margin-top: var(--header-h);
+      padding: 24px;
+      min-height: calc(100vh - var(--header-h));
+    }
+
+    .pagetitle { margin-bottom: 20px; }
+    .pagetitle h1 { font-size: 1.25rem; font-weight: 700; color: #0d1f3c; margin-bottom: 4px; }
+    .breadcrumb { background: none; padding: 0; margin: 0; font-size: .8rem; }
+    .breadcrumb-item a { color: #0066CC; text-decoration: none; }
+    .breadcrumb-item.active { color: #8a99b2; }
+    .breadcrumb-item + .breadcrumb-item::before { color: #c5cdd8; }
+
+    #footer {
+      margin-top: 20px;
+      padding: 12px 24px;
+      background: #fff;
+      border-top: 1px solid #e8ecf1;
+      font-size: .78rem;
+      color: #8a99b2;
+      display: flex;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    #footer a { color: #0066CC; text-decoration: none; }
+  </style>
+
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6925205610540207" crossorigin="anonymous"></script>
 </head>
+
 <body>
 
-  
-  <!-- ======= Header ======= -->
-  <header id="header" class="header fixed-top d-flex align-items-center">
+{{-- ══════ HEADER ══════ --}}
+<header id="header">
 
-    <div class="d-flex align-items-center justify-content-between">
-      <a href="{{ route('dashboard') }}" class="logo d-flex align-items-center">
-        <img src="{{ asset('assets_site/img/logo/logo_tp.png') }}" height="100" alt=""> 
-        {{-- <span class="d-none d-lg-block">{{ config('app.name') }}</span> --}}
-      </a>
-      <i class="bi bi-list toggle-sidebar-btn"></i>
-    </div><!-- End Logo -->
+  {{-- Logo --}}
+  <a href="{{ route('dashboard') }}" class="header-logo">
+    <div class="header-logo-icon">Φ</div>
+    <div class="header-logo-text">
+      <span class="header-logo-name">PhyloSanitas</span>
+      <span class="header-logo-sub">Administration</span>
+    </div>
+  </a>
 
-    {{-- <div class="search-bar">
-      <form class="search-form d-flex align-items-center" method="POST" action="#">
-        <input type="text" name="query" placeholder="Search" title="Enter search keyword">
-        <button type="submit" title="Search"><i class="bi bi-search"></i></button>
-      </form>
-    </div><!-- End Search Bar --> --}}
+  {{-- Toggle sidebar --}}
+  <button class="header-toggle toggle-sidebar-btn" type="button">
+    <i class="bi bi-list"></i>
+  </button>
 
-    <nav class="header-nav ms-auto">
-      <ul class="d-flex align-items-center">
+  <div class="header-spacer"></div>
 
-        <li class="nav-item d-block d-lg-none">
-          <a class="nav-link nav-icon search-bar-toggle " href="#">
-            <i class="bi bi-search"></i>
-          </a>
-        </li><!-- End Search Icon-->
+  {{-- Lien site --}}
+  <a href="{{ route('accueil') }}" target="_blank" class="header-site-link d-none d-md-flex">
+    <i class="bi bi-box-arrow-up-right"></i> Voir le site
+  </a>
 
-       
-
-        <li class="nav-item dropdown pe-3">
-
-          <a class="nav-link nav-profile d-flex align-items-center pe-0" href="#" data-bs-toggle="dropdown">
-            <img src="{{ asset('assets_admin/img/avatar.png') }}" alt="Profile" class="rounded-circle">
-          
-            <span class="d-none d-md-block dropdown-toggle ps-2">{{ Auth::user()->name }}</span>
-          </a><!-- End Profile Iamge Icon -->
-
-          <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow profile">
-            <li class="dropdown-header">
-              <h6>{{ Auth::user()->name }}</h6>
-              <span>{{ Auth::user()->roles[0]->name }}</span>
-            </li>
-            <li>
-              <hr class="dropdown-divider">
-            </li>
-
-            <li>
-              <a class="dropdown-item d-flex align-items-center" href="{{ route('user.profil',Auth::user()->id) }}">
-                <i class="bi bi-person"></i>
-                <span>Mon profil</span>
-              </a>
-            </li>
-            <li>
-              <hr class="dropdown-divider">
-            </li>
-            <li>
-              <hr class="dropdown-divider">
-            </li>
-
-            <li>
-
-              <form id="form_logout" action="{{ route('logout') }}" method="POST">
-                  @csrf
-              </form>
-              <a class="dropdown-item d-flex align-items-center" href=""  onclick="event.preventDefault();
-              document.getElementById('form_logout').submit();
-              ">
-                <i class="bi bi-box-arrow-right"></i>
-                <span>Deconnexion</span>
-              </a>
-            </li>
-
-          </ul><!-- End Profile Dropdown Items -->
-        </li><!-- End Profile Nav -->
-
-      </ul>
-    </nav><!-- End Icons Navigation -->
-
-  </header><!-- End Header -->
-
-  <!-- ======= Sidebar ======= -->
-  <aside id="sidebar" class="sidebar">
-
-    <ul class="sidebar-nav" id="sidebar-nav">
-
-      <li class="nav-item">
-        <a class="nav-link " href="{{ route('dashboard') }}">
-          <i class="bi bi-grid"></i>
-          <span>Tableau de bord</span>
+  {{-- Dropdown user --}}
+  <div class="dropdown ms-2">
+    <button class="header-user-btn dropdown-toggle" data-bs-toggle="dropdown">
+      <div class="header-avatar">{{ strtoupper(substr(Auth::user()->name, 0, 2)) }}</div>
+      <div class="d-none d-md-block text-start">
+        <div class="header-user-name">{{ Auth::user()->name }}</div>
+        <div class="header-user-role">{{ Auth::user()->roles->first()?->name ?? '—' }}</div>
+      </div>
+    </button>
+    <ul class="dropdown-menu dropdown-menu-end shadow-sm" style="min-width:200px;">
+      <li class="px-3 py-2">
+        <div class="fw-semibold small">{{ Auth::user()->name }}</div>
+        <div class="text-muted" style="font-size:.75rem;">{{ Auth::user()->email }}</div>
+      </li>
+      <li><hr class="dropdown-divider my-1"></li>
+      <li>
+        <a class="dropdown-item d-flex align-items-center gap-2" href="{{ route('user.profil', Auth::user()->id) }}">
+          <i class="bi bi-person-circle text-primary"></i> Mon profil
         </a>
-      </li><!-- End Dashboard Nav -->
-
-    
-
-      {{-- <li class="nav-heading">Pages</li> --}}
-
-      @role('administrateur')
-      <li class="nav-item">
-          <a class="nav-link collapsed" href="{{ route('category') }}">
-              <i class="bi bi-card-list"></i>
-              <span>Categories</span>
-            </a>
-        </li><!-- End Register Page Nav -->
-        @endrole
-        <li class="nav-item">
-            <a class="nav-link collapsed" href="{{ route('post') }}">
-                <i class="bi bi-card-text"></i>
-                <span>Articles</span>
-            </a>
-        </li><!-- End Login Page Nav -->
-
-        <li class="nav-item">
-          <a class="nav-link collapsed" href="/admin/post?type=sondage">
-              <i class="bi bi-card-text"></i>
-              <span>Sondages</span>
-          </a>
-      </li><!-- End Login Page Nav -->
-        @role('administrateur')
-        <li class="nav-item">
-          <a class="nav-link collapsed" href="{{ route('user') }}">
-            <i class="bi bi-people-fill"></i>
-            <span>Utilisateurs</span>
-          </a>
-        </li><!-- End Profile Page Nav -->
-     @endrole
-
-     <li class="nav-item">
-      <a class="nav-link collapsed" href="{{ route('actualite.index') }}">
-          <i class="bi bi-image"></i>
-          <span>Publicités</span>
-      </a>
-  </li><!-- End Login Page Nav -->
-
+      </li>
+      <li>
+        <a class="dropdown-item d-flex align-items-center gap-2" href="{{ route('accueil') }}" target="_blank">
+          <i class="bi bi-globe text-success"></i> Voir le site
+        </a>
+      </li>
+      <li><hr class="dropdown-divider my-1"></li>
+      <li>
+        <form id="form_logout" action="{{ route('logout') }}" method="POST" class="d-inline">@csrf</form>
+        <a class="dropdown-item d-flex align-items-center gap-2 text-danger"
+           href="#" onclick="event.preventDefault(); document.getElementById('form_logout').submit();">
+          <i class="bi bi-box-arrow-right"></i> Déconnexion
+        </a>
+      </li>
     </ul>
+  </div>
 
-  </aside><!-- End Sidebar-->
+</header>
 
-  <main id="main" class="main">
+{{-- ══════ SIDEBAR ══════ --}}
+<aside id="sidebar">
 
-    {{-- breadcrum --}}
-    <div class="pagetitle">
-      <h1>Dashboard</h1>
-      <nav>
-        <ol class="breadcrumb">
-          <li class="breadcrumb-item"><a href="#">@yield('title')</a></li>
-          <li class="breadcrumb-item active">Dashboard</li>
-        </ol>
-      </nav>
-    </div><!-- End Page Title -->
-
-@yield('content')
-@include('sweetalert::alert')
-
-
-  </main><!-- End #main -->
-
-  <!-- ======= Footer ======= -->
-  <footer id="footer" class="footer">
-    <div class="copyright">
-      &copy; {{date('Y')}} Copyright <strong><span>{{ config('app.name') }}</span></strong>. Tous droits reservés
+  {{-- Mini-profil --}}
+  <div class="sb-profile">
+    <div class="sb-avatar">{{ strtoupper(substr(Auth::user()->name, 0, 2)) }}</div>
+    <div class="overflow-hidden">
+      <div class="sb-profile-name">{{ Auth::user()->name }}</div>
+      <span class="sb-profile-role">{{ Auth::user()->roles->first()?->name ?? 'Utilisateur' }}</span>
     </div>
-    <div class="credits">
-      Développé par<a href="https://dolubux.com" target="_blank"> dolubux.com</a>
-    </div>
-  </footer><!-- End Footer -->
+  </div>
 
-  <a href="#" class="back-to-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>
-  <!-- Vendor JS Files -->
-{{-- <script src="{{ asset('assets_admin/js/bootstrap.min.js') }}"></script> --}}
-  <script src="{{ asset('assets_admin/vendor/apexcharts/apexcharts.min.js') }}"></script>
-  <script src="{{ asset('assets_admin/vendor/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
-  <script src="{{ asset('assets_admin/vendor/chart.js/chart.min.js') }}"></script>
-  <script src="{{ asset('assets_admin/vendor/echarts/echarts.min.js') }}"></script>
-  <script src="{{ asset('assets_admin/vendor/quill/quill.min.js') }}"></script>
-  <script src="{{ asset('assets_admin/vendor/simple-datatables/simple-datatables.js') }}"></script>
-  <script src="{{ asset('assets_admin/vendor/tinymce/tinymce.min.js') }}"></script>
-  <script src="{{ asset('assets_admin/vendor/php-email-form/validate.js') }}"></script>
+  {{-- Navigation --}}
+  <nav class="sb-nav">
 
-  <!-- Template Main JS File -->
-  <script src="{{ asset('assets_admin/js/main.js') }}"></script>
+    {{-- Accueil --}}
+    <a href="{{ route('dashboard') }}"
+       class="sb-link {{ request()->routeIs('dashboard') ? 'active' : '' }}">
+      <span class="sb-icon"><i class="bi bi-speedometer2"></i></span>
+      Tableau de bord
+    </a>
+
+    {{-- ── Contenu ── --}}
+    <div class="sb-section-label">Contenu</div>
+
+    <a href="{{ route('post') }}"
+       class="sb-link {{ request()->routeIs('post', 'post.create', 'post.edit') ? 'active' : '' }}">
+      <span class="sb-icon"><i class="bi bi-file-earmark-medical"></i></span>
+      Articles
+    </a>
+
+    <a href="{{ route('post', ['type' => 'sondage']) }}"
+       class="sb-link {{ request()->routeIs('post.edit-sondage') || (request()->routeIs('post') && request('type') === 'sondage') ? 'active' : '' }}">
+      <span class="sb-icon"><i class="bi bi-bar-chart-line"></i></span>
+      Sondages
+    </a>
+
+    @role('administrateur')
+    <a href="{{ route('category') }}"
+       class="sb-link {{ request()->routeIs('category', 'category.edit') ? 'active' : '' }}">
+      <span class="sb-icon"><i class="bi bi-collection"></i></span>
+      Catégories
+    </a>
+    @endrole
+
+    {{-- ── Administration ── --}}
+    @role('administrateur')
+    <div class="sb-section-label">Administration</div>
+
+    <a href="{{ route('user') }}"
+       class="sb-link {{ request()->routeIs('user', 'user.profil', 'user.edit') ? 'active' : '' }}">
+      <span class="sb-icon"><i class="bi bi-people"></i></span>
+      Utilisateurs
+    </a>
+
+    <a href="{{ route('actualite.index') }}"
+       class="sb-link {{ request()->routeIs('actualite.index') ? 'active' : '' }}">
+      <span class="sb-icon"><i class="bi bi-images"></i></span>
+      Carrousel Hero
+    </a>
+    @endrole
+
+  </nav>
+
+  {{-- Footer sidebar --}}
+  <div class="sb-footer">
+    <a href="{{ route('accueil') }}" target="_blank" class="sb-link">
+      <span class="sb-icon"><i class="bi bi-globe2"></i></span>
+      Voir le site
+    </a>
+    <form action="{{ route('logout') }}" method="POST">
+      @csrf
+      <button type="submit" class="sb-link w-100 text-start border-0 bg-transparent">
+        <span class="sb-icon"><i class="bi bi-box-arrow-right"></i></span>
+        Déconnexion
+      </button>
+    </form>
+  </div>
+
+</aside>
+
+{{-- ══════ MAIN ══════ --}}
+<main id="main">
+
+  <div class="pagetitle">
+    <h1>@yield('title', 'Dashboard')</h1>
+    <nav aria-label="breadcrumb">
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{{ route('dashboard') }}"><i class="bi bi-house me-1"></i>Accueil</a></li>
+        <li class="breadcrumb-item active">@yield('title', 'Dashboard')</li>
+      </ol>
+    </nav>
+  </div>
+
+  @yield('content')
+  @include('sweetalert::alert')
+
+</main>
+
+<footer id="footer">
+  <span>&copy; {{ date('Y') }} <strong>{{ config('app.name') }}</strong> — Tous droits réservés</span>
+  <span>Développé par <a href="https://dolubux.com" target="_blank">dolubux.com</a></span>
+</footer>
+
+<a href="#" class="back-to-top d-flex align-items-center justify-content-center">
+  <i class="bi bi-arrow-up-short"></i>
+</a>
+
+{{-- Scripts --}}
+<script src="{{ asset('assets_admin/vendor/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
+<script src="{{ asset('assets_admin/vendor/apexcharts/apexcharts.min.js') }}"></script>
+<script src="{{ asset('assets_admin/vendor/chart.js/chart.min.js') }}"></script>
+<script src="{{ asset('assets_admin/vendor/simple-datatables/simple-datatables.js') }}"></script>
+<script src="{{ asset('assets_admin/vendor/tinymce/tinymce.min.js') }}"></script>
+<script src="{{ asset('assets_admin/js/main.js') }}"></script>
 
 <script>
+  // Toastr notifications
   @if(Session::has('message'))
-  toastr.options =
-  {
-      "closeButton" : true,
-      "progressBar" : true,
-      "timeOut": "1000",
-
-  }
-          toastr.success("{{ session('message') }}");
+    toastr.options = { closeButton: true, progressBar: true, timeOut: 3000 };
+    toastr.success("{{ session('message') }}");
   @endif
-
   @if(Session::has('error'))
-  toastr.options =
-  {
-      "closeButton" : true,
-      "progressBar" : true,
-      "timeOut": "10000",
-  }
-          toastr.error("{{ session('error') }}");
+    toastr.options = { closeButton: true, progressBar: true, timeOut: 8000 };
+    toastr.error("{{ session('error') }}");
   @endif
-
   @if(Session::has('info'))
-  toastr.options =
-  {
-      "closeButton" : true,
-      "progressBar" : true
-  }
-          toastr.info("{{ session('info') }}");
+    toastr.options = { closeButton: true, progressBar: true };
+    toastr.info("{{ session('info') }}");
   @endif
-
   @if(Session::has('warning'))
-  toastr.options =
-  {
-      "closeButton" : true,
-      "progressBar" : true
-  }
-          toastr.warning("{{ session('warning') }}");
+    toastr.options = { closeButton: true, progressBar: true };
+    toastr.warning("{{ session('warning') }}");
   @endif
-
-
-
 </script>
 
-{{-- toastr.options = {
-"closeButton": false,
-"debug": false,
-"newestOnTop": false,
-"progressBar": true,
-"positionClass": "toast-top-right",
-"preventDuplicates": true,
-"onclick": null,
-"showDuration": "300",
-"hideDuration": "1000",
-"timeOut": "5000",
-"extendedTimeOut": "1000",
-"showEasing": "swing",
-"hideEasing": "linear",
-"showMethod": "fadeIn",
-"hideMethod": "fadeOut"
-} --}}
- 
-
 </body>
-
 </html>

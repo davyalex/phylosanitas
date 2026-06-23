@@ -1,108 +1,109 @@
 @extends('admin.layout')
-@section('title', 'Post')
+@section('title', 'Modifier un article')
 
 @section('content')
 <section class="section">
-
-    <form action="{{ route('post.update',$post['id'])}}" method="POST" enctype="multipart/form-data">
+    <form action="{{ route('post.update', $post->id) }}" method="POST" enctype="multipart/form-data">
         @csrf
-        <div class="card">
-            <div class="card-body">
-                <div class="row mt-4">
+        <div class="row g-3">
 
-                    <div class="col-lg-6">
-              
-                      <div class="card">
-                        <div class="card-body">
-              
-                          <!-- General Form Elements -->
-                            <div class="row mb-3 mt-2">
-                                <label for="inputNanme4" class="form-label">Titre du post </label>
-                                <input type="text" name="title" value="{{ old($post['title']) }} {{ $post['title'] }}" class="form-control @error('title') is-invalid
-                                    
-                                @enderror" id="inputNanme4">
-                                @error('title')
-                                    <p class="text-danger">{{ $message }}</p>
-                                @enderror
-                            </div>
-                            <div class="row mb-3">
-                              <label for="inputNumber" class="form-label">Image de presentation</label>
-                                <input class="form-control"  name="image" type="file" id="formFile">
-                                    <div class="border-danger">
-                                        <img
-                                        src="{{ $post ->getFirstMediaUrl('image') }}"
-                                        alt="{{ $post ->getFirstMediaUrl('image') }}"
-                                        style="width: 45px; height: 45px"
-                                        class="rounded-circle"
-                                        />
-                                    </div>
-                            </div>
-              
-                         
-              
-                        </div>
-                      </div>
-              
-                    </div>
-              
-                    <div class="col-lg-6">
-                      <div class="card">
-                        <div class="card-body">
-                          <div class="row mb-3">
-                            <label class="form-label">Categorie</label>
-                              <select name="category" class="form-select  @error('category') is-invalid @enderror" aria-label="Default select example">
-                                <option selected>selectionner</option>
-                                @foreach ($category as $item)
-                                <option value="{{ $item['id'] }}" {{ $item['id'] == $post['category_id'] ? 'selected' : '' }} >{{ $item['title'] }}</option>
-                                @endforeach
-                              </select>
-                              @error('category')
-                              <p class="text-danger">{{ $message }}</p>
-                          @enderror
-                          </div>
-            
-                          {{-- <div class="row mb-3">
-                            <label for="inputText" class="form-label">Tags</label>
-                              <input type="text" class="form-control">
-                          </div> --}}
-            
-                          <div class="row mb-3">
-                            <label for="inputText" class="form-label">Lien</label>
-                              <input type="url" name="lien" class="form-control">
-                          </div>
-            
-                        </div>
-                      </div>
-              
-                    </div>
+            {{-- Colonne gauche : titre + image --}}
+            <div class="col-lg-6">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h6 class="card-title fw-bold mb-3">Informations</h6>
 
-                    <div class="col-lg-12">
-                      <div class="card">
-                        <div class="card-body">
-                          <h5 class="card-title">Description</h5>
-              
-                          <!-- TinyMCE Editor -->
-                          <textarea name="description"   class="tinymce-editor">
-                          {{ $post['description'] }}
-                          </textarea><!-- End TinyMCE Editor -->
-              
+                        <div class="mb-3">
+                            <label class="form-label">Titre de l'article <span class="text-danger">*</span></label>
+                            <input type="text"
+                                   name="title"
+                                   value="{{ old('title', $post->title) }}"
+                                   class="form-control @error('title') is-invalid @enderror"
+                                   required>
+                            @error('title')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
                         </div>
-                      </div>
-              
-                    </div>
 
-                </div>
-                <div class="col-ld-12">
-                 <button type="submit" class="btn btn-primary w-100">Valider</button>
+                        <div class="mb-3">
+                            <label class="form-label">Image de présentation</label>
+                            <input class="form-control" name="image" type="file" accept="image/*">
+                            @if ($post->getFirstMediaUrl('image'))
+                                <div class="mt-2 d-flex align-items-center gap-2">
+                                    <img src="{{ $post->getFirstMediaUrl('image') }}"
+                                         alt="Image actuelle"
+                                         class="rounded"
+                                         style="width:60px; height:60px; object-fit:cover;">
+                                    <small class="text-muted">Image actuelle (remplacée si vous en choisissez une nouvelle)</small>
+                                </div>
+                            @endif
+                        </div>
+                    </div>
                 </div>
             </div>
+
+            {{-- Colonne droite : catégorie + lien --}}
+            <div class="col-lg-6">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h6 class="card-title fw-bold mb-3">Paramètres</h6>
+
+                        <div class="mb-3">
+                            <label class="form-label">Catégorie <span class="text-danger">*</span></label>
+                            <select name="category"
+                                    class="form-select @error('category') is-invalid @enderror"
+                                    required>
+                                <option disabled>— Sélectionner —</option>
+                                @foreach ($category as $cat)
+                                    <option value="{{ $cat->id }}"
+                                            {{ old('category', $post->category_id) == $cat->id ? 'selected' : '' }}>
+                                        {{ $cat->title }}
+                                    </option>
+                                @endforeach
+                            </select>
+                            @error('category')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Lien externe (optionnel)</label>
+                            <input type="url"
+                                   name="lien"
+                                   value="{{ old('lien', $post->lien) }}"
+                                   class="form-control @error('lien') is-invalid @enderror"
+                                   placeholder="https://exemple.com">
+                            @error('lien')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {{-- Éditeur TinyMCE --}}
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body">
+                        <h6 class="card-title fw-bold mb-3">Contenu de l'article</h6>
+                        <textarea name="description" class="tinymce-editor">{{ $post->description }}</textarea>
+                    </div>
+                </div>
+            </div>
+
+            {{-- Bouton valider --}}
+            <div class="col-12">
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-primary px-4">
+                        <i class="bi bi-check-lg me-2"></i>Enregistrer les modifications
+                    </button>
+                    <a href="{{ route('post') }}" class="btn btn-outline-secondary">
+                        <i class="bi bi-arrow-left me-2"></i>Annuler
+                    </a>
+                </div>
+            </div>
+
         </div>
     </form>
-
-
-
-
-    
-  </section>
-
+</section>
 @endsection

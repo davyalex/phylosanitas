@@ -2,215 +2,174 @@
 
 namespace App\Http\Controllers;
 
-
 use App\Models\Post;
-use  InteractsWithViews;
 use App\Models\Category;
-use App\Models\Actualite;
+use App\Models\CarouselSlide;
 use App\Models\Soumission;
+use App\Models\ContactMessage;
 use Illuminate\Http\Request;
-use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\App;
 use Stevebauman\Location\Facades\Location;
-use CyrildeWit\EloquentViewable\Contracts\Visitor;
-use Illuminate\Database\Eloquent\Relations\Relation;
-
-// use App\Services\Views\Visitor;
 
 class SiteController extends Controller
 {
+    // Colonnes de base pour les listings (jamais charger description)
+    private const LIST_SELECT = ['id', 'title', 'slug', 'category_id', 'user_id', 'published', 'created_at', 'lien'];
 
-
-    public function __construct()
+    // Eager loads optimisés pour les listings
+    private function listWith(): array
     {
-        // $category = app('category');
-        $this->category;
+        return [
+            'category:id,title,slug',
+            'media' => fn($q) => $q->where('collection_name', 'image'),
+        ];
     }
 
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
     public function index()
     {
-        //
-        // first recent post
-        // $post_recent = Post::with(['category', 'commentaires', 'media', 'user'])
-        //     ->where('published', 'public')
-        //     ->orderBy('created_at', 'desc')->first();
+        try {
+            $category_actualite = Category::whereSlug('actualites')->first();
+            $excludedIds = $category_actualite ? [$category_actualite->id] : [];
 
-        // recent post  /**get from appservice provider */
-        // $post_last = Post::with(['category', 'commentaires', 'media', 'user'])->orderBy('created_at', 'desc')
-        //     ->where('published', 'public')
-        //     ->get()->take(4);
+            $post = Post::with($this->listWith())
+                ->withCount('commentaires')
+                ->select(self::LIST_SELECT)
+                ->where('published', 'public')
+                ->whereNotIn('category_id', $excludedIds)
+                ->orderBy('created_at', 'desc')
+                ->take(12)
+                ->get();
 
-        //liste de quelque article pour la page accueil sans categorie actualite
-        $category_actualite = Category::whereSlug('actualites')->first();
+            // Carousel depuis la table dédiée ; fallback hero statique si vide
+            $slide = CarouselSlide::with(['media' => fn($q) => $q->where('collection_name', 'image')])
+                ->where('actif', true)
+                ->orderBy('ordre')
+                ->orderBy('created_at', 'desc')
+                ->get();
 
-        $post = Post::with(['category', 'commentaires', 'media', 'user'])->orderBy('created_at', 'desc')
-            ->where('published', 'public')
-            ->whereNotIn('category_id', [$category_actualite['id']])
-            ->get()->take(12);
-
-
-        // $category = Category::with('posts')->get()->sortBy('title');
-
-        //actualite sous forme de slider //publicite
-        $slide = Actualite::with('media')->orderBy('created_at', 'desc')->get();
-
-        // dd($slide->toArray());
-
-
-        return view('site.pages.accueil', compact(['post', 'slide']));
+            return view('site.pages.accueil', compact('post', 'slide'));
+        } catch (\Throwable) {
+            return view('site.pages.accueil', ['post' => collect(), 'slide' => collect()]);
+        }
     }
-
 
     public function post(Request $request)
     {
-
-
         try {
-            //liste des categories
-            $category = Category::with('posts')->get()->sortBy('title');
+            $slug_req     = $request->input('category');
+            $category_req = $slug_req ? Category::whereSlug($slug_req)->first() : null;
 
-            //liste recent post
-            $post_last = Post::with(['category', 'commentaires', 'media', 'user'])->orderBy('created_at', 'desc')
+            $post = Post::with($this->listWith())
+                ->withCount('commentaires')
+                ->select(self::LIST_SELECT)
                 ->where('published', 'public')
-                ->get()->take(4);
+                ->when($category_req, fn($q) => $q->where('category_id', $category_req->id))
+                ->orderBy('created_at', 'desc')
+                ->paginate(10);
 
-
-            /******* */
-
-            $slug_req = request('category');
-
-            // category si request
-            $category_req = Category::whereSlug($slug_req)->first();
-
-            $post = Post::with(['category', 'commentaires', 'media', 'user'])
-                ->when($slug_req, function ($q) use ($category_req) {
-                    return $q->where('category_id', $category_req['id'])
-                        ->where('published', 'public');
-                })->orderBy('created_at', 'desc')->paginate(10);
-
-
-
-            return view('site.pages.post', compact(['post_last', 'post', 'category', 'category_req']));
-        } catch (\Throwable $th) {
-            return redirect()->action([SiteController::class, 'index']);
+            return view('site.pages.post', compact('post', 'category_req'));
+        } catch (\Throwable) {
+            return redirect()->route('accueil');
         }
     }
 
-
-    public function detail(Request $request, Post $post)
+    public function detail(Request $request)
     {
-
-
         try {
-            // config('app.env');
+            $slug_req = $request->input('slug');
+            if (!$slug_req) return redirect()->route('accueil');
 
-
-            //liste des categories
-            $category = Category::with('posts')->get()->sortBy('title');
-
-            //liste recent post
-            $post_last = Post::with(['category', 'commentaires', 'media', 'user'])->orderBy('created_at', 'desc')
+            // Page détail : on charge tout (description, commentaires, toutes les medias)
+            $post = Post::with([
+                    'category:id,title,slug',
+                    'commentaires',
+                    'media',
+                    'user:id,name',
+                    'optionSondages',
+                ])
+                ->whereSlug($slug_req)
                 ->where('published', 'public')
-                ->get()->take(4);
+                ->first();
 
+            if (!$post) abort(404);
 
-            /******* */
+            $statistic_sondage = Soumission::with(['post:id', 'optionSondage:id,title'])
+                ->where('post_id', $post->id)
+                ->selectRaw('post_id, option_sondage_id, count(*) as choice')
+                ->groupBy(['post_id', 'option_sondage_id'])
+                ->get();
 
-            $slug_req = request('slug');
+            $sondage_total = Soumission::where('post_id', $post->id)->count();
 
+            $this->recordView($request, $post);
 
-            $post = Post::with(['category', 'commentaires', 'media', 'user', 'optionSondages'])
-                ->whereSlug($slug_req)->first();
-
-
-            // statistics des sondages
-            $statistic_sondage = Soumission::with(['post', 'optionSondage'])
-                ->where('post_id', $post['id'])
-                ->selectRaw('post_id,option_sondage_id,count(*) as choice')
-                ->groupBy([
-                    'post_id',
-                    'option_sondage_id'
-                ])->get();
-
-            //total votant
-            $sondage_total = Soumission::get()
-                ->where('post_id', $post['id'])
-                ->count();
-
-
-            // dd($statistic_sondage->toArray());
-
-
-            // verifier si le serveur est en production ou developpement
-
-            if (config('app.env') == 'production') {
-                // dd($post ->toArray());
-                $ip = $request->getClientIp();
-
-                $currentUserInfo = Location::get($ip);
-                $country =  $currentUserInfo->countryName;
-                $city =  $currentUserInfo->cityName;
-
-                //fonction pour nombre de vue
-                views($post)->record();
-                DB::table('views')->where('viewable_id', $post['id'])->update([
-                    'ip' => $ip,
-                    'country' => $country,
-                    'city' => $city,
-                ]);
-                // $post->visitsCounter()->increment();
-
-
-            } elseif (config('app.env') == 'local') {
-                $ip = $request->getClientIp();
-
-                $currentUserInfo = Location::get('8.8.1.1');
-                $country =  $currentUserInfo->countryName;
-                $city =  $currentUserInfo->cityName;
-
-
-                views($post)->record();
-                DB::table('views')->where('viewable_id', $post['id'])->update([
-                    'ip' => $ip,
-                    'country' => $country,
-                    'city' => $city,
-                ]);
-                // $post->visitsCounter()->increment();
-            }
-
-
-            return view('site.pages.detail', compact(['post_last', 'post', 'category', 'statistic_sondage', 'sondage_total']));
-        } catch (\Throwable $th) {
-            return redirect()->action([SiteController::class, 'index']);
+            return view('site.pages.detail', compact('post', 'statistic_sondage', 'sondage_total'));
+        } catch (\Throwable) {
+            return redirect()->route('accueil');
         }
     }
-
 
     public function search(Request $request)
     {
         try {
-            $search = $request['query'];
-            $post = Post::where('title', 'Like', "%{$search}%")
-                ->Orwhere('description', 'Like', "%{$search}%")
+            $search = trim($request->input('query', ''));
+            if (empty($search)) return redirect()->route('accueil');
+
+            $post = Post::with($this->listWith())
+                ->withCount('commentaires')
+                ->select(self::LIST_SELECT)
+                ->where(fn($q) => $q
+                    ->where('title', 'LIKE', "%{$search}%")
+                    ->orWhere('description', 'LIKE', "%{$search}%")
+                )
                 ->where('published', 'public')
-                ->orderBy('created_at', 'desc')->get();
+                ->orderBy('created_at', 'desc')
+                ->get();
 
             return view('site.pages.searchPost', compact('post'));
-        } catch (\Exception $e) {
-            $e->getMessage();
+        } catch (\Throwable) {
+            return redirect()->route('accueil');
         }
     }
 
-
-    public function contact()
+    public function contact(Request $request)
     {
-        $this->category;
+        if ($request->isMethod('post')) {
+            $request->validate([
+                'name'    => 'required|string|max:100',
+                'email'   => 'required|email|max:150',
+                'subject' => 'required|string|max:200',
+                'message' => 'required|string|max:2000',
+            ]);
+
+            ContactMessage::create($request->only('name', 'email', 'subject', 'message'));
+
+            return back()->with('success_contact', 'Votre message a bien été envoyé.');
+        }
+
         return view('site.pages.contact');
+    }
+
+    private function recordView(Request $request, Post $post): void
+    {
+        try {
+            $ip      = $request->getClientIp();
+            $testIp  = config('app.env') === 'production' ? $ip : '8.8.1.1';
+            $location = Location::get($testIp);
+
+            views($post)->record();
+
+            if ($location) {
+                DB::table('views')
+                    ->where('viewable_id', $post->id)
+                    ->update([
+                        'ip'      => $ip,
+                        'country' => $location->countryName ?? null,
+                        'city'    => $location->cityName ?? null,
+                    ]);
+            }
+        } catch (\Throwable) {
+            // Ne pas bloquer si tracking échoue
+        }
     }
 }
