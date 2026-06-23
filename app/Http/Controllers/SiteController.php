@@ -16,12 +16,12 @@ class SiteController extends Controller
     // Colonnes de base pour les listings (jamais charger description)
     private const LIST_SELECT = ['id', 'title', 'slug', 'category_id', 'user_id', 'published', 'created_at', 'lien'];
 
-    // Eager loads optimisés pour les listings
+    // Eager loads optimisés pour les listings (syntaxe explicite)
     private function listWith(): array
     {
         return [
-            'category:id,title,slug',
-            'media' => fn($q) => $q->where('collection_name', 'image'),
+            'category' => fn($q) => $q->select('id', 'title', 'slug'),
+            'media'    => fn($q) => $q->where('collection_name', 'image'),
         ];
     }
 

@@ -80,8 +80,8 @@ class AppServiceProvider extends ServiceProvider
                 $excludedIds = Category::whereIn('title', ['sondage', 'actualites'])->pluck('id');
 
                 return Post::with([
-                        'category:id,title,slug',
-                        'media' => self::imageOnly(),
+                        'category' => fn($q) => $q->select('id', 'title', 'slug'),
+                        'media'    => self::imageOnly(),
                     ])
                     ->select('id', 'title', 'slug', 'category_id', 'user_id', 'created_at')
                     ->whereNotIn('category_id', $excludedIds)
@@ -102,8 +102,8 @@ class AppServiceProvider extends ServiceProvider
                 $excludedIds = Category::whereIn('title', ['sondage', 'actualites'])->pluck('id');
 
                 return Post::with([
-                        'category:id,title,slug',
-                        'media' => self::imageOnly(),
+                        'category' => fn($q) => $q->select('id', 'title', 'slug'),
+                        'media'    => self::imageOnly(),
                     ])
                     ->select('id', 'title', 'slug', 'category_id', 'user_id', 'created_at')
                     ->whereNotIn('category_id', $excludedIds)
@@ -125,8 +125,8 @@ class AppServiceProvider extends ServiceProvider
                 if (!$surveyCategory) return collect();
 
                 return Post::with([
-                        'category:id,title,slug',
-                        'media' => self::imageOnly(),
+                        'category' => fn($q) => $q->select('id', 'title', 'slug'),
+                        'media'    => self::imageOnly(),
                     ])
                     ->select('id', 'title', 'slug', 'description', 'category_id', 'user_id', 'created_at')
                     ->where('category_id', $surveyCategory->id)
@@ -148,8 +148,8 @@ class AppServiceProvider extends ServiceProvider
                 if (!$newsCategory) return collect();
 
                 return Post::with([
-                        'category:id,title,slug',
-                        'media' => self::imageOnly(),
+                        'category' => fn($q) => $q->select('id', 'title', 'slug'),
+                        'media'    => self::imageOnly(),
                     ])
                     ->select('id', 'title', 'slug', 'category_id', 'user_id', 'created_at', 'actualite_une')
                     ->where('category_id', $newsCategory->id)

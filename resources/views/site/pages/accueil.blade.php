@@ -144,6 +144,7 @@
 @endif
 
 {{-- ⑤ Articles récents + Sidebar --}}
-@include('site.pages.sections.post', ['post' => $post->skip(3)->values()])
+{{-- On passe tous les articles : si ≤ 3 articles, la grille n'est pas vide --}}
+@include('site.pages.sections.post', ['post' => $post])
 
 @endsection
