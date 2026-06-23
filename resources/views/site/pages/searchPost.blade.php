@@ -133,7 +133,7 @@
                                                 </span>
                                                 <span title="Nombre de commentaires">
                                                     <i class="bi bi-chat-left-quote-fill text-medical-teal"></i>
-                                                    {{ $item->commentaires->count() }}
+                                                    {{ $item->commentaires_count }}
                                                 </span>
                                             </div>
                                         </div>

@@ -41,7 +41,7 @@
                         </span>
                         <span class="text-health-green">
                             <i class="bi bi-chat-left-quote-fill"></i>
-                            {{ $item->commentaires->count() }}
+                            {{ $item->commentaires_count }}
                         </span>
                     </small>
                 </div>

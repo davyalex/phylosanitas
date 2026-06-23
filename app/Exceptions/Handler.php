@@ -52,4 +52,14 @@ class Handler extends ExceptionHandler
             }
         });
     }
+    
+     public function render($request, Throwable $exception)
+    {
+        // Vérifier si le site est en mode maintenance
+        if ($exception instanceof HttpException && $exception->getStatusCode() === 503) {
+            return response()->view('maintenance', [], 503);
+        }
+
+        return parent::render($request, $exception);
+    }
 }

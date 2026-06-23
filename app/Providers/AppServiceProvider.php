@@ -116,7 +116,7 @@ class AppServiceProvider extends ServiceProvider
         try {
             $this->category = Cache::remember('categories_list', 3600, function () {
                 return Category::select('id', 'title', 'slug')
-                    ->withCount('posts')
+                    ->withCount(['posts as posts_count' => fn($q) => $q->where('published', 'public')])
                     ->get();
             });
         } catch (\Exception $e) {
@@ -164,7 +164,8 @@ class AppServiceProvider extends ServiceProvider
                         'user:id,name',
                         'media'
                     ])
-                    ->select('id', 'title', 'slug', 'category_id', 'user_id', 'views')
+                    ->withCount('commentaires')
+                    ->select('id', 'title', 'slug', 'category_id', 'user_id', 'views', 'created_at')
                     ->whereNotIn('category_id', $excludedCategories)
                     ->where('published', 'public')
                     ->orderByViews('desc')

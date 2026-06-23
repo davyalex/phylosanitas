@@ -69,7 +69,7 @@
                                           </span>
                                           <span title="Nombre de commentaires">
                                               <i class="bi bi-chat-left-quote-fill text-medical-teal"></i>
-                                              {{ $item->commentaires->count() }}
+                                              {{ $item->commentaires_count }}
                                           </span>
                                       </div>
                                   </div>
@@ -115,7 +115,7 @@
                                                   <h6 class="mb-1 fw-bold">{{ $cat->title }}</h6>
                                                   <small class="text-muted">
                                                       <i class="bi bi-file-earmark-text"></i>
-                                                      {{ $cat->posts->where('published', 'public')->count() }} articles
+                                                      {{ $cat->posts_count ?? 0 }} articles
                                                   </small>
                                               </div>
                                               <div>

@@ -57,7 +57,7 @@
         <div class="container">
     
           <section class="section error-404 min-vh-100 d-flex flex-column align-items-center justify-content-center">
-            <h2>Nous sommes en mode maintenance <br>Veuillez ressayer plutard!</h2>
+            <h2 class="text-center">Nous sommes en mode maintenance <br>Veuillez ressayer plutard!</h2>
             <img src="{{ asset('assets_admin/img/not-found.svg') }}" class="img-fluid py-5" alt="Page Not Found">
            
           </section>

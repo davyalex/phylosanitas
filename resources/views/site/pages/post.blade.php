@@ -105,7 +105,7 @@
                                                     </span>
                                                     <span>
                                                         <i class="bi bi-chat-left-quote-fill text-medical-teal"></i>
-                                                        {{ $item->commentaires->count() }}
+                                                        {{ $item->commentaires_count }}
                                                     </span>
                                                     @if($item['lien'])
                                                         <a href="{{ $item['lien'] }}" target="_blank" 
@@ -172,7 +172,7 @@
                                                     </span>
                                                     <span>
                                                         <i class="bi bi-chat-left-quote-fill text-medical-teal"></i>
-                                                        {{ $item->commentaires->count() }}
+                                                        {{ $item->commentaires_count }}
                                                     </span>
                                                 </div>
                                             </div>
