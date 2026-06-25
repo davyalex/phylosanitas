@@ -306,6 +306,72 @@
     }
 
     #footer a { color: #0066CC; text-decoration: none; }
+
+    /* ══════════════════════════════════════════════
+       RESPONSIVE MOBILE
+    ══════════════════════════════════════════════ */
+    @media (max-width: 767px) {
+
+      /* Header : logo réduit à l'icône, avatar toujours visible */
+      .header-logo {
+        width: auto;
+        min-width: 0;
+        flex-shrink: 1;
+      }
+      .header-logo-text { display: none; }
+
+      /* Avatar toujours visible — pas de débordement */
+      #header {
+        padding: 0 10px;
+        gap: 8px;
+      }
+      .header-user-btn {
+        padding: 4px 6px;
+        flex-shrink: 0;
+      }
+      /* Masquer le nom/rôle sur mobile (icône seule) */
+      .header-user-name,
+      .header-user-role { display: none !important; }
+      .header-avatar { width: 36px; height: 36px; font-size: .78rem; }
+
+      /* Spacer ne pousse pas trop */
+      .header-spacer { min-width: 0; }
+
+      /* Contenu principal : padding réduit */
+      #main { padding: 14px 10px; }
+      #footer { padding: 10px 14px; font-size: .72rem; }
+
+      /* Page title */
+      .pagetitle h1 { font-size: 1.05rem; }
+
+      /* Tables : colonnes secondaires masquées */
+      .table-admin-hide { display: none !important; }
+
+      /* Actions : boutons plus petits */
+      .btn-sm { padding: .2rem .45rem; font-size: .75rem; }
+
+      /* KPI cards */
+      .kpi-card { padding: 14px 12px; gap: 10px; }
+      .kpi-icon { width: 42px; height: 42px; font-size: 1.3rem; }
+      .kpi-value { font-size: 1.35rem; }
+      .kpi-label { font-size: .68rem; }
+
+      /* Cards : retrait réduit */
+      .card-body { padding: 14px 12px; }
+      .card-header { padding: 10px 12px; }
+
+      /* Formulaire article : pleine largeur */
+      .col-md-8, .col-md-4 { width: 100% !important; }
+    }
+
+    @media (max-width: 575px) {
+      /* Header encore plus compact */
+      .header-logo-icon { width: 30px; height: 30px; font-size: .95rem; border-radius: 7px; }
+      #main { padding: 10px 8px; }
+
+      /* Tableau actions : une colonne défilante */
+      .d-flex.gap-1.flex-nowrap { flex-wrap: wrap; gap: 4px !important; }
+    }
   </style>
 
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6925205610540207" crossorigin="anonymous"></script>

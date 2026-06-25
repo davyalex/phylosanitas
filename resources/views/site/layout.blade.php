@@ -109,7 +109,6 @@
                         </a>
                     </li>
 
-                    {{-- Exclure les catégories internes (sondage, actualites) de la navigation --}}
                     @foreach ($category->filter(fn($c) => !in_array(strtolower($c->slug), ['sondage', 'actualites'])) as $item)
                         <li>
                             <a class="text-capitalize {{ request('category') === $item->slug ? 'active' : '' }}"
@@ -127,7 +126,7 @@
                 </ul>
             </nav>
 
-            <div class="position-relative">
+            <div class="position-relative d-flex align-items-center gap-1">
                 <a href="#" class="mx-2 js-search-open"><i class="bi bi-search"></i></a>
                 <i class="bi bi-list mobile-nav-toggle"></i>
 

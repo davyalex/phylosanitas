@@ -106,6 +106,7 @@ class AppServiceProvider extends ServiceProvider
                         'media'    => self::imageOnly(),
                     ])
                     ->select('id', 'title', 'slug', 'category_id', 'user_id', 'created_at')
+                    ->withCount('commentaires')
                     ->whereNotIn('category_id', $excludedIds)
                     ->where('published', 'public')
                     ->orderByViews('desc')

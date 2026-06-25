@@ -293,6 +293,10 @@
 
     tinymce.init({
         selector: "textarea.tinymce-editor",
+        // Résolution des chemins relatifs d'images dans l'éditeur
+        document_base_url: window.location.origin + "/",
+        convert_urls: false,
+        relative_urls: false,
         plugins:
             "print preview paste importcss searchreplace autolink autosave save directionality code visualblocks visualchars fullscreen image link media template codesample table charmap hr pagebreak nonbreaking anchor toc insertdatetime advlist lists wordcount imagetools textpattern noneditable help charmap quickbars emoticons",
         imagetools_cors_hosts: ["picsum.photos"],
@@ -337,29 +341,6 @@
             },
         ],
         importcss_append: true,
-        file_picker_callback: function (callback, value, meta) {
-            /* Provide file and text for the link dialog */
-            if (meta.filetype === "file") {
-                callback("https://www.google.com/logos/google.jpg", {
-                    text: "My text",
-                });
-            }
-
-            /* Provide image and alt text for the image dialog */
-            if (meta.filetype === "image") {
-                callback("https://www.google.com/logos/google.jpg", {
-                    alt: "My alt text",
-                });
-            }
-
-            /* Provide alternative source and posted for the media dialog */
-            if (meta.filetype === "media") {
-                callback("movie.mp4", {
-                    source2: "alt.ogg",
-                    poster: "https://www.google.com/logos/google.jpg",
-                });
-            }
-        },
         templates: [
             {
                 title: "New Table",
@@ -393,41 +374,46 @@
         content_style:
             "body { font-family:Helvetica,Arial,sans-serif; font-size:14px }",
 
-        // Configuration pour l'upload d'images
-        images_upload_url: "/admin/post/upload-image", // URL vers laquelle l'image sera uploadée
+        // Upload d'images TinyMCE via fetch (plus fiable que XHR pour FormData)
         automatic_uploads: true,
-        images_reuse_filename: true, // Facultatif, pour réutiliser le nom d'origine
         file_picker_types: "image",
         images_upload_handler: function (blobInfo, success, failure) {
-            var xhr, formData;
+            var csrfMeta  = document.querySelector('meta[name="csrf-token"]');
+            var csrfToken = csrfMeta ? csrfMeta.getAttribute("content") : "";
 
-            xhr = new XMLHttpRequest();
-            xhr.withCredentials = false;
-            xhr.open("POST", "/admin/post/upload-image"); // URL d'upload de l'image
+            var formData = new FormData();
+            formData.append("file", blobInfo.blob(), blobInfo.filename());
+            if (window.TINYMCE_POST_ID) {
+                formData.append("post_id", window.TINYMCE_POST_ID);
+            }
 
-            xhr.onload = function () {
-                var json;
-
-                if (xhr.status != 200) {
-                    failure("HTTP Error: " + xhr.status);
-                    return;
+            fetch("/admin/post/upload-image", {
+                method:      "POST",
+                credentials: "same-origin",
+                headers: {
+                    "X-CSRF-TOKEN":     csrfToken,
+                    "X-Requested-With": "XMLHttpRequest"
+                },
+                body: formData
+            })
+            .then(function (response) {
+                if (!response.ok) {
+                    return response.text().then(function (text) {
+                        throw new Error("Erreur " + response.status + " : " + text);
+                    });
                 }
-
-                json = JSON.parse(xhr.responseText);
-
-                if (!json || typeof json.location != "string") {
-                    failure("Invalid JSON: " + xhr.responseText);
-                    return;
+                return response.json();
+            })
+            .then(function (json) {
+                if (json && typeof json.location === "string") {
+                    success(json.location);
+                } else {
+                    failure("Réponse invalide du serveur");
                 }
-
-                success(json.location); // Succès, on retourne l'URL de l'image
-            };
-
-            formData = new FormData();
-            formData.append("file", blobInfo.blob(), blobInfo.filename()); // On attache le fichier
-            formData.append("_token", "{{ csrf_token() }}"); // Si vous avez besoin du token CSRF
-
-            xhr.send(formData);
+            })
+            .catch(function (err) {
+                failure(err.message || "Erreur lors de l'upload de l'image");
+            });
         },
     });
 

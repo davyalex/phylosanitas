@@ -3,8 +3,10 @@
 
 @section('content')
 <section class="section">
-    <form action="{{ route('post.update', $post->id) }}" method="POST" enctype="multipart/form-data">
+    <form action="{{ route('post.update', $post->id) }}" method="POST" enctype="multipart/form-data"
+          data-post-id="{{ $post->id }}">
         @csrf
+        <input type="hidden" name="post_id" value="{{ $post->id }}">
         <div class="row g-3">
 
             {{-- Colonne gauche : titre + image --}}
@@ -86,6 +88,8 @@
                 <div class="card">
                     <div class="card-body">
                         <h6 class="card-title fw-bold mb-3">Contenu de l'article</h6>
+                        {{-- post_id exposé pour l'upload d'images TinyMCE --}}
+                        <script>window.TINYMCE_POST_ID = {{ $post->id }};</script>
                         <textarea name="description" class="tinymce-editor">{{ $post->description }}</textarea>
                     </div>
                 </div>

@@ -59,33 +59,34 @@
                             <table class="table table-hover datatable align-middle">
                                 <thead class="table-light">
                                     <tr>
-                                        <th>#</th>
+                                        <th class="table-admin-hide">#</th>
                                         <th>Image</th>
                                         <th>Titre</th>
-                                        <th>Catégorie</th>
+                                        <th class="table-admin-hide">Catégorie</th>
                                         <th>Statut</th>
-                                        <th>Commentaires</th>
-                                        <th>Date</th>
+                                        <th class="table-admin-hide">Commentaires</th>
+                                        <th class="table-admin-hide">Date</th>
                                         <th>Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     @forelse ($post as $key => $item)
                                         <tr>
-                                            <td>{{ ++$key }}</td>
+                                            <td class="table-admin-hide">{{ ++$key }}</td>
 
                                             <td>
                                                 <img src="{{ $item->getFirstMediaUrl('image') ?: asset('assets_site/img/medc.jpg') }}"
                                                      alt="{{ $item->title }}"
                                                      class="rounded-circle"
-                                                     style="width:45px; height:45px; object-fit:cover;">
+                                                     style="width:40px; height:40px; object-fit:cover;">
                                             </td>
 
                                             <td>
-                                                <span class="fw-semibold">{{ Str::limit($item->title, 50, '…') }}</span>
+                                                <span class="fw-semibold d-block" style="max-width:200px;">{{ Str::limit($item->title, 45, '…') }}</span>
+                                                <span class="badge bg-secondary d-md-none mt-1">{{ $item->category->title }}</span>
                                             </td>
 
-                                            <td>
+                                            <td class="table-admin-hide">
                                                 <span class="badge bg-secondary">{{ $item->category->title }}</span>
                                             </td>
 
@@ -113,14 +114,14 @@
                                                 @endif
                                             </td>
 
-                                            <td class="text-center">
+                                            <td class="text-center table-admin-hide">
                                                 <span class="badge bg-light text-dark">
                                                     <i class="bi bi-chat-left-quote text-muted me-1"></i>
                                                     {{ $item->commentaires->count() }}
                                                 </span>
                                             </td>
 
-                                            <td class="text-muted small">
+                                            <td class="text-muted small table-admin-hide">
                                                 {{ \Carbon\Carbon::parse($item->created_at)->diffForHumans() }}
                                             </td>
 

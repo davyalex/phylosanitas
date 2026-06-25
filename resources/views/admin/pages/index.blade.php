@@ -64,31 +64,32 @@
                     <table class="table table-hover mb-0 align-middle">
                         <thead class="table-light">
                             <tr>
-                                <th class="ps-3">#</th>
+                                <th class="ps-3 table-admin-hide">#</th>
                                 <th>Article</th>
-                                <th>Catégorie</th>
+                                <th class="table-admin-hide">Catégorie</th>
                                 <th class="text-center">Vues</th>
-                                <th class="text-center">Commentaires</th>
+                                <th class="text-center table-admin-hide">Commentaires</th>
                             </tr>
                         </thead>
                         <tbody>
                             @forelse($most_viewed_posts as $i => $post)
                                 <tr>
-                                    <td class="ps-3 fw-bold text-muted">{{ $i + 1 }}</td>
+                                    <td class="ps-3 fw-bold text-muted table-admin-hide">{{ $i + 1 }}</td>
                                     <td>
                                         <a href="{{ route('post.detail', ['slug' => $post['slug']]) }}"
                                            target="_blank"
                                            class="text-decoration-none text-dark fw-semibold">
-                                            {{ Str::limit($post['title'], 48) }}
+                                            {{ Str::limit($post['title'], 40) }}
                                         </a>
+                                        <span class="badge bg-primary bg-opacity-10 text-primary d-md-none ms-1">{{ $post['category'] }}</span>
                                     </td>
-                                    <td><span class="badge bg-primary bg-opacity-10 text-primary">{{ $post['category'] }}</span></td>
+                                    <td class="table-admin-hide"><span class="badge bg-primary bg-opacity-10 text-primary">{{ $post['category'] }}</span></td>
                                     <td class="text-center">
                                         <span class="badge bg-info text-white">
                                             <i class="bi bi-eye me-1"></i>{{ number_format($post['views']) }}
                                         </span>
                                     </td>
-                                    <td class="text-center">
+                                    <td class="text-center table-admin-hide">
                                         <span class="badge bg-success text-white">
                                             <i class="bi bi-chat-left-quote me-1"></i>{{ $post['comments'] }}
                                         </span>
@@ -201,29 +202,32 @@
             <table class="table table-hover mb-0 align-middle">
                 <thead class="table-light">
                     <tr>
-                        <th class="ps-3" style="width:55px;"></th>
+                        <th class="ps-3 table-admin-hide" style="width:55px;"></th>
                         <th>Titre</th>
-                        <th>Catégorie</th>
-                        <th>Auteur</th>
-                        <th>Date</th>
-                        <th class="text-center">Commentaires</th>
+                        <th class="table-admin-hide">Catégorie</th>
+                        <th class="table-admin-hide">Auteur</th>
+                        <th class="table-admin-hide">Date</th>
+                        <th class="text-center table-admin-hide">Comm.</th>
                         <th></th>
                     </tr>
                 </thead>
                 <tbody>
                     @forelse($post_recent as $item)
                         <tr>
-                            <td class="ps-3">
+                            <td class="ps-3 table-admin-hide">
                                 <img src="{{ $item->getFirstMediaUrl('image') ?: asset('assets_site/img/medc.jpg') }}"
                                      alt="{{ $item->title }}"
                                      class="rounded"
-                                     style="width:44px;height:44px;object-fit:cover;">
+                                     style="width:40px;height:40px;object-fit:cover;">
                             </td>
-                            <td class="fw-semibold">{{ Str::limit($item->title, 55) }}</td>
-                            <td><span class="badge bg-primary bg-opacity-10 text-primary">{{ $item->category->title ?? '—' }}</span></td>
-                            <td class="text-muted small">{{ $item->user->name ?? '—' }}</td>
-                            <td class="text-muted small">{{ \Carbon\Carbon::parse($item->created_at)->diffForHumans() }}</td>
-                            <td class="text-center">
+                            <td class="fw-semibold">
+                                {{ Str::limit($item->title, 45) }}
+                                <span class="d-md-none"><br><span class="badge bg-primary bg-opacity-10 text-primary small">{{ $item->category->title ?? '—' }}</span></span>
+                            </td>
+                            <td class="table-admin-hide"><span class="badge bg-primary bg-opacity-10 text-primary">{{ $item->category->title ?? '—' }}</span></td>
+                            <td class="text-muted small table-admin-hide">{{ $item->user->name ?? '—' }}</td>
+                            <td class="text-muted small table-admin-hide">{{ \Carbon\Carbon::parse($item->created_at)->diffForHumans() }}</td>
+                            <td class="text-center table-admin-hide">
                                 <span class="badge bg-light text-dark">{{ $item->commentaires->count() }}</span>
                             </td>
                             <td>

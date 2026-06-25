@@ -9,12 +9,13 @@ use App\Models\Soumission;
 use App\Models\ContactMessage;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Cache;
 use Stevebauman\Location\Facades\Location;
 
 class SiteController extends Controller
 {
-    // Colonnes de base pour les listings (jamais charger description)
-    private const LIST_SELECT = ['id', 'title', 'slug', 'category_id', 'user_id', 'published', 'created_at', 'lien'];
+    // Les sondages n'ont pas de title — description est obligatoire pour les listings
+    private const LIST_SELECT = ['id', 'title', 'slug', 'description', 'category_id', 'user_id', 'published', 'created_at', 'lien'];
 
     // Eager loads optimisés pour les listings (syntaxe explicite)
     private function listWith(): array
@@ -32,8 +33,8 @@ class SiteController extends Controller
             $excludedIds = $category_actualite ? [$category_actualite->id] : [];
 
             $post = Post::with($this->listWith())
-                ->withCount('commentaires')
                 ->select(self::LIST_SELECT)
+                ->withCount('commentaires')
                 ->where('published', 'public')
                 ->whereNotIn('category_id', $excludedIds)
                 ->orderBy('created_at', 'desc')
@@ -60,8 +61,8 @@ class SiteController extends Controller
             $category_req = $slug_req ? Category::whereSlug($slug_req)->first() : null;
 
             $post = Post::with($this->listWith())
-                ->withCount('commentaires')
                 ->select(self::LIST_SELECT)
+                ->withCount('commentaires')
                 ->where('published', 'public')
                 ->when($category_req, fn($q) => $q->where('category_id', $category_req->id))
                 ->orderBy('created_at', 'desc')
@@ -79,29 +80,38 @@ class SiteController extends Controller
             $slug_req = $request->input('slug');
             if (!$slug_req) return redirect()->route('accueil');
 
-            // Page détail : on charge tout (description, commentaires, toutes les medias)
-            $post = Post::with([
+            // Cache 5 min — invalidé par PostObserver à chaque modification
+            $post = Cache::remember("post_detail_{$slug_req}", 300, fn() =>
+                Post::with([
                     'category:id,title,slug',
                     'commentaires',
-                    'media',
+                    'media'         => fn($q) => $q->where('collection_name', 'image'),
                     'user:id,name',
                     'optionSondages',
                 ])
+                ->withCount('commentaires')
+                ->withViewsCount()
                 ->whereSlug($slug_req)
                 ->where('published', 'public')
-                ->first();
+                ->first()
+            );
 
             if (!$post) abort(404);
 
-            $statistic_sondage = Soumission::with(['post:id', 'optionSondage:id,title'])
-                ->where('post_id', $post->id)
-                ->selectRaw('post_id, option_sondage_id, count(*) as choice')
-                ->groupBy(['post_id', 'option_sondage_id'])
-                ->get();
+            $statistic_sondage = Cache::remember("post_stats_{$post->id}", 300, fn() =>
+                Soumission::with(['optionSondage:id,title'])
+                    ->where('post_id', $post->id)
+                    ->selectRaw('post_id, option_sondage_id, count(*) as choice')
+                    ->groupBy(['post_id', 'option_sondage_id'])
+                    ->get()
+            );
 
-            $sondage_total = Soumission::where('post_id', $post->id)->count();
+            $sondage_total = Cache::remember("post_votes_{$post->id}", 300, fn() =>
+                Soumission::where('post_id', $post->id)->count()
+            );
 
-            $this->recordView($request, $post);
+            // Enregistrement de la vue APRÈS envoi de la réponse (non bloquant)
+            $this->scheduleRecordView($post->id, $request->getClientIp());
 
             return view('site.pages.detail', compact('post', 'statistic_sondage', 'sondage_total'));
         } catch (\Throwable) {
@@ -116,14 +126,15 @@ class SiteController extends Controller
             if (empty($search)) return redirect()->route('accueil');
 
             $post = Post::with($this->listWith())
-                ->withCount('commentaires')
                 ->select(self::LIST_SELECT)
+                ->withCount('commentaires')
                 ->where(fn($q) => $q
                     ->where('title', 'LIKE', "%{$search}%")
                     ->orWhere('description', 'LIKE', "%{$search}%")
                 )
                 ->where('published', 'public')
                 ->orderBy('created_at', 'desc')
+                ->limit(30)
                 ->get();
 
             return view('site.pages.searchPost', compact('post'));
@@ -150,26 +161,36 @@ class SiteController extends Controller
         return view('site.pages.contact');
     }
 
-    private function recordView(Request $request, Post $post): void
+    private function scheduleRecordView(int $postId, string $ip): void
     {
-        try {
-            $ip      = $request->getClientIp();
-            $testIp  = config('app.env') === 'production' ? $ip : '8.8.1.1';
-            $location = Location::get($testIp);
-
-            views($post)->record();
-
-            if ($location) {
-                DB::table('views')
-                    ->where('viewable_id', $post->id)
-                    ->update([
-                        'ip'      => $ip,
-                        'country' => $location->countryName ?? null,
-                        'city'    => $location->cityName ?? null,
-                    ]);
+        // Exécuté après que PHP-FPM a envoyé la réponse au client
+        register_shutdown_function(static function () use ($postId, $ip) {
+            // Libère la connexion FastCGI → le navigateur reçoit la page immédiatement
+            if (function_exists('fastcgi_finish_request')) {
+                fastcgi_finish_request();
             }
-        } catch (\Throwable) {
-            // Ne pas bloquer si tracking échoue
-        }
+            try {
+                $post = Post::find($postId);
+                if (!$post) return;
+
+                views($post)->record();
+
+                $testIp   = config('app.env') === 'production' ? $ip : '8.8.1.1';
+                $location = Cache::remember("ip_geo_{$testIp}", 86400,
+                    fn() => Location::get($testIp)
+                );
+
+                if ($location) {
+                    DB::table('views')
+                        ->where('viewable_id', $postId)
+                        ->whereNull('ip')
+                        ->update([
+                            'ip'      => $ip,
+                            'country' => $location->countryName ?? null,
+                            'city'    => $location->cityName ?? null,
+                        ]);
+                }
+            } catch (\Throwable) {}
+        });
     }
 }

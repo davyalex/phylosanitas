@@ -132,13 +132,17 @@ class PostController extends Controller
     public function uploadTinyMCEImage(Request $request)
     {
         if (!$request->hasFile('file')) {
+            \Log::warning('TinyMCE upload: pas de fichier', ['keys' => array_keys($request->all()), 'files' => array_keys($request->allFiles())]);
             return response()->json(['error' => 'Aucun fichier fourni'], 400);
         }
 
         $postId = $request->input('post_id');
-        $post = $postId
-            ? Post::find($postId)
-            : Post::where('user_id', Auth::id())->latest()->first();
+
+        if ($postId) {
+            $post = Post::find($postId);
+        } else {
+            $post = Post::where('user_id', Auth::id())->latest()->first();
+        }
 
         if (!$post) {
             return response()->json(['error' => 'Article introuvable'], 404);
@@ -147,7 +151,8 @@ class PostController extends Controller
         $media = $post->addMediaFromRequest('file')
             ->toMediaCollection('tinyMceImages');
 
-        return response()->json(['location' => $media->getUrl()]);
+        // URL absolue pour garantir l'affichage dans TinyMCE
+        return response()->json(['location' => url($media->getUrl())]);
     }
 
     public function edit(Post $post, $slug)
