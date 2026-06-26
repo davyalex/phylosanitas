@@ -1380,6 +1380,30 @@
   font-size: .78rem;
   color: var(--gray-text);
 }
+.featured-side-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .75rem;          /* espace entre vues / commentaires / date */
+  font-size: .73rem;
+  color: var(--gray-text);
+  margin-top: .45rem;
+  padding-top: .35rem;
+  border-top: 1px solid var(--gray-medium);
+}
+.featured-side-meta span { display: flex; align-items: center; gap: .25rem; }
+.featured-side-meta i { color: var(--medical-blue); font-size: .75rem; }
+
+/* Sidebar posts meta (populaires + récents) — aligné sur pcard__meta */
+.sidebar-post-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .6rem;
+  font-size: .75rem;
+  color: var(--gray-text);
+  margin-top: .3rem;
+}
+.sidebar-post-meta span { display: flex; align-items: center; gap: .3rem; }
+.sidebar-post-meta i { color: var(--medical-blue); }
 
 /* ========================================
    HOMEPAGE — BANDE CATÉGORIES

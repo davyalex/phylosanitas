@@ -19,15 +19,9 @@
                 <div class="row g-4">
                     @forelse($post as $item)
                         @php
-                            $isSondage = strtolower($item->category->title ?? '') === 'sondage';
-                            $rawTitle  = $item->title ?? strip_tags($item->description ?? '');
-                            $title     = Str::title(Str::limit($rawTitle, 70));
-                            $excerpt   = $isSondage
-                                ? Str::limit(strip_tags($item->description ?? ''), 90)
-                                : Str::limit(strip_tags($item->description ?? ''), 90);
-                            $wordCount = str_word_count(strip_tags($item->description ?? ''));
-                            $readMin   = max(1, round($wordCount / 200));
-                            $catIcon   = match(true) {
+                            $rawTitle = $item->title ?? strip_tags($item->description ?? '');
+                            $title    = Str::title(Str::limit($rawTitle, 70));
+                            $catIcon  = match(true) {
                                 str_contains(strtolower($item->category->slug ?? ''), 'actualite') => 'newspaper',
                                 str_contains(strtolower($item->category->slug ?? ''), 'sondage')   => 'bar-chart-fill',
                                 str_contains(strtolower($item->category->title ?? ''), 'nutri')    => 'egg-fried',
@@ -55,13 +49,12 @@
                                             {{ $title }}
                                         </a>
                                     </h3>
-                                    @if($excerpt)
-                                        <p class="pcard__excerpt">{{ $excerpt }}</p>
-                                    @endif
                                     <div class="pcard__meta">
                                         <span><i class="bi bi-calendar3"></i> {{ \Carbon\Carbon::parse($item->created_at)->diffForHumans() }}</span>
-                                        <span><i class="bi bi-chat-left-quote"></i> {{ $item->commentaires_count ?? 0 }}</span>
-                                        <span><i class="bi bi-clock"></i> {{ $readMin }} min</span>
+                                        @if(($item->commentaires_count ?? 0) > 0)
+                                            <span><i class="bi bi-chat-left-quote"></i> {{ $item->commentaires_count }}</span>
+                                        @endif
+                                        <span><i class="bi bi-eye-fill"></i> {{ number_format($item->views_count ?? 0) }}</span>
                                     </div>
                                 </div>
                             </article>

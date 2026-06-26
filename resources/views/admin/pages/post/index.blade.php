@@ -100,17 +100,11 @@
                                                         <i class="bi bi-circle-fill me-1" style="font-size:.5rem;"></i>Brouillon
                                                     </span>
                                                 @endif
-                                                @if ($item->category->slug === 'actualites')
+                                                @if ($item->actualite_une)
                                                     <br>
-                                                    @if ($item->actualite_une)
-                                                        <span class="badge bg-info mt-1">
-                                                            <i class="bi bi-star-fill me-1"></i>À la une
-                                                        </span>
-                                                    @else
-                                                        <span class="badge bg-light text-muted mt-1">
-                                                            <i class="bi bi-star me-1"></i>Pas à la une
-                                                        </span>
-                                                    @endif
+                                                    <span class="badge bg-info mt-1">
+                                                        <i class="bi bi-star-fill me-1"></i>À la une
+                                                    </span>
                                                 @endif
                                             </td>
 
@@ -134,14 +128,12 @@
                                                         <i class="bi bi-{{ $item->published === 'public' ? 'eye-slash' : 'eye' }}"></i>
                                                     </a>
 
-                                                    {{-- Mettre à la une (actualités) --}}
-                                                    @if ($item->category->slug === 'actualites')
-                                                        <a href="/admin/post/actualite?actualite_une={{ $item->actualite_une ? 0 : 1 }}&actualite={{ $item->id }}"
-                                                           class="btn btn-sm {{ $item->actualite_une ? 'btn-info' : 'btn-outline-info' }}"
-                                                           title="{{ $item->actualite_une ? 'Retirer de la une' : 'Mettre à la une' }}">
-                                                            <i class="bi bi-star{{ $item->actualite_une ? '-fill' : '' }}"></i>
-                                                        </a>
-                                                    @endif
+                                                    {{-- Mettre à la une --}}
+                                                    <a href="/admin/post/actualite?actualite_une={{ $item->actualite_une ? 0 : 1 }}&actualite={{ $item->id }}"
+                                                       class="btn btn-sm {{ $item->actualite_une ? 'btn-info' : 'btn-outline-info' }}"
+                                                       title="{{ $item->actualite_une ? 'Retirer de la une' : 'Mettre à la une' }}">
+                                                        <i class="bi bi-star{{ $item->actualite_une ? '-fill' : '' }}"></i>
+                                                    </a>
 
                                                     {{-- Voir en ligne --}}
                                                     <a href="{{ route('post.detail', ['slug' => $item->slug]) }}"

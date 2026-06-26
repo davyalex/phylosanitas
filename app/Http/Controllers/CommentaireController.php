@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Post;
 use App\Models\Commentaire;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 
 class CommentaireController extends Controller
 {
@@ -28,11 +30,17 @@ class CommentaireController extends Controller
         }
 
         Commentaire::create([
-            'user_name' => $user_name,
+            'user_name'  => $user_name,
             'user_email' => $request->email,
-            'message'   => $request->message,
-            'post_id'   => $request->post_id,
+            'message'    => $request->message,
+            'post_id'    => $request->post_id,
         ]);
+
+        // Invalider le cache du post pour afficher le nouveau commentaire immédiatement
+        $post = Post::find($request->post_id);
+        if ($post) {
+            Cache::forget("post_detail_{$post->slug}");
+        }
 
         return back()->with('success_comment', 'Votre commentaire a été publié avec succès.');
     }

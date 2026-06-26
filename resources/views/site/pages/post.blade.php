@@ -51,14 +51,10 @@
                     <div class="post-list mt-4">
                         @foreach($post as $item)
                             @php
-                                $isSondage = strtolower($item->category->title ?? '') === 'sondage';
-                                $rawTitle  = $item->title ?? strip_tags($item->description ?? '');
-                                $title     = Str::title(Str::limit($rawTitle, 80));
-                                $excerpt   = Str::limit(strip_tags($item->description ?? ''), 120);
-                                $wordCount = str_word_count(strip_tags($item->description ?? ''));
-                                $readMin   = max(1, round($wordCount / 200));
-                                $catSlug   = strtolower($item->category->slug ?? '');
-                                $catIcon   = match(true) {
+                                $rawTitle = $item->title ?? strip_tags($item->description ?? '');
+                                $title    = Str::title(Str::limit($rawTitle, 80));
+                                $catSlug  = strtolower($item->category->slug ?? '');
+                                $catIcon  = match(true) {
                                     str_contains($catSlug,'actualite') => 'newspaper',
                                     str_contains($catSlug,'sondage')   => 'bar-chart-fill',
                                     str_contains(strtolower($item->category->title ?? ''),'sport') => 'heart-pulse-fill',
@@ -89,13 +85,12 @@
                                             {{ $title }}
                                         </a>
                                     </h2>
-                                    @if($excerpt)
-                                        <p class="post-list-excerpt">{{ $excerpt }}</p>
-                                    @endif
                                     <div class="post-list-meta">
                                         <span><i class="bi bi-calendar3"></i> {{ \Carbon\Carbon::parse($item->created_at)->diffForHumans() }}</span>
-                                        <span><i class="bi bi-chat-left-quote"></i> {{ $item->commentaires_count ?? 0 }} commentaire{{ ($item->commentaires_count ?? 0) > 1 ? 's' : '' }}</span>
-                                        <span><i class="bi bi-clock"></i> {{ $readMin }} min de lecture</span>
+                                        @if(($item->commentaires_count ?? 0) > 0)
+                                            <span><i class="bi bi-chat-left-quote"></i> {{ $item->commentaires_count }} commentaire{{ $item->commentaires_count > 1 ? 's' : '' }}</span>
+                                        @endif
+                                        <span><i class="bi bi-eye-fill"></i> {{ number_format($item->views_count ?? 0) }} vue{{ ($item->views_count ?? 0) > 1 ? 's' : '' }}</span>
                                     </div>
                                     <a href="{{ route('post.detail', ['slug' => $item->slug]) }}"
                                        class="post-list-read">

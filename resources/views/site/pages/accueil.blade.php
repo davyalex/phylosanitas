@@ -73,17 +73,20 @@
                             </h2>
                             <div class="featured-main-meta">
                                 <span><i class="bi bi-calendar3 me-1"></i>{{ \Carbon\Carbon::parse($featuredPost->created_at)->diffForHumans() }}</span>
-                                <span><i class="bi bi-chat-left-quote me-1"></i>{{ $featuredPost->commentaires_count ?? 0 }} commentaire(s)</span>
+                                <span><i class="bi bi-eye-fill me-1"></i>{{ number_format($featuredPost->views_count ?? 0) }}</span>
+                                @if(($featuredPost->commentaires_count ?? 0) > 0)
+                                    <span><i class="bi bi-chat-left-quote me-1"></i>{{ $featuredPost->commentaires_count }}</span>
+                                @endif
                             </div>
                         </div>
                     </div>
                 </a>
             </div>
 
-            {{-- Articles secondaires (2 à droite) --}}
+            {{-- Articles secondaires (3 à droite) --}}
             <div class="col-lg-5">
                 <div class="d-flex flex-column gap-3 h-100">
-                    @foreach($post->skip(1)->take(2) as $item)
+                    @foreach($post->skip(1)->take(3) as $item)
                         <a href="{{ route('post.detail', ['slug' => $item->slug]) }}"
                            class="featured-side-card d-flex text-decoration-none flex-grow-1">
                             <div class="featured-side-img-wrap flex-shrink-0">
@@ -94,12 +97,15 @@
                             <div class="featured-side-body">
                                 <span class="featured-side-badge">{{ $item->category->title ?? '' }}</span>
                                 <h5 class="featured-side-title">
-                                    {{ Str::limit($item->title ?? strip_tags($item->description), 75) }}
+                                    {{ Str::limit($item->title ?? strip_tags($item->description), 65) }}
                                 </h5>
-                                <span class="featured-side-date">
-                                    <i class="bi bi-calendar3 me-1"></i>
-                                    {{ \Carbon\Carbon::parse($item->created_at)->diffForHumans() }}
-                                </span>
+                                <div class="featured-side-meta">
+                                    <span><i class="bi bi-calendar3"></i> {{ \Carbon\Carbon::parse($item->created_at)->diffForHumans() }}</span>
+                                    <span><i class="bi bi-eye-fill"></i> {{ number_format($item->views_count ?? 0) }}</span>
+                                    @if(($item->commentaires_count ?? 0) > 0)
+                                        <span><i class="bi bi-chat-left-quote"></i> {{ $item->commentaires_count }}</span>
+                                    @endif
+                                </div>
                             </div>
                         </a>
                     @endforeach

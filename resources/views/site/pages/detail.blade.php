@@ -210,34 +210,65 @@
                 </div>
 
                 {{-- Formulaire commentaire --}}
-                <div class="detail-comment-form mt-4">
+                <div class="detail-comment-form mt-4" id="comment-form-section">
                     <h3 class="detail-section-title">
                         <i class="bi bi-pencil-square me-2"></i>Laisser un commentaire
                     </h3>
-                    <form action="{{ route('post.comment') }}" method="POST">
+
+                    {{-- Erreurs de validation --}}
+                    @if($errors->any())
+                        <div class="alert alert-danger mb-3 rounded-3">
+                            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                            @foreach($errors->all() as $error)
+                                <span>{{ $error }}</span>
+                            @endforeach
+                        </div>
+                    @endif
+
+                    <form action="{{ route('post.comment') }}" method="POST" id="comment-form">
                         @csrf
                         <input type="hidden" name="post_id" value="{{ $post->id }}">
                         @guest
                             <div class="mb-3">
                                 <label class="form-label fw-semibold">
-                                    <i class="bi bi-person-fill me-1 text-medical-blue"></i>Votre nom
+                                    <i class="bi bi-person-fill me-1 text-medical-blue"></i>Votre nom <span class="text-danger">*</span>
                                 </label>
-                                <input type="text" name="name" class="form-control"
+                                <input type="text" name="name" class="form-control @error('name') is-invalid @enderror"
+                                       value="{{ old('name') }}"
                                        placeholder="Entrez votre nom" required>
+                                @error('name')<div class="invalid-feedback">{{ $message }}</div>@enderror
                             </div>
                         @endguest
                         <div class="mb-3">
                             <label class="form-label fw-semibold">
-                                <i class="bi bi-chat-left-text-fill me-1 text-medical-blue"></i>Votre message
+                                <i class="bi bi-chat-left-text-fill me-1 text-medical-blue"></i>Votre message <span class="text-danger">*</span>
                             </label>
-                            <textarea name="message" class="form-control"
-                                      placeholder="Partagez votre avis…" rows="5" required></textarea>
+                            <textarea name="message" rows="5"
+                                      class="form-control @error('message') is-invalid @enderror"
+                                      placeholder="Partagez votre avis…" required>{{ old('message') }}</textarea>
+                            @error('message')<div class="invalid-feedback">{{ $message }}</div>@enderror
                         </div>
-                        <button type="submit" class="btn btn-medical px-5">
+                        <button type="submit" class="btn btn-medical px-5" id="comment-submit">
                             <i class="bi bi-send-fill me-2"></i>Envoyer
                         </button>
                     </form>
                 </div>
+
+                <script>
+                    // Scroll vers les erreurs ou le formulaire si erreur de validation
+                    @if($errors->any())
+                    document.addEventListener('DOMContentLoaded', function () {
+                        document.getElementById('comment-form-section').scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    });
+                    @endif
+
+                    // Désactiver le bouton pendant l'envoi
+                    document.getElementById('comment-form').addEventListener('submit', function () {
+                        var btn = document.getElementById('comment-submit');
+                        btn.disabled = true;
+                        btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Envoi...';
+                    });
+                </script>
 
                 {{-- Articles liés --}}
                 @if(isset($post_last) && $post_last->count())

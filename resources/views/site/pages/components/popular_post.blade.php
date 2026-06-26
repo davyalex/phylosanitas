@@ -32,10 +32,13 @@
                             {{ Str::limit($item['title'], 60, '...') }}
                         </a>
                     </h6>
-                    <small class="text-muted">
-                        <i class="bi bi-calendar3 text-medical-blue"></i>
-                        {{ \Carbon\Carbon::parse($item->created_at)->diffForHumans() }}
-                    </small>
+                    <div class="sidebar-post-meta">
+                        <span><i class="bi bi-eye-fill"></i> {{ number_format($item->views_count ?? 0) }}</span>
+                        @if(($item->commentaires_count ?? 0) > 0)
+                            <span><i class="bi bi-chat-left-quote"></i> {{ $item->commentaires_count }}</span>
+                        @endif
+                        <span><i class="bi bi-calendar3"></i> {{ \Carbon\Carbon::parse($item->created_at)->diffForHumans() }}</span>
+                    </div>
                 </div>
             </div>
         </div>
