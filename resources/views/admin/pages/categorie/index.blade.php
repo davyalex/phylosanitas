@@ -73,16 +73,12 @@
                                     </button>
 
                                     @if($item->posts_count === 0)
-                                        <form action="{{ route('category.delete', $item->id) }}" method="POST">
+                                        <form action="{{ route('category.delete', $item->id) }}" method="POST"
+                                              data-confirm="Supprimer la catégorie « {{ $item->title }} » ?">
                                             @csrf
-                                            <button type="button"
-                                                    class="btn btn-sm btn-danger"
-                                                    data-bs-toggle="modal"
-                                                    data-bs-target="#confirmDelete{{ $item->id }}"
-                                                    title="Supprimer">
+                                            <button type="submit" class="btn btn-sm btn-danger" title="Supprimer" aria-label="Supprimer">
                                                 <i class="bi bi-trash"></i>
                                             </button>
-                                            @include('admin.partials.deleteConfirm')
                                         </form>
                                     @else
                                         <button class="btn btn-sm btn-outline-danger" disabled

@@ -48,11 +48,57 @@ class Post extends Model implements HasMedia, Viewable
         'category_id',
         'user_id',
         'published',
-        'actualite_une', // Mettre une actualité à la une ....mettre en slide
+        'actualite_une', // Article : « À la une » de l'accueil · Actualité : widget Actualités
+        'une_at',        // date de mise à la une (le plus récent = article principal)
         'created_at',
         'updated_at',
         'deleted_at',
     ];
+
+    protected $casts = [
+        'une_at' => 'datetime',
+    ];
+
+    /** Nombre de places « À la une » sur l'accueil : 1 article principal + 3 secondaires */
+    public const UNE_PLACES = 4;
+
+    /** Articles à la une de l'accueil (hors catégorie « Actualités », qui a son propre widget) */
+    public function scopeALaUne($query)
+    {
+        $actualites = Category::where('slug', 'actualites')->value('id');
+
+        return $query->where('actualite_une', 1)
+            ->when($actualites, fn($q) => $q->where('category_id', '!=', $actualites))
+            ->orderByDesc('une_at')
+            ->orderByDesc('updated_at');
+    }
+
+    /**
+     * Met l'article à la une (il devient l'article principal) ou l'en retire.
+     * Au-delà de 4 articles, le plus ancien quitte automatiquement la une.
+     * Retourne les articles qui ont quitté la une.
+     */
+    public function mettreALaUne(bool $on): \Illuminate\Support\Collection
+    {
+        if (!$on) {
+            $this->forceFill(['actualite_une' => 0, 'une_at' => null])->save();
+            return collect();
+        }
+
+        $this->forceFill(['actualite_une' => 1, 'une_at' => now()])->save();
+
+        // Les actualités externes ne comptent pas dans les 4 places de l'accueil
+        if ($this->category && $this->category->slug === 'actualites') return collect();
+
+        $sortants = static::aLaUne()->where('id', '!=', $this->id)
+            ->skip(self::UNE_PLACES - 1)->take(1000)->get();
+
+        foreach ($sortants as $p) {
+            $p->forceFill(['actualite_une' => 0, 'une_at' => null])->save();
+        }
+
+        return $sortants;
+    }
 
     //slugable
     public function sluggable(): array

@@ -8,6 +8,7 @@
     $online  = $item->published === 'public';
     $editUrl = $isPoll ? route('post.edit-sondage', $item->id) : route('post.edit', $item->slug);
     $label   = $isPoll ? 'ce sondage' : 'cet article';
+    $nom     = Str::limit($item->title ?: strip_tags($item->description ?? ''), 70);
 @endphp
 
 <div class="row-menu">
@@ -50,7 +51,7 @@
             @endunless
             <li><hr class="dropdown-divider"></li>
             <li>
-                <form action="{{ route('post.delete', $item->id) }}" method="POST" data-confirm="Supprimer définitivement {{ $label }} ?">
+                <form action="{{ route('post.delete', $item->id) }}" method="POST" data-confirm="Supprimer {{ $label }} « {{ $nom }} » ? Il disparaîtra du site et ses images seront effacées.">
                     @csrf
                     <button type="submit" class="dropdown-item text-danger"><i class="bi bi-trash"></i>Supprimer</button>
                 </form>
