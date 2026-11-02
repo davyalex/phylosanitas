@@ -73,9 +73,10 @@ class AppServiceProvider extends ServiceProvider
                         'messages' => \App\Models\ContactMessage::where('status', 'new')->count(),
                         'flash'    => \App\Models\FlashInfo::visible()->count(),
                         'pubs'     => \App\Models\Publicite::diffusable()->count(),
+                        'popups'   => \App\Models\Popup::diffusable()->count(),
                     ];
                 } catch (\Throwable) {
-                    return ['messages' => 0, 'flash' => 0, 'pubs' => 0];
+                    return ['messages' => 0, 'flash' => 0, 'pubs' => 0, 'popups' => 0];
                 }
             }));
         });
@@ -85,6 +86,7 @@ class AppServiceProvider extends ServiceProvider
             $view->with([
                 'flash_infos' => \App\Models\FlashInfo::forSite(),
                 'site_visits' => \App\Http\Middleware\CountSiteVisit::totals(),
+                'site_popup'  => \App\Models\Popup::forSite(),
             ]);
         });
     }

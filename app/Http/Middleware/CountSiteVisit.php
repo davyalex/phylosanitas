@@ -52,7 +52,7 @@ class CountSiteVisit
     private function shouldCount(Request $request, $response): bool
     {
         if (!$request->isMethod('GET') || $request->ajax() || $request->prefetch()) return false;
-        if ($request->is('admin*', 'login', 'sitemap.xml', 'robots.txt', 'manifest.webmanifest', 'hors-ligne', 'pub/*', 'storage/*')) return false;
+        if ($request->is('admin*', 'login', 'sitemap.xml', 'robots.txt', 'manifest.webmanifest', 'hors-ligne', 'pub/*', 'popup/*', 'storage/*')) return false;
         if (method_exists($response, 'getStatusCode') && $response->getStatusCode() !== 200) return false;
         if (preg_match(self::BOTS, (string) $request->userAgent())) return false;
         if ($request->user()) return false; // l'équipe ne gonfle pas les chiffres

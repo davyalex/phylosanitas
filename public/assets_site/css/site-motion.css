@@ -242,6 +242,48 @@
   .consult--inline .consult__actions .btn { flex: 1 1 100%; justify-content: center; }
 }
 
+/* ---------- 32. Popup d'information (Admin > Popups) ---------- */
+.popup {
+  padding: 0; border: 0; background: transparent; color: var(--ink);
+  width: min(460px, calc(100vw - 32px)); max-width: none; max-height: calc(100dvh - 32px);
+  overflow: visible;
+}
+.popup:not([open]) { display: none; }
+.popup::backdrop { background: rgba(8, 26, 48, .62); -webkit-backdrop-filter: blur(3px); backdrop-filter: blur(3px); }
+.popup--poster { width: min(520px, calc(100vw - 32px)); }
+.popup__panel {
+  position: relative; display: flex; flex-direction: column;
+  max-height: calc(100dvh - 32px); overflow: auto;
+  background: var(--surface); border-radius: var(--r-lg); box-shadow: var(--shadow-3);
+}
+.popup__close {
+  position: absolute; top: 10px; right: 10px; z-index: 2;
+  width: 40px; height: 40px; border-radius: 50%; border: 0; display: grid; place-items: center;
+  background: rgba(255, 255, 255, .94); color: var(--ink); box-shadow: 0 2px 10px rgba(8, 26, 48, .25);
+  font-size: 1rem; cursor: pointer; transition: transform var(--t-fast), background var(--t-fast);
+}
+.popup__close:hover { transform: rotate(90deg); background: #fff; }
+.popup__close:focus-visible { outline: none; box-shadow: var(--ring); }
+.popup__media { display: block; background: var(--brand-soft); line-height: 0; }
+.popup__img { display: block; width: 100%; height: auto; max-height: 62dvh; object-fit: contain; border-radius: var(--r-lg) var(--r-lg) 0 0; }
+.popup--poster .popup__img { max-height: calc(100dvh - 120px); }
+.popup__body { padding: 1.25rem 1.375rem 1.375rem; }
+.popup--poster .popup__body { padding: .875rem 1rem 1rem; }
+.popup__title { font-family: var(--font-serif); font-weight: 700; font-size: var(--fs-lg); line-height: 1.25; margin: 0 0 .5rem; padding-right: 2.5rem; }
+.popup__media + .popup__body .popup__title { padding-right: 0; }
+.popup__text { color: var(--ink-2); margin: 0 0 1.125rem; line-height: 1.55; }
+.popup__actions { display: flex; flex-wrap: wrap; gap: .5rem; }
+.popup__actions .btn { display: inline-flex; align-items: center; justify-content: center; gap: .4rem; flex: 1 1 auto; }
+.popup--poster .popup__actions .btn-outline-medical:only-child { flex: 1 1 100%; }
+body.has-popup { overflow: hidden; }
+
+@media (prefers-reduced-motion: no-preference) {
+  .popup[open] .popup__panel { animation: popupIn .45s var(--ease-out); }
+  .popup[open]::backdrop { animation: popupFade .3s ease-out; }
+}
+@keyframes popupIn { from { opacity: 0; transform: translateY(18px) scale(.97); } to { opacity: 1; transform: none; } }
+@keyframes popupFade { from { opacity: 0; } to { opacity: 1; } }
+
 /* Notification d'erreur (anti-spam, trop d'envois…) */
 .ps-toast--error { background: var(--danger); }
 /* Le formulaire newsletter contient le champ piège positionné hors écran */

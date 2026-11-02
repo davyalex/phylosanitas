@@ -494,6 +494,13 @@
       @if(($admin_badges['flash'] ?? 0) > 0)<span class="sb-badge" title="En ligne">{{ $admin_badges['flash'] }}</span>@endif
     </a>
 
+    <a href="{{ route('popup.index') }}"
+       class="sb-link {{ request()->routeIs('popup.*') ? 'active' : '' }}">
+      <span class="sb-icon"><i class="bi bi-window-stack"></i></span>
+      Popups
+      @if(($admin_badges['popups'] ?? 0) > 0)<span class="sb-badge" title="En diffusion">{{ $admin_badges['popups'] }}</span>@endif
+    </a>
+
     {{-- ── Audience & revenus ── --}}
     @role('administrateur')
     <div class="sb-section-label">Audience & revenus</div>

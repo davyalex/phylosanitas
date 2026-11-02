@@ -246,3 +246,13 @@ label.form-label:has(.field-count) { display: block; }
 .action-menu .dropdown-item.text-danger:hover { background: var(--a-red-soft); color: var(--a-red) !important; }
 .action-menu form { margin: 0; }
 .action-menu .dropdown-divider { margin: .3rem 0; }
+
+/* Popups d'information */
+.popup-thumb { width: 48px; height: 60px; border-radius: 6px; border: 1px solid var(--a-line); background: var(--a-soft); object-fit: cover; display: block; }
+.popup-thumb--text { display: grid; place-items: center; color: var(--a-muted); font-size: 1.1rem; }
+.choice { display: flex; gap: .6rem; align-items: flex-start; padding: .6rem .75rem; border: 1px solid var(--a-line); border-radius: 10px; cursor: pointer; transition: border-color .15s, background .15s; }
+.choice:hover { border-color: var(--a-brand); }
+.choice:has(input:checked) { border-color: var(--a-brand); background: var(--a-brand-soft); }
+.choice input { margin-top: .2rem; flex-shrink: 0; }
+.choice strong { display: block; font-size: .875rem; }
+.choice small { display: block; color: var(--a-muted); font-size: .78rem; line-height: 1.35; }

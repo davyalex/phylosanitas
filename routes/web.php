@@ -13,6 +13,7 @@ use App\Http\Controllers\CommentaireController;
 use App\Http\Controllers\NewsletterController;
 use App\Http\Controllers\FlashInfoController;
 use App\Http\Controllers\PubliciteController;
+use App\Http\Controllers\PopupController;
 use App\Http\Controllers\MessageController;
 use App\Http\Controllers\SettingController;
 
@@ -103,6 +104,18 @@ Route::middleware('auth')->prefix('admin')->group(function () {
         Route::delete('{flash}',        'destroy')->name('destroy');
     });
 
+    /** Popups d'information (affiche de campagne, annonce…) */
+    Route::controller(PopupController::class)->prefix('popups')->name('popup.')->group(function () {
+        Route::get('/',                  'index')->name('index');
+        Route::get('create',             'create')->name('create');
+        Route::post('/',                 'store')->name('store');
+        Route::get('{popup}/edit',       'edit')->name('edit');
+        Route::put('{popup}',            'update')->name('update');
+        Route::patch('{popup}/toggle',   'toggle')->name('toggle');
+        Route::patch('{popup}/reset',    'resetStats')->name('reset');
+        Route::delete('{popup}',         'destroy')->name('destroy');
+    });
+
     /** Administrateurs uniquement */
     Route::middleware('role:administrateur')->group(function () {
 
@@ -178,6 +191,7 @@ route::get('robots.txt', function () {
         'Disallow: /recherche',
         'Disallow: /post/search',
         'Disallow: /pub/',
+        'Disallow: /popup/',
         '',
         'Sitemap: ' . route('sitemap'),
     ];
@@ -186,6 +200,10 @@ route::get('robots.txt', function () {
 
 // Clic sur une publicité (compté puis redirigé vers l'annonceur)
 route::get('pub/{publicite}', [PubliciteController::class, 'click'])->name('publicite.click');
+
+// Popup d'information : affichage compté (appel JS) et clic sur le bouton
+route::post('popup/{popup}/vue', [PopupController::class, 'vue'])->name('popup.vue')->middleware('throttle:20,1');
+route::get('popup/{popup}/clic', [PopupController::class, 'clic'])->name('popup.clic');
 
 // Formulaires publics : limite d'envois + protection anti-robots (<x-honeypot /> dans chaque formulaire)
 route::post('newsletter/subscribe', [NewsletterController::class, 'store'])->name('newsletter.store')->middleware(['throttle:forms', 'antispam']);
