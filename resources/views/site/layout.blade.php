@@ -121,6 +121,7 @@
 
     <!-- Thème du site -->
     <link href="{{ asset('assets_site/css/site.css') }}?v={{ @filemtime(public_path('assets_site/css/site.css')) }}" rel="stylesheet">
+    <link href="{{ asset('assets_site/css/site-motion.css') }}?v={{ @filemtime(public_path('assets_site/css/site-motion.css')) }}" rel="stylesheet">
 
     @stack('head')
 
@@ -296,7 +297,19 @@
         @include('sweetalert::alert')
 
         {{-- Notifications --}}
-        @if (session('success_comment') || session('newsletter_success') || session('newsletter_info'))
+        @if (session('form_error'))
+            <div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index:1080">
+                <div class="toast show ps-toast ps-toast--error" role="alert" aria-live="assertive">
+                    <div class="d-flex align-items-center">
+                        <div class="toast-body">
+                            <i class="bi bi-exclamation-triangle-fill me-2" aria-hidden="true"></i>
+                            {{ session('form_error') }}
+                        </div>
+                        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Fermer"></button>
+                    </div>
+                </div>
+            </div>
+        @elseif (session('success_comment') || session('newsletter_success') || session('newsletter_info'))
             <div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index:1080">
                 <div class="toast show ps-toast {{ session('newsletter_info') ? 'ps-toast--info' : '' }}" role="status" aria-live="polite">
                     <div class="d-flex align-items-center">

@@ -16,7 +16,7 @@ class SettingController extends Controller
         'telephone_1', 'telephone_1_label', 'telephone_2', 'telephone_2_label', 'telephone_3', 'telephone_3_label',
         'email_1', 'email_1_label', 'email_2', 'email_2_label', 'email_3', 'email_3_label',
         'whatsapp', 'facebook', 'twitter', 'instagram', 'linkedin', 'youtube', 'tiktok',
-        'visites_depart', 'avertissement',
+        'visites_depart', 'avertissement', 'urgence',
     ];
 
     public function edit()
@@ -55,12 +55,14 @@ class SettingController extends Controller
             'tiktok'            => 'nullable|url|max:300',
             'visites_depart'    => 'nullable|integer|min:0|max:100000000',
             'avertissement'     => 'nullable|string|max:500',
+            'urgence'           => ['nullable', 'string', 'max:20', 'regex:/^[\d\s+]{2,20}$/'],
             'logo'              => 'nullable|image|mimes:png,jpg,jpeg,webp,svg|max:2048',
         ], [
             'site_nom.required'   => 'Le nom du site est obligatoire.',
             'telephone_1.regex'   => 'Le téléphone 1 contient des caractères non autorisés.',
             'telephone_2.regex'   => 'Le téléphone 2 contient des caractères non autorisés.',
             'telephone_3.regex'   => 'Le téléphone 3 contient des caractères non autorisés.',
+            'urgence.regex'       => 'Le numéro d\'urgence ne doit contenir que des chiffres.',
             'whatsapp.regex'      => 'Le numéro WhatsApp contient des caractères non autorisés.',
             'email_1.email'       => 'L\'email 1 n\'est pas une adresse valide.',
             'email_2.email'       => 'L\'email 2 n\'est pas une adresse valide.',

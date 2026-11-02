@@ -58,7 +58,7 @@
             <div class="layout__main">
                 @if($post->isEmpty())
                     <div class="empty">
-                        <i class="bi bi-journal-x" aria-hidden="true"></i>
+                        <x-health-art name="screening" class="empty__art" />
                         <h2>Aucun article dans cette catégorie</h2>
                         <p>Revenez bientôt, ou explorez une autre thématique.</p>
                         <a href="{{ route('accueil') }}" class="btn btn-medical">Retour à l'accueil</a>
@@ -102,6 +102,8 @@
                         {!! $post->appends(request()->query())->links('vendor.pagination.custom') !!}
                     </div>
                 @endif
+
+                @include('site.pages.sections.prevention', ['compact' => true])
             </div>
 
             <aside class="layout__side" aria-label="Compléments">

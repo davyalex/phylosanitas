@@ -29,7 +29,7 @@ use App\Http\Controllers\SettingController;
 
 
 //LOGIN
-Route::post('login', [UserController::class, 'login'])->name('login');
+Route::post('login', [UserController::class, 'login'])->name('login')->middleware('throttle:login');
 Route::get('login', [UserController::class, 'loginForm'])->name('login-form');
 
 
@@ -141,7 +141,7 @@ Route::middleware('auth')->prefix('admin')->group(function () {
 
 route::controller(SondageController::class)->prefix('sondage')->group(function () {
     route::post('index', 'index')->name('sondage.index');
-    route::post('store', 'store')->name('sondage.store');
+    route::post('store', 'store')->name('sondage.store')->middleware(['throttle:forms', 'antispam']);
 });
 
 
@@ -158,7 +158,7 @@ route::controller(SiteController::class)->group(function () {
     route::get('post/detail', 'legacyDetail');
 
     route::get('contact', 'contact')->name('contact');
-    route::post('contact', 'contact')->name('contact.store');
+    route::post('contact', 'contact')->name('contact.store')->middleware(['throttle:forms', 'antispam']);
     route::match(['get', 'post'], 'recherche', 'search')->name('search');
     route::post('post/search', 'search');
 
@@ -187,9 +187,10 @@ route::get('robots.txt', function () {
 // Clic sur une publicité (compté puis redirigé vers l'annonceur)
 route::get('pub/{publicite}', [PubliciteController::class, 'click'])->name('publicite.click');
 
-route::post('newsletter/subscribe', [NewsletterController::class, 'store'])->name('newsletter.store');
+// Formulaires publics : limite d'envois + protection anti-robots (<x-honeypot /> dans chaque formulaire)
+route::post('newsletter/subscribe', [NewsletterController::class, 'store'])->name('newsletter.store')->middleware(['throttle:forms', 'antispam']);
 
 
 route::controller(CommentaireController::class)->group(function () {
-    route::post('comment', 'store')->name('post.comment');
+    route::post('comment', 'store')->name('post.comment')->middleware(['throttle:forms', 'antispam']);
 });

@@ -48,5 +48,30 @@ class RouteServiceProvider extends ServiceProvider
         RateLimiter::for('api', function (Request $request) {
             return Limit::perMinute(60)->by($request->user()?->id ?: $request->ip());
         });
+
+        // Formulaires publics (newsletter, commentaires, contact, sondages) : limite par IP
+        RateLimiter::for('forms', function (Request $request) {
+            $tooMany = fn () => redirect()->back()
+                ->withInput($request->except(['_token', '_ft', 'site_web']))
+                ->with('form_error', 'Trop d\'envois en peu de temps. Réessayez dans quelques minutes.');
+
+            return [
+                Limit::perMinute(5)->by('forms-min|' . $request->ip())->response($tooMany),
+                Limit::perHour(30)->by('forms-hour|' . $request->ip())->response($tooMany),
+            ];
+        });
+
+        // Connexion admin : freine les robots qui testent des mots de passe
+        RateLimiter::for('login', function (Request $request) {
+            $tooMany = function () use ($request) {
+                \RealRashid\SweetAlert\Facades\Alert::error('Trop de tentatives de connexion. Réessayez dans une minute.');
+                return redirect()->back()->withInput(['phone' => $request->input('phone')]);
+            };
+
+            return [
+                Limit::perMinute(5)->by('login|' . strtolower((string) $request->input('phone')) . '|' . $request->ip())->response($tooMany),
+                Limit::perMinute(20)->by('login-ip|' . $request->ip())->response($tooMany),
+            ];
+        });
     }
 }

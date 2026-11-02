@@ -21,7 +21,7 @@
                     </div>
                 @elseif(($post ?? collect())->isEmpty())
                     <div class="empty">
-                        <i class="bi bi-journal-x" aria-hidden="true"></i>
+                        <x-health-art name="read" class="empty__art" />
                         <h2 id="recent-title">Aucun article pour le moment</h2>
                         <p>Les premières publications arrivent bientôt.</p>
                     </div>
@@ -36,6 +36,7 @@
                             <p class="cta-band__text">Recevez les dernières actualités santé dans votre boîte mail.</p>
                             <form action="{{ route('newsletter.store') }}" method="POST" class="inline-form">
                                 @csrf
+                                <x-honeypot />
                                 <label for="nl-email" class="visually-hidden">Votre adresse email</label>
                                 <input id="nl-email" type="email" name="email" placeholder="Votre adresse email" required autocomplete="email">
                                 <button type="submit" class="btn btn-medical">S'abonner</button>
@@ -48,6 +49,9 @@
                         <a href="{{ route('contact') }}" class="btn btn-outline-medical">Nous contacter</a>
                     </div>
                 </div>
+
+                {{-- Quand consulter ? (hôpital animé + chiffres) : remplit la colonne à côté de la sidebar --}}
+                @include('site.pages.sections.consulter')
             </div>
 
             <aside class="layout__side" aria-label="Compléments">

@@ -282,6 +282,54 @@ document.addEventListener('DOMContentLoaded', function () {
     window.addEventListener('appinstalled', hide);
   })();
 
+  /* ---------- Apparition au défilement + compteurs ---------- */
+  // Seuls les éléments encore sous l'écran sont masqués : rien ne clignote au chargement.
+  if (!reduceMotion && 'IntersectionObserver' in window) {
+    var REVEAL = '.sec-head, .lead, .prow--feature, .pcard, .ptile, .prevention__head, .consult__art, .consult__body, .stat, '
+      + '.endread, .litem, .widget, .cta-band, .related, .panel, .page-head, .empty, .contact__line';
+    var fold = window.innerHeight * 0.95;
+
+    var revealObs = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (!entry.isIntersecting) return;
+        entry.target.classList.add('is-in');
+        revealObs.unobserve(entry.target);
+      });
+    }, { rootMargin: '0px 0px -8% 0px', threshold: 0.08 });
+
+    document.querySelectorAll(REVEAL).forEach(function (el) {
+      if (el.closest('.reveal') || el.getBoundingClientRect().top < fold) return;
+      // Décalage en cascade entre éléments frères (cartes d'une même grille)
+      var siblings = Array.prototype.filter.call(el.parentElement.children, function (s) { return s.matches(REVEAL); });
+      var i = siblings.indexOf(el);
+      if (i > 0) el.style.setProperty('--rd', Math.min(i, 5) * 80 + 'ms');
+      el.classList.add('reveal');
+      revealObs.observe(el);
+    });
+
+    // Compteurs : de 0 à la valeur finale quand ils deviennent visibles
+    var fmt = new Intl.NumberFormat('fr-FR');
+    var countObs = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (!entry.isIntersecting) return;
+        countObs.unobserve(entry.target);
+        var el = entry.target, target = parseInt(el.getAttribute('data-count'), 10) || 0, t0 = null, dur = 1400;
+        var step = function (t) {
+          if (!t0) t0 = t;
+          var p = Math.min((t - t0) / dur, 1), eased = 1 - Math.pow(1 - p, 3);
+          el.textContent = fmt.format(Math.round(target * eased));
+          if (p < 1) requestAnimationFrame(step);
+        };
+        requestAnimationFrame(step);
+      });
+    }, { threshold: 0.5 });
+    document.querySelectorAll('[data-count]').forEach(function (el) {
+      if (el.getBoundingClientRect().top < fold) return;
+      el.textContent = '0';
+      countObs.observe(el);
+    });
+  }
+
   /* ---------- Notifications : disparition auto ---------- */
   document.querySelectorAll('.toast.show').forEach(function (toast) {
     setTimeout(function () { toast.classList.remove('show'); }, 6000);

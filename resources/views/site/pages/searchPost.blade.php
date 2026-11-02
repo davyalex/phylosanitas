@@ -27,7 +27,7 @@
             <div class="layout__main">
                 @if($count < 1)
                     <div class="empty">
-                        <i class="bi bi-search" aria-hidden="true"></i>
+                        <x-health-art name="screening" class="empty__art" />
                         <h2>Aucun résultat pour «&nbsp;{{ $q }}&nbsp;»</h2>
                         <ul class="empty__tips">
                             <li>Vérifiez l'orthographe des mots-clés</li>
@@ -44,6 +44,8 @@
                         @endforeach
                     </div>
                 @endif
+
+                @include('site.pages.sections.prevention', ['compact' => true])
             </div>
 
             <aside class="layout__side" aria-label="Compléments">
