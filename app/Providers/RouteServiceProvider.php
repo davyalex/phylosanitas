@@ -63,10 +63,9 @@ class RouteServiceProvider extends ServiceProvider
 
         // Connexion admin : freine les robots qui testent des mots de passe
         RateLimiter::for('login', function (Request $request) {
-            $tooMany = function () use ($request) {
-                \RealRashid\SweetAlert\Facades\Alert::error('Trop de tentatives de connexion. Réessayez dans une minute.');
-                return redirect()->back()->withInput(['phone' => $request->input('phone')]);
-            };
+            $tooMany = fn () => redirect()->back()
+                ->withInput(['phone' => $request->input('phone')])
+                ->withErrors(['login' => 'Trop de tentatives de connexion. Patientez une minute avant de réessayer.']);
 
             return [
                 Limit::perMinute(5)->by('login|' . strtolower((string) $request->input('phone')) . '|' . $request->ip())->response($tooMany),
