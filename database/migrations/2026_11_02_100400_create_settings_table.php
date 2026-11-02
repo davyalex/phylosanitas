@@ -30,7 +30,7 @@ return new class extends Migration
             'email_1_label'   => 'Contact',
             'facebook'        => 'https://www.facebook.com/phylosanitas',
             'afficher_visites'=> '1',
-            'avertissement'   => "Les contenus publiés sur ce site sont fournis à titre d'information et ne remplacent pas l'avis d'un professionnel de santé. En cas de doute ou d'urgence, consultez un médecin.",
+            'avertissement'   => "Les articles de ce blog sont rédigés par un médecin, dans un but d'information et de prévention. Ils ne remplacent pas une consultation : chaque patient est unique, et seul un examen personnalisé permet de poser un diagnostic ou d'adapter un traitement. En cas de doute, parlez-en à votre médecin ; en cas d'urgence, appelez le SAMU (185) ou rendez-vous aux urgences les plus proches.",
         ];
         DB::table('settings')->insert(array_map(
             fn($k, $v) => ['key' => $k, 'value' => $v, 'created_at' => $now, 'updated_at' => $now],

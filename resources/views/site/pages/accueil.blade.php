@@ -83,7 +83,10 @@
 </div>
 @endif
 
-{{-- ⑤ Articles récents + Sidebar --}}
+{{-- ⑤ Prévention : bons réflexes illustrés --}}
+@include('site.pages.sections.prevention')
+
+{{-- ⑥ Articles récents + newsletter + « Quand consulter ? » + Sidebar --}}
 @include('site.pages.sections.post', ['gridPosts' => $gridPosts ?? collect()])
 
 @endsection

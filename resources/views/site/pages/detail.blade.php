@@ -144,6 +144,9 @@
                     </footer>
                 </article>
 
+                {{-- Fin de lecture --}}
+                @include('site.pages.partials.end-read')
+
                 {{-- Commentaires --}}
                 <section class="panel" id="comments" aria-labelledby="comments-title">
                     <h2 id="comments-title" class="panel__title">
@@ -177,6 +180,7 @@
 
                         <form action="{{ route('post.comment') }}" method="POST" id="comment-form">
                             @csrf
+                            <x-honeypot />
                             <input type="hidden" name="post_id" value="{{ $post->id }}">
                             @guest
                                 <div class="field">

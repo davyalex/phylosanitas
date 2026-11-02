@@ -134,6 +134,13 @@
                 <h2 class="fsec__title"><i class="bi bi-info-circle"></i>Avertissement médical</h2>
                 <p class="fsec__hint">Affiché sous chaque article et dans le pied de page. Laissez vide pour le masquer.</p>
                 <textarea name="avertissement" rows="3" class="form-control" maxlength="500" aria-label="Avertissement médical">{{ $v('avertissement') }}</textarea>
+
+                <div class="mt-3" style="max-width:260px">
+                    <label for="urgence" class="form-label">Numéro d'urgence</label>
+                    <input id="urgence" type="text" name="urgence" class="form-control @error('urgence') is-invalid @enderror" value="{{ $v('urgence') }}" placeholder="185" inputmode="tel" maxlength="20">
+                    <div class="form-text">Affiché dans « Quand consulter ? » (accueil et fin d'article). Vide = 185 (SAMU).</div>
+                    @error('urgence')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                </div>
             </section>
         </div>
 

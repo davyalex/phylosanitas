@@ -57,6 +57,7 @@
         {{-- Avant le vote : le formulaire seul (les résultats s'affichent après) --}}
         <form action="{{ route('sondage.store') }}" method="post" class="poll-form">
             @csrf
+            <x-honeypot />
             <input type="hidden" name="post_id" value="{{ $post->id }}">
             <fieldset>
                 <legend class="panel__title" id="poll-title">Votre réponse</legend>

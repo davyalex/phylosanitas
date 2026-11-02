@@ -88,6 +88,8 @@ class Setting extends Model
             'show_visits'   => (bool) $g('afficher_visites', 1),
             'visites_depart'=> (int) $g('visites_depart', 0),
             'avertissement' => $g('avertissement'),
+            'urgence'       => $g('urgence', '185'),
+            'urgence_href'  => 'tel:' . preg_replace('/[^\d+]/', '', $g('urgence', '185')),
         ];
     }
 

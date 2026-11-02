@@ -83,6 +83,7 @@
 
                 <form action="{{ route('contact.store') }}" method="POST" novalidate>
                     @csrf
+                    <x-honeypot />
                     <div class="field-row">
                         <div class="field">
                             <label for="contact-name">Votre nom <span class="req" aria-hidden="true">*</span></label>
