@@ -28,5 +28,6 @@ class PostObserver
         Cache::forget(AppServiceProvider::CACHE_POPULAR_POSTS);
         Cache::forget(AppServiceProvider::CACHE_SURVEYS);
         Cache::forget(AppServiceProvider::CACHE_NEWS);
+        Cache::forget('sitemap_xml');
     }
 }

@@ -3,143 +3,112 @@
 @section('description', 'Contactez l\'équipe PhyloSanitas — blog médical et santé.')
 
 @section('content')
-<section id="contact" class="contact py-5 mt-4">
-    <div class="container" data-aos="fade-up">
+<section class="section section--tight">
+    <div class="container-xl">
 
-        <div class="row mb-5">
-            <div class="col-lg-12 text-center">
-                <h1 class="text-medical-blue fw-bold">
-                    <i class="bi bi-envelope-heart-fill me-2"></i>Contactez-nous
-                </h1>
-                <p class="text-muted mt-2">Notre équipe répond à toutes vos questions dans les plus brefs délais.</p>
-            </div>
-        </div>
+        <nav aria-label="Fil d'Ariane" class="crumbs">
+            <a href="{{ route('accueil') }}">Accueil</a>
+            <i class="bi bi-chevron-right" aria-hidden="true"></i>
+            <span aria-current="page">Contact</span>
+        </nav>
 
-        {{-- Informations de contact --}}
-        <div class="row gy-4 mb-5">
-            <div class="col-md-4">
-                <div class="info-item text-center card card-medical p-4 h-100">
-                    <i class="bi bi-geo-alt-fill text-medical-blue" style="font-size:2rem;"></i>
-                    <h5 class="mt-3 fw-bold">Adresse</h5>
-                    <address class="text-muted mb-0">Abidjan, Côte d'Ivoire</address>
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="info-item text-center card card-medical p-4 h-100">
-                    <i class="bi bi-telephone-fill text-health-green" style="font-size:2rem;"></i>
-                    <h5 class="mt-3 fw-bold">Téléphone</h5>
-                    <p class="text-muted mb-0">
-                        <a href="tel:+2250103487555" class="text-medical-blue">(+225) 01 03 48 75 55</a>
-                    </p>
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="info-item text-center card card-medical p-4 h-100">
-                    <i class="bi bi-envelope-fill text-medical-teal" style="font-size:2rem;"></i>
-                    <h5 class="mt-3 fw-bold">Email</h5>
-                    <p class="text-muted mb-0">
-                        <a href="mailto:dr_akencho@yahoo.fr" class="text-medical-blue">dr_akencho@yahoo.fr</a>
-                    </p>
-                </div>
-            </div>
-        </div>
+        <div class="contact">
+            <div class="contact__intro">
+                <h1 class="page-title">Contactez-nous</h1>
+                <p class="lede">Notre équipe répond à toutes vos questions dans les plus brefs délais.</p>
 
-        {{-- Notification de succès --}}
-        @if (session('success_contact'))
-            <div class="alert alert-success d-flex align-items-center mb-4" role="alert">
-                <i class="bi bi-check-circle-fill me-2 fs-5"></i>
-                <span>{{ session('success_contact') }}</span>
-            </div>
-        @endif
+                <ul class="contact__list">
+                    @if($site['adresse'])
+                        <li>
+                            <span class="contact__icon" aria-hidden="true"><i class="bi bi-geo-alt"></i></span>
+                            <span><strong>Adresse</strong><address>{{ $site['adresse'] }}</address></span>
+                        </li>
+                    @endif
+                    @if(count($site['phones']))
+                        <li>
+                            <span class="contact__icon" aria-hidden="true"><i class="bi bi-telephone"></i></span>
+                            <span>
+                                <strong>Téléphone{{ count($site['phones']) > 1 ? 's' : '' }}</strong>
+                                @foreach($site['phones'] as $p)
+                                    <span class="contact__line"><a href="{{ $p['href'] }}">{{ $p['value'] }}</a>@if($p['label'])<small>{{ $p['label'] }}</small>@endif</span>
+                                @endforeach
+                            </span>
+                        </li>
+                    @endif
+                    @if(count($site['emails']))
+                        <li>
+                            <span class="contact__icon" aria-hidden="true"><i class="bi bi-envelope"></i></span>
+                            <span>
+                                <strong>Email{{ count($site['emails']) > 1 ? 's' : '' }}</strong>
+                                @foreach($site['emails'] as $e)
+                                    <span class="contact__line"><a href="{{ $e['href'] }}">{{ $e['value'] }}</a>@if($e['label'])<small>{{ $e['label'] }}</small>@endif</span>
+                                @endforeach
+                            </span>
+                        </li>
+                    @endif
+                    @if($site['horaires'])
+                        <li>
+                            <span class="contact__icon" aria-hidden="true"><i class="bi bi-clock"></i></span>
+                            <span><strong>Horaires</strong><span class="contact__line">{{ $site['horaires'] }}</span></span>
+                        </li>
+                    @endif
+                </ul>
 
-        {{-- Formulaire de contact --}}
-        <div class="row justify-content-center">
-            <div class="col-lg-8">
-                <div class="card card-medical shadow-medical">
-                    <div class="card-header bg-medical-light">
-                        <h4 class="mb-0 text-medical-blue fw-bold">
-                            <i class="bi bi-pencil-square me-2"></i>Envoyer un message
-                        </h4>
+                @if($site['whatsapp_url'] || count($site['socials']))
+                    <div class="contact__actions">
+                        @if($site['whatsapp_url'])
+                            <a href="{{ $site['whatsapp_url'] }}" target="_blank" rel="noopener" class="btn btn-whatsapp"><i class="bi bi-whatsapp" aria-hidden="true"></i>Écrire sur WhatsApp</a>
+                        @endif
+                        @if(count($site['socials']))
+                            <div class="contact__social">@include('site.partials.socials')</div>
+                        @endif
                     </div>
-                    <div class="card-body p-4 p-md-5">
-                        <form action="{{ route('contact.store') }}" method="POST" novalidate>
-                            @csrf
-                            <div class="row g-4">
-                                <div class="col-md-6">
-                                    <label for="contact-name" class="form-label fw-bold text-medical-blue">
-                                        <i class="bi bi-person-fill me-1"></i>Votre nom <span class="text-danger">*</span>
-                                    </label>
-                                    <input type="text"
-                                           name="name"
-                                           id="contact-name"
-                                           class="form-control form-control-lg @error('name') is-invalid @enderror"
-                                           value="{{ old('name') }}"
-                                           placeholder="Dr. Jean Dupont"
-                                           required>
-                                    @error('name')
-                                        <div class="invalid-feedback">{{ $message }}</div>
-                                    @enderror
-                                </div>
+                @endif
 
-                                <div class="col-md-6">
-                                    <label for="contact-email" class="form-label fw-bold text-medical-blue">
-                                        <i class="bi bi-envelope-fill me-1"></i>Votre email <span class="text-danger">*</span>
-                                    </label>
-                                    <input type="email"
-                                           name="email"
-                                           id="contact-email"
-                                           class="form-control form-control-lg @error('email') is-invalid @enderror"
-                                           value="{{ old('email') }}"
-                                           placeholder="exemple@email.com"
-                                           required>
-                                    @error('email')
-                                        <div class="invalid-feedback">{{ $message }}</div>
-                                    @enderror
-                                </div>
+                <aside class="notice notice--compact" aria-label="Urgence médicale">
+                    <i class="bi bi-exclamation-circle" aria-hidden="true"></i>
+                    <p>Ce formulaire ne permet pas de traiter les urgences. En cas d'urgence médicale, contactez immédiatement les services d'urgence.</p>
+                </aside>
+            </div>
 
-                                <div class="col-12">
-                                    <label for="contact-subject" class="form-label fw-bold text-medical-blue">
-                                        <i class="bi bi-chat-left-text-fill me-1"></i>Sujet <span class="text-danger">*</span>
-                                    </label>
-                                    <input type="text"
-                                           name="subject"
-                                           id="contact-subject"
-                                           class="form-control form-control-lg @error('subject') is-invalid @enderror"
-                                           value="{{ old('subject') }}"
-                                           placeholder="Question sur un article, partenariat..."
-                                           required>
-                                    @error('subject')
-                                        <div class="invalid-feedback">{{ $message }}</div>
-                                    @enderror
-                                </div>
+            <div class="contact__form panel">
+                <h2 class="panel__title">Envoyer un message</h2>
 
-                                <div class="col-12">
-                                    <label for="contact-message" class="form-label fw-bold text-medical-blue">
-                                        <i class="bi bi-pencil-fill me-1"></i>Message <span class="text-danger">*</span>
-                                    </label>
-                                    <textarea name="message"
-                                              id="contact-message"
-                                              class="form-control form-control-lg @error('message') is-invalid @enderror"
-                                              rows="6"
-                                              placeholder="Décrivez votre demande..."
-                                              required>{{ old('message') }}</textarea>
-                                    @error('message')
-                                        <div class="invalid-feedback">{{ $message }}</div>
-                                    @enderror
-                                </div>
-
-                                <div class="col-12 text-center">
-                                    <button type="submit" class="btn btn-medical btn-lg px-5">
-                                        <i class="bi bi-send-fill me-2"></i>Envoyer le message
-                                    </button>
-                                </div>
-                            </div>
-                        </form>
+                @if (session('success_contact'))
+                    <div class="success-box" role="status">
+                        <i class="bi bi-check-circle" aria-hidden="true"></i>
+                        <span>{{ session('success_contact') }}</span>
                     </div>
-                </div>
+                @endif
+
+                <form action="{{ route('contact.store') }}" method="POST" novalidate>
+                    @csrf
+                    <div class="field-row">
+                        <div class="field">
+                            <label for="contact-name">Votre nom <span class="req" aria-hidden="true">*</span></label>
+                            <input type="text" name="name" id="contact-name" class="@error('name') is-invalid @enderror" value="{{ old('name') }}" required autocomplete="name">
+                            @error('name')<p class="field__error">{{ $message }}</p>@enderror
+                        </div>
+                        <div class="field">
+                            <label for="contact-email">Votre email <span class="req" aria-hidden="true">*</span></label>
+                            <input type="email" name="email" id="contact-email" class="@error('email') is-invalid @enderror" value="{{ old('email') }}" placeholder="exemple@email.com" required autocomplete="email">
+                            @error('email')<p class="field__error">{{ $message }}</p>@enderror
+                        </div>
+                    </div>
+                    <div class="field">
+                        <label for="contact-subject">Sujet <span class="req" aria-hidden="true">*</span></label>
+                        <input type="text" name="subject" id="contact-subject" class="@error('subject') is-invalid @enderror" value="{{ old('subject') }}" placeholder="Question sur un article, partenariat…" required>
+                        @error('subject')<p class="field__error">{{ $message }}</p>@enderror
+                    </div>
+                    <div class="field">
+                        <label for="contact-message">Message <span class="req" aria-hidden="true">*</span></label>
+                        <textarea name="message" id="contact-message" class="@error('message') is-invalid @enderror" rows="6" placeholder="Décrivez votre demande…" required>{{ old('message') }}</textarea>
+                        @error('message')<p class="field__error">{{ $message }}</p>@enderror
+                    </div>
+                    <button type="submit" class="btn btn-medical">Envoyer le message</button>
+                </form>
             </div>
         </div>
-
     </div>
 </section>
 @endsection

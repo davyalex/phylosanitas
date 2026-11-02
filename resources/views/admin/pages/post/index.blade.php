@@ -64,6 +64,7 @@
                                         <th>Titre</th>
                                         <th class="table-admin-hide">Catégorie</th>
                                         <th>Statut</th>
+                                        <th class="text-center">Vues</th>
                                         <th class="table-admin-hide">Commentaires</th>
                                         <th class="table-admin-hide">Date</th>
                                         <th>Actions</th>
@@ -82,7 +83,7 @@
                                             </td>
 
                                             <td>
-                                                <span class="fw-semibold d-block" style="max-width:200px;">{{ Str::limit($item->title, 45, '…') }}</span>
+                                                <a href="{{ route('post.show', $item->id) }}" class="fw-semibold d-block text-decoration-none text-reset" style="max-width:240px;" title="Voir le détail">{{ Str::limit($item->title, 55, '…') }}</a>
                                                 <span class="badge bg-secondary d-md-none mt-1">{{ $item->category->title }}</span>
                                             </td>
 
@@ -108,10 +109,16 @@
                                                 @endif
                                             </td>
 
+                                            <td class="text-center" data-sort="{{ (int) ($item->views_count ?? 0) }}">
+                                                <span class="views-pill" title="{{ number_format($item->views_count ?? 0, 0, ',', ' ') }} vue{{ ($item->views_count ?? 0) > 1 ? 's' : '' }}">
+                                                    <i class="bi bi-eye" aria-hidden="true"></i>{{ number_format($item->views_count ?? 0, 0, ',', ' ') }}
+                                                </span>
+                                            </td>
+
                                             <td class="text-center table-admin-hide">
                                                 <span class="badge bg-light text-dark">
                                                     <i class="bi bi-chat-left-quote text-muted me-1"></i>
-                                                    {{ $item->commentaires->count() }}
+                                                    {{ $item->commentaires_count }}
                                                 </span>
                                             </td>
 
@@ -120,54 +127,12 @@
                                             </td>
 
                                             <td>
-                                                <div class="d-flex gap-1 flex-nowrap">
-                                                    {{-- Publier / Dépublier --}}
-                                                    <a href="{{ route('post.published', $item->id) }}"
-                                                       class="btn btn-sm {{ $item->published === 'public' ? 'btn-warning' : 'btn-success' }}"
-                                                       title="{{ $item->published === 'public' ? 'Mettre en brouillon' : 'Publier' }}">
-                                                        <i class="bi bi-{{ $item->published === 'public' ? 'eye-slash' : 'eye' }}"></i>
-                                                    </a>
-
-                                                    {{-- Mettre à la une --}}
-                                                    <a href="/admin/post/actualite?actualite_une={{ $item->actualite_une ? 0 : 1 }}&actualite={{ $item->id }}"
-                                                       class="btn btn-sm {{ $item->actualite_une ? 'btn-info' : 'btn-outline-info' }}"
-                                                       title="{{ $item->actualite_une ? 'Retirer de la une' : 'Mettre à la une' }}">
-                                                        <i class="bi bi-star{{ $item->actualite_une ? '-fill' : '' }}"></i>
-                                                    </a>
-
-                                                    {{-- Voir en ligne --}}
-                                                    <a href="{{ route('post.detail', ['slug' => $item->slug]) }}"
-                                                       target="_blank"
-                                                       class="btn btn-sm btn-outline-secondary"
-                                                       title="Voir sur le site">
-                                                        <i class="bi bi-box-arrow-up-right"></i>
-                                                    </a>
-
-                                                    {{-- Modifier --}}
-                                                    <a href="{{ route('post.edit', $item->slug) }}"
-                                                       class="btn btn-sm btn-primary"
-                                                       title="Modifier">
-                                                        <i class="bi bi-pencil"></i>
-                                                    </a>
-
-                                                    {{-- Supprimer --}}
-                                                    <form action="{{ route('post.delete', $item->id) }}" method="POST">
-                                                        @csrf
-                                                        <button type="button"
-                                                                class="btn btn-sm btn-danger"
-                                                                data-bs-toggle="modal"
-                                                                data-bs-target="#confirmDelete{{ $item->id }}"
-                                                                title="Supprimer">
-                                                            <i class="bi bi-trash"></i>
-                                                        </button>
-                                                        @include('admin.partials.deleteConfirm')
-                                                    </form>
-                                                </div>
+                                                @include('admin.pages.post._actions', ['item' => $item, 'isPoll' => false])
                                             </td>
                                         </tr>
                                     @empty
                                         <tr>
-                                            <td colspan="8" class="text-center text-muted py-4">
+                                            <td colspan="9" class="text-center text-muted py-4">
                                                 <i class="bi bi-journal-x fs-3 d-block mb-2"></i>
                                                 Aucun article trouvé.
                                             </td>

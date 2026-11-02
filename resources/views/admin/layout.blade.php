@@ -12,9 +12,10 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
 
   <link href="{{ asset('assets_admin/vendor/bootstrap/css/bootstrap.min.css') }}" rel="stylesheet">
-  <link href="{{ asset('assets_admin/vendor/bootstrap-icons/bootstrap-icons.css') }}" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
   <link href="{{ asset('assets_admin/vendor/simple-datatables/style.css') }}" rel="stylesheet">
   <link href="{{ asset('assets_admin/css/style.css') }}" rel="stylesheet">
+  <link href="{{ asset('assets_admin/css/admin-ui.css') }}?v={{ @filemtime(public_path('assets_admin/css/admin-ui.css')) }}" rel="stylesheet">
 
   <script src="{{ asset('assets_admin/js/jquery.min.js') }}"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/js/toastr.min.js"></script>
@@ -486,6 +487,38 @@
     </a>
     @endrole
 
+    <a href="{{ route('flash.index') }}"
+       class="sb-link {{ request()->routeIs('flash.*') ? 'active' : '' }}">
+      <span class="sb-icon"><i class="bi bi-lightning-charge"></i></span>
+      Infos flash
+      @if(($admin_badges['flash'] ?? 0) > 0)<span class="sb-badge" title="En ligne">{{ $admin_badges['flash'] }}</span>@endif
+    </a>
+
+    {{-- ── Audience & revenus ── --}}
+    @role('administrateur')
+    <div class="sb-section-label">Audience & revenus</div>
+
+    <a href="{{ route('publicite.index') }}"
+       class="sb-link {{ request()->routeIs('publicite.*') ? 'active' : '' }}">
+      <span class="sb-icon"><i class="bi bi-badge-ad"></i></span>
+      Publicités
+      @if(($admin_badges['pubs'] ?? 0) > 0)<span class="sb-badge" title="En diffusion">{{ $admin_badges['pubs'] }}</span>@endif
+    </a>
+
+    <a href="{{ route('messages.index') }}"
+       class="sb-link {{ request()->routeIs('messages.*') ? 'active' : '' }}">
+      <span class="sb-icon"><i class="bi bi-envelope"></i></span>
+      Messages
+      @if(($admin_badges['messages'] ?? 0) > 0)<span class="sb-badge sb-badge--alert" title="Non lus">{{ $admin_badges['messages'] }}</span>@endif
+    </a>
+
+    <a href="{{ route('newsletter.index') }}"
+       class="sb-link {{ request()->routeIs('newsletter.*') ? 'active' : '' }}">
+      <span class="sb-icon"><i class="bi bi-envelope-paper-heart"></i></span>
+      Newsletter
+    </a>
+    @endrole
+
     {{-- ── Administration ── --}}
     @role('administrateur')
     <div class="sb-section-label">Administration</div>
@@ -500,6 +533,12 @@
        class="sb-link {{ request()->routeIs('actualite.index') ? 'active' : '' }}">
       <span class="sb-icon"><i class="bi bi-images"></i></span>
       Carrousel Hero
+    </a>
+
+    <a href="{{ route('settings.edit') }}"
+       class="sb-link {{ request()->routeIs('settings.*') ? 'active' : '' }}">
+      <span class="sb-icon"><i class="bi bi-gear"></i></span>
+      Configuration
     </a>
     @endrole
 
@@ -525,6 +564,17 @@
 {{-- ══════ MAIN ══════ --}}
 <main id="main">
 
+  @hasSection('page_header')
+    {{-- En-tête riche : titre + description + actions --}}
+    <nav aria-label="breadcrumb" class="mb-2">
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{{ route('dashboard') }}"><i class="bi bi-house me-1"></i>Accueil</a></li>
+        @yield('breadcrumb')
+        <li class="breadcrumb-item active">@yield('title', 'Dashboard')</li>
+      </ol>
+    </nav>
+    @yield('page_header')
+  @else
   <div class="pagetitle">
     <h1>@yield('title', 'Dashboard')</h1>
     <nav aria-label="breadcrumb">
@@ -534,6 +584,17 @@
       </ol>
     </nav>
   </div>
+  @endif
+
+  @if($errors->any() && !View::hasSection('inline_errors'))
+    <div class="alert alert-danger d-flex gap-2 align-items-start" role="alert">
+      <i class="bi bi-exclamation-triangle-fill mt-1"></i>
+      <div>
+        <strong>Le formulaire contient {{ $errors->count() }} erreur{{ $errors->count() > 1 ? 's' : '' }} :</strong>
+        <ul class="mb-0 ps-3">@foreach($errors->all() as $e)<li>{{ $e }}</li>@endforeach</ul>
+      </div>
+    </div>
+  @endif
 
   @yield('content')
   @include('sweetalert::alert')
@@ -556,6 +617,8 @@
 <script src="{{ asset('assets_admin/vendor/simple-datatables/simple-datatables.js') }}"></script>
 <script src="{{ asset('assets_admin/vendor/tinymce/tinymce.min.js') }}"></script>
 <script src="{{ asset('assets_admin/js/main.js') }}"></script>
+<script src="{{ asset('assets_admin/js/admin-ui.js') }}?v={{ @filemtime(public_path('assets_admin/js/admin-ui.js')) }}"></script>
+@stack('scripts')
 
 <script>
   // Toastr notifications

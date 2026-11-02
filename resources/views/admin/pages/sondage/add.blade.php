@@ -10,14 +10,9 @@
         </div>
     </div>
 
-    {{-- Catégorie (cachée, auto-sélectionnée sur "sondage") --}}
-    <div class="col-lg-6 d-none">
-        <select name="category" required>
-            @foreach ($category as $item)
-                <option value="{{ $item['id'] }}" selected>{{ $item['title'] }}</option>
-            @endforeach
-        </select>
-    </div>
+    {{-- Catégorie : toujours « Sondage » --}}
+    @php $sondageCat = $category->first(fn($c) => strtolower($c->title) === 'sondage' || strtolower($c->slug) === 'sondage'); @endphp
+    <input type="hidden" name="category" value="{{ $sondageCat->id ?? '' }}">
 
     {{-- Question --}}
     <div class="col-12">

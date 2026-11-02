@@ -8,6 +8,7 @@ use App\Models\CarouselSlide;
 use App\Models\Soumission;
 use App\Models\ContactMessage;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Cache;
 use Stevebauman\Location\Facades\Location;
@@ -58,8 +59,9 @@ class SiteController extends Controller
     public function post(Request $request)
     {
         try {
-            $slug_req     = $request->input('category');
+            $slug_req     = $request->route('category');
             $category_req = $slug_req ? Category::whereSlug($slug_req)->first() : null;
+            if ($slug_req && !$category_req) abort(404);
 
             $post = Post::with($this->listWith())
                 ->select(self::LIST_SELECT)
@@ -71,6 +73,8 @@ class SiteController extends Controller
                 ->paginate(10);
 
             return view('site.pages.post', compact('post', 'category_req'));
+        } catch (\Symfony\Component\HttpKernel\Exception\HttpExceptionInterface $e) {
+            throw $e;
         } catch (\Throwable) {
             return redirect()->route('accueil');
         }
@@ -79,7 +83,7 @@ class SiteController extends Controller
     public function detail(Request $request)
     {
         try {
-            $slug_req = $request->input('slug');
+            $slug_req = $request->route('slug');
             if (!$slug_req) return redirect()->route('accueil');
 
             // Cache 5 min — invalidé par PostObserver à chaque modification
@@ -115,10 +119,97 @@ class SiteController extends Controller
             // Enregistrement de la vue APRÈS envoi de la réponse (non bloquant)
             $this->scheduleRecordView($post->id, $request->getClientIp());
 
-            return view('site.pages.detail', compact('post', 'statistic_sondage', 'sondage_total'));
+            // Réponse déjà donnée par ce visiteur (sondages) : on affiche alors les résultats
+            $my_vote = null;
+            if (strtolower($post->category->title ?? '') === 'sondage') {
+                $my_vote = session("poll_votes.{$post->id}")
+                    ?? Soumission::where('post_id', $post->id)->where('user_session', $request->session()->getId())->value('option_sondage_id');
+            }
+
+            return view('site.pages.detail', compact('post', 'statistic_sondage', 'sondage_total', 'my_vote'));
+        } catch (\Symfony\Component\HttpKernel\Exception\HttpExceptionInterface $e) {
+            throw $e; // vraie 404 pour les moteurs de recherche
         } catch (\Throwable) {
             return redirect()->route('accueil');
         }
+    }
+
+    /** Ancienne URL /post?category=x → /articles/x (301) */
+    public function legacyList(Request $request)
+    {
+        $params = array_filter(['category' => $request->query('category')]);
+        $query  = $request->query('page') ? ['page' => $request->query('page')] : [];
+
+        return redirect()->to(route('post.list', $params) . ($query ? '?' . http_build_query($query) : ''), 301);
+    }
+
+    /** Ancienne URL /post/detail?slug=x → /article/x (301) */
+    public function legacyDetail(Request $request)
+    {
+        $slug = $request->query('slug');
+        abort_unless($slug && preg_match('/^[A-Za-z0-9\-_]+$/', $slug), 404);
+
+        return redirect()->route('post.detail', ['slug' => $slug], 301);
+    }
+
+    /** Manifeste PWA (nom, couleurs, icônes) — reprend Admin > Configuration */
+    public function manifest()
+    {
+        $site = \App\Models\Setting::forViews();
+        $nom  = $site['nom'];
+
+        $manifest = [
+            'id'               => '/',
+            'name'             => $nom . ($site['slogan'] ? ' — ' . $site['slogan'] : ''),
+            'short_name'       => Str::limit($nom, 12, ''),
+            'description'      => $site['description'] ?: 'Articles médicaux, actualités santé et conseils bien-être.',
+            'lang'             => 'fr',
+            'dir'              => 'ltr',
+            'start_url'        => '/?source=pwa',
+            'scope'            => '/',
+            'display'          => 'standalone',
+            'orientation'      => 'portrait-primary',
+            'background_color' => '#ffffff',
+            'theme_color'      => '#004A99',
+            'categories'       => ['health', 'medical', 'news', 'education'],
+            'icons'            => [
+                ['src' => asset('assets_site/img/android-chrome-192x192.png'), 'sizes' => '192x192', 'type' => 'image/png', 'purpose' => 'any'],
+                ['src' => asset('assets_site/img/android-chrome-512x512.png'), 'sizes' => '512x512', 'type' => 'image/png', 'purpose' => 'any'],
+                ['src' => asset('assets_site/img/android-chrome-512x512.png'), 'sizes' => '512x512', 'type' => 'image/png', 'purpose' => 'maskable'],
+            ],
+            'shortcuts'        => [
+                ['name' => 'Tous les articles', 'url' => '/articles?source=pwa', 'icons' => [['src' => asset('assets_site/img/android-chrome-192x192.png'), 'sizes' => '192x192']]],
+                ['name' => 'Rechercher', 'url' => '/recherche?source=pwa', 'icons' => [['src' => asset('assets_site/img/android-chrome-192x192.png'), 'sizes' => '192x192']]],
+                ['name' => 'Contact', 'url' => '/contact?source=pwa', 'icons' => [['src' => asset('assets_site/img/android-chrome-192x192.png'), 'sizes' => '192x192']]],
+            ],
+        ];
+
+        return response()->json($manifest, 200, ['Content-Type' => 'application/manifest+json; charset=UTF-8'], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+    }
+
+    /** Page affichée par l'application quand il n'y a pas de connexion */
+    public function offline()
+    {
+        return view('site.pages.offline', ['site' => \App\Models\Setting::forViews()]);
+    }
+
+    /** Plan du site XML pour Google / Bing (cache 1 h) */
+    public function sitemap()
+    {
+        $xml = Cache::remember('sitemap_xml', 3600, function () {
+            $posts = Post::select('slug', 'updated_at', 'created_at')
+                ->with(['media' => fn($q) => $q->where('collection_name', 'image')])
+                ->where('published', 'public')
+                ->whereNotNull('slug')
+                ->latest()
+                ->get();
+
+            $categories = Category::select('id', 'slug', 'updated_at')->get();
+
+            return view('site.sitemap', compact('posts', 'categories'))->render();
+        });
+
+        return response($xml, 200, ['Content-Type' => 'application/xml; charset=UTF-8']);
     }
 
     public function search(Request $request)

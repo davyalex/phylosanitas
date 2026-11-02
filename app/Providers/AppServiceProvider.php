@@ -35,6 +35,11 @@ class AppServiceProvider extends ServiceProvider
 
         if ($this->tablesExist()) {
             $this->shareDataWithAllViews();
+
+            // Nom du site modifiable depuis Admin > Configuration
+            if ($nom = \App\Models\Setting::get('site_nom')) {
+                config(['app.name' => $nom]);
+            }
         }
     }
 
@@ -49,13 +54,37 @@ class AppServiceProvider extends ServiceProvider
 
     private function shareDataWithAllViews(): void
     {
-        View::composer('*', function ($view) {
+        View::composer(['site.*', 'admin.*', 'welcome', 'maintenance'], function ($view) {
             $view->with([
                 'category'          => $this->getCategories(),
                 'post_last'         => $this->getRecentPosts(),
                 'post_popular'      => $this->getPopularPosts(),
                 'sondage_front'     => $this->getSurveys(),
                 'actualite_externe' => $this->getExternalNews(),
+                'site'              => \App\Models\Setting::forViews(),
+            ]);
+        });
+
+        // Compteurs du menu d'administration
+        View::composer('admin.layout', function ($view) {
+            $view->with('admin_badges', Cache::remember('admin_badges', 60, function () {
+                try {
+                    return [
+                        'messages' => \App\Models\ContactMessage::where('status', 'new')->count(),
+                        'flash'    => \App\Models\FlashInfo::visible()->count(),
+                        'pubs'     => \App\Models\Publicite::diffusable()->count(),
+                    ];
+                } catch (\Throwable) {
+                    return ['messages' => 0, 'flash' => 0, 'pubs' => 0];
+                }
+            }));
+        });
+
+        // Données propres au gabarit public (bandeau infos flash + compteur de visites)
+        View::composer('site.layout', function ($view) {
+            $view->with([
+                'flash_infos' => \App\Models\FlashInfo::forSite(),
+                'site_visits' => \App\Http\Middleware\CountSiteVisit::totals(),
             ]);
         });
     }

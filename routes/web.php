@@ -11,6 +11,10 @@ use App\Http\Controllers\CarouselController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\CommentaireController;
 use App\Http\Controllers\NewsletterController;
+use App\Http\Controllers\FlashInfoController;
+use App\Http\Controllers\PubliciteController;
+use App\Http\Controllers\MessageController;
+use App\Http\Controllers\SettingController;
 
 /*
 |--------------------------------------------------------------------------
@@ -73,7 +77,9 @@ Route::middleware('auth')->prefix('admin')->group(function () {
         Route::post('destroy/{id}', 'destroy')->name('post.delete');
         Route::get('published/{id}', 'published')->name('post.published');
         Route::get('actualite', 'actualite_une'); //Mettre une actualite à la une
-        Route::post('upload-image', 'uploadTinyMCEImage')->name('post.upload-image'); // les image de tinyMce 
+        Route::post('upload-image', 'uploadTinyMCEImage')->name('post.upload-image');
+        Route::get('{id}/detail', 'show')->name('post.show')->whereNumber('id');
+        Route::delete('commentaire/{id}', 'destroyComment')->name('post.comment.delete')->whereNumber('id'); // les image de tinyMce 
 
 
     });
@@ -86,6 +92,45 @@ Route::middleware('auth')->prefix('admin')->group(function () {
         Route::get('toggle/{id}',    'toggleActive')->name('actualite.toggle');
         Route::get('up/{id}',        'moveUp')->name('actualite.up');
         Route::get('down/{id}',      'moveDown')->name('actualite.down');
+    });
+
+    /** Infos flash (bandeau défilant du site) */
+    Route::controller(FlashInfoController::class)->prefix('infos-flash')->name('flash.')->group(function () {
+        Route::get('/',                 'index')->name('index');
+        Route::post('/',                'store')->name('store');
+        Route::put('{flash}',           'update')->name('update');
+        Route::patch('{flash}/toggle',  'toggle')->name('toggle');
+        Route::delete('{flash}',        'destroy')->name('destroy');
+    });
+
+    /** Administrateurs uniquement */
+    Route::middleware('role:administrateur')->group(function () {
+
+        /** Publicités */
+        Route::controller(PubliciteController::class)->prefix('publicites')->name('publicite.')->group(function () {
+            Route::get('/',                      'index')->name('index');
+            Route::get('create',                 'create')->name('create');
+            Route::post('/',                     'store')->name('store');
+            Route::get('{publicite}/edit',       'edit')->name('edit');
+            Route::put('{publicite}',            'update')->name('update');
+            Route::patch('{publicite}/toggle',   'toggle')->name('toggle');
+            Route::patch('{publicite}/reset',    'resetStats')->name('reset');
+            Route::delete('{publicite}',         'destroy')->name('destroy');
+        });
+
+        /** Configuration du site (coordonnées, logo, slogan, réseaux) */
+        Route::get('configuration', [SettingController::class, 'edit'])->name('settings.edit');
+        Route::put('configuration', [SettingController::class, 'update'])->name('settings.update');
+
+        /** Messages de contact & newsletter */
+        Route::controller(MessageController::class)->group(function () {
+            Route::get('messages',                     'index')->name('messages.index');
+            Route::get('messages/{message}',           'show')->name('messages.show');
+            Route::patch('messages/{message}/traite',  'markReplied')->name('messages.replied');
+            Route::delete('messages/{message}',        'destroy')->name('messages.destroy');
+            Route::get('newsletter',                   'newsletter')->name('newsletter.index');
+            Route::get('newsletter/export',            'exportNewsletter')->name('newsletter.export');
+        });
     });
 });
 
@@ -103,12 +148,44 @@ route::controller(SondageController::class)->prefix('sondage')->group(function (
 //api pour le site
 route::controller(SiteController::class)->group(function () {
     route::get('', 'index')->name('accueil');
-    route::get('post', 'post')->name('post.list');
-    route::get('post/detail', 'detail')->name('post.detail');
+
+    // URLs lisibles (SEO) : /articles, /articles/{categorie}, /article/{slug}
+    route::get('articles/{category?}', 'post')->name('post.list')->where('category', '[a-z0-9\-]+');
+    route::get('article/{slug}', 'detail')->name('post.detail')->where('slug', '[A-Za-z0-9\-_]+');
+
+    // Anciennes URLs → redirection permanente (301) pour conserver le référencement
+    route::get('post', 'legacyList');
+    route::get('post/detail', 'legacyDetail');
+
     route::get('contact', 'contact')->name('contact');
     route::post('contact', 'contact')->name('contact.store');
-    route::post('post/search', 'search')->name('search');
+    route::match(['get', 'post'], 'recherche', 'search')->name('search');
+    route::post('post/search', 'search');
+
+    route::get('sitemap.xml', 'sitemap')->name('sitemap');
+
+    // Application installable (PWA)
+    route::get('manifest.webmanifest', 'manifest')->name('manifest');
+    route::get('hors-ligne', 'offline')->name('offline');
 });
+
+// robots.txt dynamique (pointe vers le sitemap avec le bon domaine)
+route::get('robots.txt', function () {
+    $lines = [
+        'User-agent: *',
+        'Disallow: /admin',
+        'Disallow: /login',
+        'Disallow: /recherche',
+        'Disallow: /post/search',
+        'Disallow: /pub/',
+        '',
+        'Sitemap: ' . route('sitemap'),
+    ];
+    return response(implode("\n", $lines) . "\n", 200, ['Content-Type' => 'text/plain; charset=UTF-8']);
+});
+
+// Clic sur une publicité (compté puis redirigé vers l'annonceur)
+route::get('pub/{publicite}', [PubliciteController::class, 'click'])->name('publicite.click');
 
 route::post('newsletter/subscribe', [NewsletterController::class, 'store'])->name('newsletter.store');
 

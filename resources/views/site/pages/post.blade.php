@@ -1,121 +1,112 @@
+@php
+    $listName = $category_req ? $category_req->title : 'Tous les articles santé';
+    $pageNum  = $post->currentPage();
+@endphp
 @extends('site.layout')
-@section('title', $category_req ? Str::title($category_req->title) : 'Articles')
-@section('description', 'Parcourez les articles de la catégorie ' . ($category_req ? $category_req->title : 'santé') . ' sur PhyloSanitas.')
+@section('title', $listName . ($pageNum > 1 ? " — page $pageNum" : ''))
+@section('description', $category_req
+    ? "Articles et conseils santé sur le thème « {$category_req->title} » : informations fiables et accessibles, rédigées par des professionnels de santé."
+    : "Tous les articles santé de " . config('app.name') . " : actualités médicales, prévention, nutrition, conseils bien-être et sondages.")
+@section('canonical', $post->url($pageNum) === $post->url(1) ? route('post.list', array_filter(['category' => $category_req->slug ?? null])) : $post->url($pageNum))
+
+@push('meta')
+    @if($post->previousPageUrl())<link rel="prev" href="{{ $post->previousPageUrl() }}">@endif
+    @if($post->nextPageUrl())<link rel="next" href="{{ $post->nextPageUrl() }}">@endif
+@endpush
+
+@push('jsonld')
+<script type="application/ld+json">
+{!! json_encode([
+    '@context' => 'https://schema.org',
+    '@type'    => 'BreadcrumbList',
+    'itemListElement' => array_values(array_filter([
+        ['@type' => 'ListItem', 'position' => 1, 'name' => 'Accueil', 'item' => route('accueil')],
+        ['@type' => 'ListItem', 'position' => 2, 'name' => 'Articles', 'item' => route('post.list')],
+        $category_req ? ['@type' => 'ListItem', 'position' => 3, 'name' => $category_req->title, 'item' => route('post.list', ['category' => $category_req->slug])] : null,
+    ])),
+], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) !!}
+</script>
+@endpush
 
 @section('content')
-<section class="category-list-section py-5 mt-4">
+<section class="section section--tight">
     <div class="container-xl">
-        <div class="row g-4">
 
-            {{-- Colonne principale --}}
-            <div class="col-lg-9" data-aos="fade-up">
+        <nav aria-label="Fil d'Ariane" class="crumbs">
+            <a href="{{ route('accueil') }}">Accueil</a>
+            <i class="bi bi-chevron-right" aria-hidden="true"></i>
+            @if($category_req)
+                <a href="{{ route('post.list') }}">Articles</a>
+                <i class="bi bi-chevron-right" aria-hidden="true"></i>
+                <span aria-current="page">{{ $category_req->title }}</span>
+            @else
+                <span aria-current="page">Articles</span>
+            @endif
+        </nav>
 
-                {{-- En-tête catégorie --}}
-                <div class="cat-list-header">
-                    <a href="javascript:history.go(-1)" class="cat-list-back">
-                        <i class="bi bi-arrow-left"></i>
-                    </a>
-                    <div class="cat-list-info">
-                        @if($category_req)
-                            @php
-                                $ico = match(true) {
-                                    str_contains(strtolower($category_req->slug),'actualite') => 'newspaper',
-                                    str_contains(strtolower($category_req->slug),'sondage')   => 'bar-chart-fill',
-                                    str_contains(strtolower($category_req->title),'nutri')    => 'egg-fried',
-                                    str_contains(strtolower($category_req->title),'sport')    => 'heart-pulse-fill',
-                                    str_contains(strtolower($category_req->title),'obés')     => 'person-arms-up',
-                                    str_contains(strtolower($category_req->title),'scolaire') => 'mortarboard-fill',
-                                    default => 'collection-fill',
-                                };
-                            @endphp
-                            <span class="cat-list-icon"><i class="bi bi-{{ $ico }}"></i></span>
-                            <h1 class="cat-list-title">{{ Str::title($category_req->title) }}</h1>
-                        @else
-                            <span class="cat-list-icon"><i class="bi bi-newspaper"></i></span>
-                            <h1 class="cat-list-title">Tous les articles</h1>
-                        @endif
-                    </div>
-                    <span class="cat-list-count">{{ $post->total() }} article{{ $post->total() > 1 ? 's' : '' }}</span>
-                </div>
+        <header class="page-head">
+            <span class="page-head__icon" aria-hidden="true">
+                @if($category_req)<x-cat-icon :cat="$category_req" />@else<i class="bi bi-collection"></i>@endif
+            </span>
+            <div>
+                <h1 class="page-head__title">{{ $category_req ? $category_req->title : 'Tous les articles' }}</h1>
+                <p class="page-head__sub">{{ $post->total() }} article{{ $post->total() > 1 ? 's' : '' }} publié{{ $post->total() > 1 ? 's' : '' }}</p>
+            </div>
+        </header>
 
-                {{-- Liste articles --}}
+        <div class="layout">
+            <div class="layout__main">
                 @if($post->isEmpty())
-                    <div class="empty-state text-center py-5">
-                        <i class="bi bi-journal-x empty-state-icon"></i>
-                        <h5 class="mt-3">Aucun article dans cette catégorie.</h5>
-                        <a href="{{ route('accueil') }}" class="btn btn-medical mt-3">
-                            <i class="bi bi-house-fill me-2"></i>Retour à l'accueil
-                        </a>
+                    <div class="empty">
+                        <i class="bi bi-journal-x" aria-hidden="true"></i>
+                        <h2>Aucun article dans cette catégorie</h2>
+                        <p>Revenez bientôt, ou explorez une autre thématique.</p>
+                        <a href="{{ route('accueil') }}" class="btn btn-medical">Retour à l'accueil</a>
                     </div>
                 @else
-                    <div class="post-list mt-4">
+                    <div class="post-list">
                         @foreach($post as $item)
                             @php
-                                $rawTitle = $item->title ?? strip_tags($item->description ?? '');
-                                $title    = Str::title(Str::limit($rawTitle, 80));
-                                $catSlug  = strtolower($item->category->slug ?? '');
-                                $catIcon  = match(true) {
-                                    str_contains($catSlug,'actualite') => 'newspaper',
-                                    str_contains($catSlug,'sondage')   => 'bar-chart-fill',
-                                    str_contains(strtolower($item->category->title ?? ''),'sport') => 'heart-pulse-fill',
-                                    str_contains(strtolower($item->category->title ?? ''),'obés')  => 'person-arms-up',
-                                    str_contains(strtolower($item->category->title ?? ''),'scolaire') => 'mortarboard-fill',
-                                    default => 'file-medical-fill',
-                                };
+                                $title = $item->title ?: Str::limit(strip_tags($item->description ?? ''), 110);
+                                $url   = route('post.detail', ['slug' => $item->slug]);
                             @endphp
-                            <article class="post-list-item">
-                                <a href="{{ route('post.detail', ['slug' => $item->slug]) }}"
-                                   class="post-list-thumb">
-                                    <img src="{{ $item->getFirstMediaUrl('image') ?: asset('assets_site/img/medc.jpg') }}"
-                                         loading="lazy"
-                                         alt="{{ $rawTitle }}">
+                            <article class="litem">
+                                <div class="litem__media">
+                                    <x-media-img :model="$item" :alt="$title" sizes="(min-width: 576px) 260px, 112px" />
                                     @if($item->lien)
-                                        <span class="post-list-ext" title="Lien externe">
-                                            <i class="bi bi-box-arrow-up-right"></i>
-                                        </span>
+                                        <span class="litem__ext" title="Source externe"><i class="bi bi-box-arrow-up-right" aria-hidden="true"></i><span class="visually-hidden">Source externe</span></span>
                                     @endif
-                                </a>
-                                <div class="post-list-body">
-                                    <span class="post-list-cat">
-                                        <i class="bi bi-{{ $catIcon }} me-1"></i>
-                                        {{ $item->category->title ?? '' }}
-                                    </span>
-                                    <h2 class="post-list-title">
-                                        <a href="{{ route('post.detail', ['slug' => $item->slug]) }}">
-                                            {{ $title }}
-                                        </a>
-                                    </h2>
-                                    <div class="post-list-meta">
-                                        <span><i class="bi bi-calendar3"></i> {{ \Carbon\Carbon::parse($item->created_at)->diffForHumans() }}</span>
+                                </div>
+                                <div class="litem__body">
+                                    @if($item->category)
+                                        <span class="litem__cat"><x-cat-icon :cat="$item->category" />{{ $item->category->title }}</span>
+                                    @endif
+                                    <h2 class="litem__title"><a href="{{ $url }}" class="litem__link">{{ $title }}</a></h2>
+                                    <div class="meta">
+                                        <time datetime="{{ \Carbon\Carbon::parse($item->created_at)->toDateString() }}"><i class="bi bi-calendar3" aria-hidden="true"></i>{{ \Carbon\Carbon::parse($item->created_at)->diffForHumans() }}</time>
+                                        <span><i class="bi bi-eye" aria-hidden="true"></i>{{ number_format($item->views_count ?? 0, 0, ',', ' ') }} vue{{ ($item->views_count ?? 0) > 1 ? 's' : '' }}</span>
                                         @if(($item->commentaires_count ?? 0) > 0)
-                                            <span><i class="bi bi-chat-left-quote"></i> {{ $item->commentaires_count }} commentaire{{ $item->commentaires_count > 1 ? 's' : '' }}</span>
+                                            <span><i class="bi bi-chat-left-text" aria-hidden="true"></i>{{ $item->commentaires_count }}</span>
                                         @endif
-                                        <span><i class="bi bi-eye-fill"></i> {{ number_format($item->views_count ?? 0) }} vue{{ ($item->views_count ?? 0) > 1 ? 's' : '' }}</span>
                                     </div>
-                                    <a href="{{ route('post.detail', ['slug' => $item->slug]) }}"
-                                       class="post-list-read">
-                                        Lire l'article <i class="bi bi-arrow-right ms-1"></i>
-                                    </a>
+                                    <span class="litem__read" aria-hidden="true">Lire l'article <i class="bi bi-arrow-right"></i></span>
                                 </div>
                             </article>
+                            @if($loop->iteration === 5 && $post->count() > 6)
+                                <x-ad-slot format="infeed" />
+                            @endif
                         @endforeach
                     </div>
 
-                    {{-- Pagination --}}
-                    <div class="d-flex justify-content-center mt-5">
+                    <div class="pager-wrap">
                         {!! $post->appends(request()->query())->links('vendor.pagination.custom') !!}
                     </div>
                 @endif
-
-            </div>{{-- /col-lg-9 --}}
-
-            {{-- Sidebar --}}
-            <div class="col-lg-3">
-                <div class="sidebar-wrapper sticky-sidebar">
-                    @include('site.pages.sections.sidebar')
-                </div>
             </div>
 
+            <aside class="layout__side" aria-label="Compléments">
+                @include('site.pages.sections.sidebar')
+            </aside>
         </div>
     </div>
 </section>

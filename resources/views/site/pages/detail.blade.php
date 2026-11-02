@@ -1,322 +1,236 @@
+@php
+    $title     = $post->title ?: Str::limit(strip_tags($post->description ?? ''), 110);
+    $plainText = trim(preg_replace('/\s+/u', ' ', html_entity_decode(strip_tags($post->description ?? ''), ENT_QUOTES, 'UTF-8')));
+    $metaDesc  = $post->meta_description ?: Str::limit($plainText, 158, '…');
+    $wordCount = str_word_count($plainText);
+    $readMin   = max(1, (int) round($wordCount / 200));
+    $isPoll    = strtolower($post->category->title ?? '') === 'sondage';
+    $shareUrl  = route('post.detail', ['slug' => $post->slug]);
+    $imageUrl  = $post->getFirstMediaUrl('image') ? url($post->getFirstMediaUrl('image')) : asset('assets_site/img/logo/logo_tp.png');
+    $related   = isset($post_last) ? $post_last->where('id', '!=', $post->id)->take(3) : collect();
+@endphp
+
 @extends('site.layout')
-@section('title', Str::title($post->title ?? strip_tags($post->description ?? '')))
-@section('description', Str::limit(strip_tags($post->description ?? ''), 160))
-@section('image', asset($post->getFirstMediaUrl('image')))
-@section('url', url()->full())
+@section('title', Str::limit($title, 65, '…'))
+@section('description', $metaDesc)
+@section('image', $imageUrl)
+@section('canonical', $shareUrl)
+@section('og_type', 'article')
+
+@push('meta')
+    <meta property="article:published_time" content="{{ \Carbon\Carbon::parse($post->created_at)->toIso8601String() }}">
+    <meta property="article:modified_time" content="{{ \Carbon\Carbon::parse($post->updated_at ?? $post->created_at)->toIso8601String() }}">
+    @if($post->category)<meta property="article:section" content="{{ $post->category->title }}">@endif
+@endpush
+
+@push('jsonld')
+<script type="application/ld+json">
+{!! json_encode([
+    '@context' => 'https://schema.org',
+    '@graph'   => array_values(array_filter([
+        [
+            '@type'            => $isPoll ? 'WebPage' : 'Article',
+            '@id'              => $shareUrl . '#article',
+            'mainEntityOfPage' => $shareUrl,
+            'headline'         => Str::limit($title, 110, ''),
+            'description'      => $metaDesc,
+            'image'            => [$imageUrl],
+            'datePublished'    => \Carbon\Carbon::parse($post->created_at)->toIso8601String(),
+            'dateModified'     => \Carbon\Carbon::parse($post->updated_at ?? $post->created_at)->toIso8601String(),
+            'inLanguage'       => 'fr-FR',
+            'wordCount'        => $wordCount,
+            'articleSection'   => $post->category->title ?? null,
+            'author'           => ['@type' => 'Organization', 'name' => config('app.name'), 'url' => url('/')],
+            'publisher'        => ['@id' => url('/') . '#organization'],
+        ],
+        [
+            '@type'           => 'BreadcrumbList',
+            'itemListElement' => array_values(array_filter([
+                ['@type' => 'ListItem', 'position' => 1, 'name' => 'Accueil', 'item' => route('accueil')],
+                $post->category ? ['@type' => 'ListItem', 'position' => 2, 'name' => $post->category->title, 'item' => route('post.list', ['category' => $post->category->slug])] : null,
+                ['@type' => 'ListItem', 'position' => $post->category ? 3 : 2, 'name' => Str::limit($title, 80, '')],
+            ])),
+        ],
+    ])),
+], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) !!}
+</script>
+@endpush
 
 @section('content')
 
-{{-- Barre de progression lecture --}}
-<div id="reading-progress" class="reading-progress-bar"></div>
+<div id="reading-progress" class="reading-progress" aria-hidden="true"></div>
 
-<article class="detail-section py-4 py-md-5">
+<div class="section section--tight">
     <div class="container-xl">
-        <div class="row g-4 g-lg-5">
 
-            {{-- Contenu principal --}}
-            <div class="col-lg-8" data-aos="fade-up">
+        <nav aria-label="Fil d'Ariane" class="crumbs">
+            <a href="{{ route('accueil') }}">Accueil</a>
+            @if($post->category)
+                <i class="bi bi-chevron-right" aria-hidden="true"></i>
+                <a href="{{ route('post.list', ['category' => $post->category->slug]) }}">{{ $post->category->title }}</a>
+            @endif
+            <i class="bi bi-chevron-right" aria-hidden="true"></i>
+            <span aria-current="page">{{ Str::limit($title, 48) }}</span>
+        </nav>
 
-                {{-- Fil d'Ariane --}}
-                <nav aria-label="breadcrumb" class="mb-4">
-                    <ol class="breadcrumb detail-breadcrumb">
-                        <li class="breadcrumb-item">
-                            <a href="{{ route('accueil') }}"><i class="bi bi-house-door me-1"></i>Accueil</a>
-                        </li>
-                        @if($post->category)
-                            <li class="breadcrumb-item">
-                                <a href="{{ route('post.list', ['category' => $post->category->slug]) }}">
-                                    {{ Str::title($post->category->title) }}
+        <div class="layout layout--article">
+            <div class="layout__main">
+
+                <article class="article">
+                    <header class="article__head">
+                        <div class="article__tags">
+                            @if($post->category)
+                                <a href="{{ route('post.list', ['category' => $post->category->slug]) }}" class="tag">
+                                    <x-cat-icon :cat="$post->category" />{{ $post->category->title }}
                                 </a>
-                            </li>
-                        @endif
-                        <li class="breadcrumb-item active" aria-current="page">
-                            {{ Str::limit($post->title ?? 'Article', 40) }}
-                        </li>
-                    </ol>
-                </nav>
+                            @endif
+                            <span class="article__readtime"><i class="bi bi-clock" aria-hidden="true"></i>{{ $readMin }} min de lecture</span>
+                        </div>
 
-                {{-- Bloc article --}}
-                <div class="detail-article">
+                        <h1 class="article__title">{{ $title }}</h1>
 
-                    {{-- Catégorie + Temps de lecture --}}
-                    @php
-                        $wordCount = str_word_count(strip_tags($post->description ?? ''));
-                        $readMin   = max(1, round($wordCount / 200));
-                        $catSlug   = strtolower($post->category->slug ?? '');
-                        $catIcon   = match(true) {
-                            str_contains($catSlug, 'actualite') => 'newspaper',
-                            str_contains($catSlug, 'sondage')   => 'bar-chart-fill',
-                            str_contains(strtolower($post->category->title ?? ''), 'sport') => 'heart-pulse-fill',
-                            str_contains(strtolower($post->category->title ?? ''), 'obés')  => 'person-arms-up',
-                            str_contains(strtolower($post->category->title ?? ''), 'scolaire') => 'mortarboard-fill',
-                            default => 'file-medical-fill',
-                        };
-                    @endphp
-                    <div class="detail-tags mb-3">
-                        <a href="{{ route('post.list', ['category' => $post->category->slug ?? '']) }}"
-                           class="detail-cat-badge">
-                            <i class="bi bi-{{ $catIcon }} me-1"></i>
-                            {{ Str::title($post->category->title ?? '') }}
-                        </a>
-                        <span class="detail-readtime">
-                            <i class="bi bi-clock me-1"></i>{{ $readMin }} min de lecture
-                        </span>
-                    </div>
+                        <div class="meta meta--lg">
+                            <time datetime="{{ \Carbon\Carbon::parse($post->created_at)->toDateString() }}"><i class="bi bi-calendar3" aria-hidden="true"></i>{{ \Carbon\Carbon::parse($post->created_at)->translatedFormat('d F Y') }}</time>
+                            <span><i class="bi bi-eye" aria-hidden="true"></i>{{ number_format($post->views_count ?? 0, 0, ',', ' ') }} vue{{ ($post->views_count ?? 0) > 1 ? 's' : '' }}</span>
+                            <a href="#comments"><i class="bi bi-chat-left-text" aria-hidden="true"></i>{{ $post->commentaires_count }} commentaire{{ $post->commentaires_count > 1 ? 's' : '' }}</a>
+                        </div>
+                    </header>
 
-                    {{-- Titre --}}
-                    <h1 class="detail-title">
-                        {{ Str::title($post->title ?? strip_tags($post->description ?? '')) }}
-                    </h1>
+                    @if($post->getFirstMedia('image'))
+                        <figure class="article__figure">
+                            <x-media-img :model="$post" size="large" :alt="$title" :eager="true"
+                                         sizes="(min-width: 1200px) 800px, (min-width: 992px) 64vw, 100vw"
+                                         width="1280" height="720" />
+                        </figure>
+                    @endif
 
-                    {{-- Meta --}}
-                    <div class="detail-meta">
-                        <span><i class="bi bi-calendar3"></i> {{ \Carbon\Carbon::parse($post->created_at)->format('d M Y') }}</span>
-                        <span><i class="bi bi-eye-fill"></i> {{ number_format($post->views_count ?? 0) }} vue{{ ($post->views_count ?? 0) > 1 ? 's' : '' }}</span>
-                        <span><i class="bi bi-chat-left-quote-fill"></i> {{ $post->commentaires_count }} commentaire{{ $post->commentaires_count > 1 ? 's' : '' }}</span>
-                    </div>
-
-                    {{-- Image principale --}}
-                    @if($post->getFirstMediaUrl('image'))
-                        <div class="detail-hero-img">
-                            <img src="{{ asset($post->getFirstMediaUrl('image')) }}"
-                                 alt="{{ $post->title }}"
-                                 loading="eager"
-                                 class="w-100">
+                    @if($isPoll)
+                        @include('site.pages.partials.poll')
+                    @else
+                        <div class="prose js-prose">
+                            {!! $post->description !!}
                         </div>
                     @endif
 
-                    {{-- Corps de l'article --}}
-                    <div class="detail-body">
-                        {!! $post->description !!}
+                    {{-- Publicité intégrée (déplacée après le 3e paragraphe par site.js) --}}
+                    <div class="js-inarticle-ad">
+                        <x-ad-slot format="inarticle" />
                     </div>
 
-                    {{-- Lien externe --}}
                     @if($post->lien)
-                        <div class="detail-ext-link">
-                            <i class="bi bi-link-45deg me-2"></i>
-                            <a href="{{ $post->lien }}" target="_blank" rel="noopener noreferrer">
-                                Consulter la source officielle
-                                <i class="bi bi-box-arrow-up-right ms-1"></i>
-                            </a>
-                        </div>
+                        <a href="{{ $post->lien }}" target="_blank" rel="noopener noreferrer" class="source-link">
+                            <i class="bi bi-link-45deg" aria-hidden="true"></i>
+                            <span>Consulter la source officielle</span>
+                            <i class="bi bi-box-arrow-up-right" aria-hidden="true"></i>
+                        </a>
                     @endif
 
-                    {{-- Partage --}}
-                    <div class="detail-share">
-                        <span class="detail-share-label"><i class="bi bi-share-fill me-2"></i>Partager</span>
-                        <a href="https://www.facebook.com/sharer/sharer.php?u={{ urlencode(url()->full()) }}"
-                           target="_blank" rel="noopener noreferrer" class="share-btn share-btn--fb"
-                           aria-label="Partager sur Facebook">
-                            <i class="bi bi-facebook"></i>
-                        </a>
-                        <a href="https://twitter.com/intent/tweet?url={{ urlencode(url()->full()) }}&text={{ urlencode(Str::limit($post->title ?? '', 80)) }}"
-                           target="_blank" rel="noopener noreferrer" class="share-btn share-btn--tw"
-                           aria-label="Partager sur Twitter">
-                            <i class="bi bi-twitter"></i>
-                        </a>
-                        <a href="https://wa.me/?text={{ urlencode(($post->title ?? '').' '.url()->full()) }}"
-                           target="_blank" rel="noopener noreferrer" class="share-btn share-btn--wa"
-                           aria-label="Partager sur WhatsApp">
-                            <i class="bi bi-whatsapp"></i>
-                        </a>
-                        <button class="share-btn share-btn--copy"
-                                onclick="navigator.clipboard.writeText('{{ url()->full() }}').then(()=>this.innerHTML='<i class=\'bi bi-check-lg\'></i>')"
-                                aria-label="Copier le lien">
-                            <i class="bi bi-link-45deg"></i>
+                    @if($site['avertissement'] ?? null)
+                        <aside class="notice" aria-label="Avertissement médical">
+                            <i class="bi bi-info-circle" aria-hidden="true"></i>
+                            <p>{{ $site['avertissement'] }}</p>
+                        </aside>
+                    @endif
+
+                    <footer class="share">
+                        <span class="share__label">Partager</span>
+                        <a href="https://www.facebook.com/sharer/sharer.php?u={{ urlencode($shareUrl) }}" target="_blank" rel="noopener noreferrer" class="share__btn" aria-label="Partager sur Facebook"><i class="bi bi-facebook"></i></a>
+                        <a href="https://wa.me/?text={{ urlencode($title . ' ' . $shareUrl) }}" target="_blank" rel="noopener noreferrer" class="share__btn" aria-label="Partager sur WhatsApp"><i class="bi bi-whatsapp"></i></a>
+                        <a href="https://twitter.com/intent/tweet?url={{ urlencode($shareUrl) }}&text={{ urlencode(Str::limit($title, 80)) }}" target="_blank" rel="noopener noreferrer" class="share__btn" aria-label="Partager sur X (Twitter)"><i class="bi bi-twitter-x"></i></a>
+                        <button type="button" class="share__btn js-copy-link" data-url="{{ $shareUrl }}" aria-label="Copier le lien">
+                            <i class="bi bi-link-45deg" aria-hidden="true"></i>
                         </button>
-                    </div>
-
-                </div>{{-- /detail-article --}}
-
-                {{-- Sondage --}}
-                @if(strtolower($post->category->title ?? '') === 'sondage')
-                    <div class="mt-5">
-                        @if($sondage_total > 0)
-                        <div class="detail-poll-results mb-4">
-                            <h4 class="detail-poll-title">
-                                <i class="bi bi-bar-chart-fill me-2"></i>Résultats du sondage
-                                <span class="detail-poll-total">{{ number_format($sondage_total) }} participant{{ $sondage_total > 1 ? 's' : '' }}</span>
-                            </h4>
-                            @foreach($statistic_sondage as $key => $item)
-                                @php
-                                    $pct    = $sondage_total > 0 ? round(($item['choice'] * 100) / $sondage_total, 1) : 0;
-                                    $colors = ['#0066CC','#00A86B','#17a2b8','#8E24AA'];
-                                    $col    = $colors[$key % 4];
-                                @endphp
-                                <div class="poll-bar-item">
-                                    <div class="poll-bar-label">
-                                        <span>{{ ++$key }}. {{ $item['optionSondage']['title'] ?? '' }}</span>
-                                        <span class="poll-bar-pct" style="color:{{ $col }}">{{ $pct }}%</span>
-                                    </div>
-                                    <div class="poll-bar-track">
-                                        <div class="poll-bar-fill" style="width:{{ $pct }}%; background:{{ $col }};"></div>
-                                    </div>
-                                </div>
-                            @endforeach
-                        </div>
-                        @endif
-
-                        <div class="detail-poll-form">
-                            <h4 class="detail-poll-title">
-                                <i class="bi bi-hand-thumbs-up-fill me-2"></i>Participez au sondage
-                            </h4>
-                            <form action="{{ route('sondage.store') }}" method="post">
-                                @csrf
-                                <input type="hidden" name="post_id" value="{{ $post->id }}">
-                                @foreach($post->optionSondages as $opt)
-                                    <label class="poll-option" for="opt{{ $opt->id }}">
-                                        <input class="poll-radio" type="radio"
-                                               name="sondage_option"
-                                               id="opt{{ $opt->id }}"
-                                               value="{{ $opt->id }}" required>
-                                        <span class="poll-option-label">{{ $opt->title }}</span>
-                                    </label>
-                                @endforeach
-                                <button type="submit" class="btn btn-medical w-100 mt-3">
-                                    <i class="bi bi-send-fill me-2"></i>Valider ma réponse
-                                </button>
-                            </form>
-                        </div>
-                    </div>
-                @endif
+                        <span class="share__feedback" role="status" aria-live="polite"></span>
+                    </footer>
+                </article>
 
                 {{-- Commentaires --}}
-                <div class="detail-comments mt-5">
-                    <h3 class="detail-section-title">
-                        <i class="bi bi-chat-left-quote-fill me-2"></i>
-                        {{ $post->commentaires_count }}
-                        Commentaire{{ $post->commentaires_count > 1 ? 's' : '' }}
-                    </h3>
+                <section class="panel" id="comments" aria-labelledby="comments-title">
+                    <h2 id="comments-title" class="panel__title">
+                        {{ $post->commentaires_count }} commentaire{{ $post->commentaires_count > 1 ? 's' : '' }}
+                    </h2>
 
                     @forelse($post->commentaires as $item)
-                        <div class="comment-item">
-                            <div class="comment-avatar">
-                                {{ strtoupper(substr($item->user_name ?? 'A', 0, 1)) }}
-                            </div>
-                            <div class="comment-content">
-                                <div class="comment-header">
+                        <div class="comment">
+                            <span class="comment__avatar" aria-hidden="true">{{ strtoupper(mb_substr($item->user_name ?? 'A', 0, 1)) }}</span>
+                            <div class="comment__body">
+                                <div class="comment__head">
                                     <strong>{{ $item->user_name ?? 'Anonyme' }}</strong>
-                                    <time class="comment-time">
-                                        <i class="bi bi-clock me-1"></i>
-                                        {{ \Carbon\Carbon::parse($item->created_at)->diffForHumans() }}
-                                    </time>
+                                    <time datetime="{{ \Carbon\Carbon::parse($item->created_at)->toIso8601String() }}">{{ \Carbon\Carbon::parse($item->created_at)->diffForHumans() }}</time>
                                 </div>
-                                <p class="comment-text">{{ $item->message }}</p>
+                                <p>{{ $item->message }}</p>
                             </div>
                         </div>
                     @empty
-                        <p class="text-muted fst-italic">Aucun commentaire pour le moment. Soyez le premier !</p>
+                        <p class="muted">Aucun commentaire pour le moment. Soyez le premier à réagir.</p>
                     @endforelse
-                </div>
 
-                {{-- Formulaire commentaire --}}
-                <div class="detail-comment-form mt-4" id="comment-form-section">
-                    <h3 class="detail-section-title">
-                        <i class="bi bi-pencil-square me-2"></i>Laisser un commentaire
-                    </h3>
+                    <div class="comment-form" id="comment-form-section">
+                        <h3 class="comment-form__title">Laisser un commentaire</h3>
 
-                    {{-- Erreurs de validation --}}
-                    @if($errors->any())
-                        <div class="alert alert-danger mb-3 rounded-3">
-                            <i class="bi bi-exclamation-triangle-fill me-2"></i>
-                            @foreach($errors->all() as $error)
-                                <span>{{ $error }}</span>
+                        @if($errors->any())
+                            <div class="alert-box" role="alert">
+                                <i class="bi bi-exclamation-triangle" aria-hidden="true"></i>
+                                <div>@foreach($errors->all() as $error)<span>{{ $error }}</span>@endforeach</div>
+                            </div>
+                        @endif
+
+                        <form action="{{ route('post.comment') }}" method="POST" id="comment-form">
+                            @csrf
+                            <input type="hidden" name="post_id" value="{{ $post->id }}">
+                            @guest
+                                <div class="field">
+                                    <label for="c-name">Votre nom <span class="req" aria-hidden="true">*</span></label>
+                                    <input id="c-name" type="text" name="name" class="@error('name') is-invalid @enderror" value="{{ old('name') }}" required autocomplete="name">
+                                    @error('name')<p class="field__error">{{ $message }}</p>@enderror
+                                </div>
+                            @endguest
+                            <div class="field">
+                                <label for="c-message">Votre message <span class="req" aria-hidden="true">*</span></label>
+                                <textarea id="c-message" name="message" rows="5" class="@error('message') is-invalid @enderror" placeholder="Partagez votre avis ou votre question…" required>{{ old('message') }}</textarea>
+                                @error('message')<p class="field__error">{{ $message }}</p>@enderror
+                            </div>
+                            <button type="submit" class="btn btn-medical" id="comment-submit">Publier le commentaire</button>
+                        </form>
+                    </div>
+                </section>
+
+                {{-- À lire aussi --}}
+                @if($related->count())
+                    <section class="related" aria-labelledby="related-title">
+                        <div class="sec-head">
+                            <h2 id="related-title" class="sec-head__title">À lire aussi</h2>
+                        </div>
+                        <div class="card-grid card-grid--3">
+                            @foreach($related as $rel)
+                                <x-post-card :post="$rel" />
                             @endforeach
                         </div>
-                    @endif
-
-                    <form action="{{ route('post.comment') }}" method="POST" id="comment-form">
-                        @csrf
-                        <input type="hidden" name="post_id" value="{{ $post->id }}">
-                        @guest
-                            <div class="mb-3">
-                                <label class="form-label fw-semibold">
-                                    <i class="bi bi-person-fill me-1 text-medical-blue"></i>Votre nom <span class="text-danger">*</span>
-                                </label>
-                                <input type="text" name="name" class="form-control @error('name') is-invalid @enderror"
-                                       value="{{ old('name') }}"
-                                       placeholder="Entrez votre nom" required>
-                                @error('name')<div class="invalid-feedback">{{ $message }}</div>@enderror
-                            </div>
-                        @endguest
-                        <div class="mb-3">
-                            <label class="form-label fw-semibold">
-                                <i class="bi bi-chat-left-text-fill me-1 text-medical-blue"></i>Votre message <span class="text-danger">*</span>
-                            </label>
-                            <textarea name="message" rows="5"
-                                      class="form-control @error('message') is-invalid @enderror"
-                                      placeholder="Partagez votre avis…" required>{{ old('message') }}</textarea>
-                            @error('message')<div class="invalid-feedback">{{ $message }}</div>@enderror
-                        </div>
-                        <button type="submit" class="btn btn-medical px-5" id="comment-submit">
-                            <i class="bi bi-send-fill me-2"></i>Envoyer
-                        </button>
-                    </form>
-                </div>
-
-                <script>
-                    // Scroll vers les erreurs ou le formulaire si erreur de validation
-                    @if($errors->any())
-                    document.addEventListener('DOMContentLoaded', function () {
-                        document.getElementById('comment-form-section').scrollIntoView({ behavior: 'smooth', block: 'start' });
-                    });
-                    @endif
-
-                    // Désactiver le bouton pendant l'envoi
-                    document.getElementById('comment-form').addEventListener('submit', function () {
-                        var btn = document.getElementById('comment-submit');
-                        btn.disabled = true;
-                        btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Envoi...';
-                    });
-                </script>
-
-                {{-- Articles liés --}}
-                @if(isset($post_last) && $post_last->count())
-                <div class="detail-related mt-5">
-                    <h3 class="detail-section-title">
-                        <i class="bi bi-collection-fill me-2"></i>À lire aussi
-                    </h3>
-                    <div class="row g-3">
-                        @foreach($post_last->take(3) as $rel)
-                            <div class="col-12 col-sm-4">
-                                <a href="{{ route('post.detail', ['slug' => $rel->slug]) }}"
-                                   class="related-card text-decoration-none">
-                                    <img src="{{ $rel->getFirstMediaUrl('image') ?: asset('assets_site/img/medc.jpg') }}"
-                                         alt="{{ $rel->title }}" loading="lazy">
-                                    <div class="related-card__body">
-                                        <span class="related-card__cat">{{ $rel->category->title ?? '' }}</span>
-                                        <p class="related-card__title">
-                                            {{ Str::title(Str::limit($rel->title ?? '', 55)) }}
-                                        </p>
-                                    </div>
-                                </a>
-                            </div>
-                        @endforeach
-                    </div>
-                </div>
+                    </section>
                 @endif
-
-            </div>{{-- /col-lg-8 --}}
-
-            {{-- Sidebar --}}
-            <div class="col-lg-4">
-                <div class="sidebar-wrapper sticky-sidebar">
-                    @include('site.pages.sections.sidebar')
-                </div>
             </div>
 
+            <aside class="layout__side" aria-label="Compléments">
+                @include('site.pages.sections.sidebar')
+            </aside>
         </div>
     </div>
-</article>
+</div>
 
+@push('scripts')
 <script>
-    // Barre de progression lecture
-    document.addEventListener('scroll', function () {
-        const el    = document.getElementById('reading-progress');
-        const doc   = document.documentElement;
-        const pct   = (doc.scrollTop / (doc.scrollHeight - doc.clientHeight)) * 100;
-        if (el) el.style.width = Math.min(pct, 100) + '%';
-    }, { passive: true });
+    document.addEventListener('DOMContentLoaded', function () {
+        @if($errors->any())
+            document.getElementById('comment-form-section').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        @endif
+        var form = document.getElementById('comment-form');
+        if (form) form.addEventListener('submit', function () {
+            var btn = document.getElementById('comment-submit');
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span>Envoi…';
+        });
+    });
 </script>
+@endpush
 
 @endsection

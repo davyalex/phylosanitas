@@ -7,6 +7,7 @@
                 <th>Question</th>
                 <th>Catégorie</th>
                 <th>Statut</th>
+                <th class="text-center">Vues</th>
                 <th>Date</th>
                 <th>Actions</th>
             </tr>
@@ -24,9 +25,9 @@
                     </td>
 
                     <td>
-                        <span class="fw-semibold">
+                        <a href="{{ route('post.show', $item->id) }}" class="fw-semibold text-decoration-none text-reset" title="Voir le détail">
                             {{ Str::limit(strip_tags($item->description), 60, '…') }}
-                        </span>
+                        </a>
                     </td>
 
                     <td>
@@ -45,52 +46,21 @@
                         @endif
                     </td>
 
+                    <td class="text-center">
+                        <span class="views-pill"><i class="bi bi-eye" aria-hidden="true"></i>{{ number_format($item->views_count ?? 0, 0, ',', ' ') }}</span>
+                    </td>
+
                     <td class="text-muted small">
                         {{ \Carbon\Carbon::parse($item->created_at)->diffForHumans() }}
                     </td>
 
                     <td>
-                        <div class="d-flex gap-1 flex-nowrap">
-                            {{-- Publier / Dépublier --}}
-                            <a href="{{ route('post.published', $item->id) }}"
-                               class="btn btn-sm {{ $item->published === 'public' ? 'btn-warning' : 'btn-success' }}"
-                               title="{{ $item->published === 'public' ? 'Dépublier' : 'Publier' }}">
-                                <i class="bi bi-{{ $item->published === 'public' ? 'eye-slash' : 'eye' }}"></i>
-                            </a>
-
-                            {{-- Voir en ligne --}}
-                            <a href="{{ route('post.detail', ['slug' => $item->slug]) }}"
-                               target="_blank"
-                               class="btn btn-sm btn-outline-secondary"
-                               title="Voir sur le site">
-                                <i class="bi bi-box-arrow-up-right"></i>
-                            </a>
-
-                            {{-- Modifier — utilise l'ID (pas le slug) --}}
-                            <a href="{{ route('post.edit-sondage', $item->id) }}"
-                               class="btn btn-sm btn-primary"
-                               title="Modifier">
-                                <i class="bi bi-pencil"></i>
-                            </a>
-
-                            {{-- Supprimer --}}
-                            <form action="{{ route('post.delete', $item->id) }}" method="POST">
-                                @csrf
-                                <button type="button"
-                                        class="btn btn-sm btn-danger"
-                                        data-bs-toggle="modal"
-                                        data-bs-target="#confirmDelete{{ $item->id }}"
-                                        title="Supprimer">
-                                    <i class="bi bi-trash"></i>
-                                </button>
-                                @include('admin.partials.deleteConfirm')
-                            </form>
-                        </div>
+                        @include('admin.pages.post._actions', ['item' => $item, 'isPoll' => true])
                     </td>
                 </tr>
             @empty
                 <tr>
-                    <td colspan="7" class="text-center text-muted py-4">
+                    <td colspan="8" class="text-center text-muted py-4">
                         <i class="bi bi-bar-chart fs-3 d-block mb-2"></i>
                         Aucun sondage trouvé.
                     </td>

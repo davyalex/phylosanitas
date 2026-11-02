@@ -40,6 +40,7 @@ class Post extends Model implements HasMedia, Viewable
     protected $fillable = [
         'code',
         'title',
+        'meta_description',
         'slug',
         'tag',
         'description',
@@ -120,5 +121,20 @@ class Post extends Model implements HasMedia, Viewable
             ->format(Manipulations::FORMAT_JPG);  // Optionnel: changer le format si nécessaire
             // ->quality(85);  // Ajuster la qualité
 
+        // Miniature légère pour les cards et listes (affichées entre 100 et 420px)
+        $this->addMediaConversion('thumb')
+            ->fit(Manipulations::FIT_MAX, 800, 800)
+            ->format(Manipulations::FORMAT_WEBP)
+            ->quality(78)
+            ->performOnCollections('image')
+            ->nonQueued();
+
+        // Version moyenne pour l'image de une et l'image d'article
+        $this->addMediaConversion('large')
+            ->fit(Manipulations::FIT_MAX, 1280, 1280)
+            ->format(Manipulations::FORMAT_WEBP)
+            ->quality(80)
+            ->performOnCollections('image')
+            ->nonQueued();
     }
 }
