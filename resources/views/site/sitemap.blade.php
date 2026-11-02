@@ -35,4 +35,9 @@
         <changefreq>yearly</changefreq>
         <priority>0.3</priority>
     </url>
+    <url>
+        <loc>{{ route('privacy') }}</loc>
+        <changefreq>yearly</changefreq>
+        <priority>0.2</priority>
+    </url>
 </urlset>

@@ -176,6 +176,7 @@ route::controller(SiteController::class)->group(function () {
     route::post('post/search', 'search');
 
     route::get('sitemap.xml', 'sitemap')->name('sitemap');
+    route::get('politique-de-confidentialite', 'privacy')->name('privacy');
 
     // Application installable (PWA)
     route::get('manifest.webmanifest', 'manifest')->name('manifest');
