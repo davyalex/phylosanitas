@@ -398,7 +398,7 @@
             @endif
 
             <div class="footer__legal">
-                <span>&copy; {{ date('Y') }} <strong>{{ config('app.name') }}</strong>. Tous droits réservés.</span>
+                <span>&copy; {{ date('Y') }} <strong>{{ config('app.name') }}</strong>. Tous droits réservés. · <a href="{{ route('privacy') }}">Politique de confidentialité</a></span>
                 <span>Développé par <a href="https://dolubux.com" target="_blank" rel="noopener noreferrer">dolubux.com</a></span>
             </div>
         </div>

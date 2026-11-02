@@ -202,6 +202,12 @@ class SiteController extends Controller
     }
 
     /** Page affichée par l'application quand il n'y a pas de connexion */
+    /** Politique de confidentialité (exigée par Google AdSense) */
+    public function privacy()
+    {
+        return view('site.pages.confidentialite');
+    }
+
     public function offline()
     {
         return view('site.pages.offline', ['site' => \App\Models\Setting::forViews()]);

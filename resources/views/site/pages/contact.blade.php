@@ -107,6 +107,7 @@
                         @error('message')<p class="field__error">{{ $message }}</p>@enderror
                     </div>
                     <button type="submit" class="btn btn-medical">Envoyer le message</button>
+                    <p class="form-note">Vos informations servent uniquement à vous répondre. <a href="{{ route('privacy') }}">Politique de confidentialité</a></p>
                 </form>
             </div>
         </div>
