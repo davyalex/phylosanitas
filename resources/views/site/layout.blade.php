@@ -405,6 +405,32 @@
     </footer>
 
     {{-- ======= Installer l'application (PWA) ======= --}}
+    {{-- Popup d'information (Admin > Popups) --}}
+    @if(($site_popup ?? null) && $site_popup->image && ($site_popup->pages === 'tout' || request()->routeIs('accueil')))
+        @php
+            $pp     = $site_popup;
+            $ppHref = $pp->lien ? route('popup.clic', $pp->id) : null;
+        @endphp
+        <dialog class="popup popup--poster js-popup" aria-label="{{ $pp->titre }}"
+                data-id="{{ $pp->id }}" data-frequency="{{ $pp->frequence }}" data-delay="{{ $pp->delai }}"
+                data-track="{{ route('popup.vue', $pp->id) }}">
+            <div class="popup__panel">
+                <button type="button" class="popup__close js-popup-close" aria-label="Fermer"><i class="bi bi-x-lg" aria-hidden="true"></i></button>
+                @if($ppHref)<a href="{{ $ppHref }}" class="popup__media">@else<div class="popup__media">@endif
+                    <img class="popup__img" data-src="{{ $pp->image }}" alt="{{ $pp->titre }}" decoding="async">
+                @if($ppHref)</a>@else</div>@endif
+                <div class="popup__body">
+                    <div class="popup__actions">
+                        @if($ppHref)
+                            <a href="{{ $ppHref }}" class="btn btn-medical">{{ $pp->bouton_texte ?: 'En savoir plus' }} <i class="bi bi-arrow-right" aria-hidden="true"></i></a>
+                        @endif
+                        <button type="button" class="btn btn-outline-medical js-popup-close">Fermer</button>
+                    </div>
+                </div>
+            </div>
+        </dialog>
+    @endif
+
     <div class="install js-install" role="dialog" aria-labelledby="install-title" aria-describedby="install-text" hidden>
         <img src="{{ asset('assets_site/img/android-chrome-192x192.png') }}" alt="" class="install__icon" width="48" height="48">
         <div class="install__body">

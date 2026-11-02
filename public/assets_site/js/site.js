@@ -216,6 +216,69 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   });
 
+  /* ---------- Popup d'information (géré dans Admin > Popups) ---------- */
+  // popupDone se résout quand il n'y a rien à afficher ou quand le visiteur ferme le popup :
+  // la bannière d'installation attend ce moment pour ne pas s'empiler par-dessus.
+  var popupDone = (function () {
+    var dlg = document.querySelector('.js-popup');
+    if (!dlg) return Promise.resolve();
+
+    var id = dlg.getAttribute('data-id');
+    var freq = dlg.getAttribute('data-frequency');
+    var key = 'ps-popup-' + id;
+    var today = new Date().toISOString().slice(0, 10);
+    var store = null;
+    try { store = freq === 'session' ? window.sessionStorage : window.localStorage; } catch (e) {}
+
+    var seen = null;
+    try { seen = store && store.getItem(key); } catch (e) {}
+    if (seen && (freq !== 'daily' || seen === today)) return Promise.resolve();
+
+    return new Promise(function (done) {
+      var delay = (parseInt(dlg.getAttribute('data-delay'), 10) || 0) * 1000;
+      var img = dlg.querySelector('img[data-src]');
+      var loaded = !img;
+
+      // L'affiche n'est téléchargée que si le popup doit vraiment s'ouvrir
+      var imgReady = new Promise(function (res) {
+        if (!img) return res();
+        img.addEventListener('load', function () { loaded = true; res(); }, { once: true });
+        img.addEventListener('error', res, { once: true });
+        img.src = img.getAttribute('data-src');
+        setTimeout(res, 8000);
+      });
+      var waited = new Promise(function (res) { setTimeout(res, delay); });
+
+      var open = function () {
+        // Affiche introuvable ou trop lente : on n'ouvre pas un popup vide
+        if (!loaded || document.querySelector('dialog[open]')) return done();
+        if (typeof dlg.showModal === 'function') dlg.showModal(); else dlg.setAttribute('open', '');
+        document.body.classList.add('has-popup');
+        try { store && store.setItem(key, freq === 'daily' ? today : '1'); } catch (e) {}
+
+        var token = document.querySelector('meta[name="csrf-token"]');
+        if (window.fetch) {
+          fetch(dlg.getAttribute('data-track'), {
+            method: 'POST', keepalive: true, credentials: 'same-origin',
+            headers: { 'X-CSRF-TOKEN': token ? token.content : '', 'X-Requested-With': 'XMLHttpRequest' }
+          }).catch(function () {});
+        }
+      };
+
+      var close = function () {
+        if (typeof dlg.close === 'function' && dlg.open) dlg.close(); else { dlg.removeAttribute('open'); onClosed(); }
+      };
+      var onClosed = function () { document.body.classList.remove('has-popup'); done(); };
+
+      dlg.addEventListener('close', onClosed);
+      dlg.querySelectorAll('.js-popup-close').forEach(function (btn) { btn.addEventListener('click', close); });
+      // Clic sur le fond sombre : ferme
+      dlg.addEventListener('click', function (e) { if (e.target === dlg) close(); });
+
+      Promise.all([imgReady, waited]).then(open);
+    });
+  })();
+
   /* ---------- Application installable (PWA) ---------- */
   // Enregistré dès que la page est utilisable (sans attendre les scripts publicitaires, parfois lents)
   if ('serviceWorker' in navigator) {
@@ -243,8 +306,11 @@ document.addEventListener('DOMContentLoaded', function () {
     var isIOS = /iphone|ipad|ipod/i.test(ua) && !window.MSStream;
 
     var show = function () {
-      banner.hidden = false;
-      requestAnimationFrame(function () { banner.classList.add('is-visible'); });
+      // Attend la fermeture du popup d'information éventuel
+      popupDone.then(function () {
+        banner.hidden = false;
+        requestAnimationFrame(function () { banner.classList.add('is-visible'); });
+      });
     };
     var hide = function () {
       banner.classList.remove('is-visible');

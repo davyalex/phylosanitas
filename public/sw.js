@@ -21,7 +21,7 @@ const PRECACHE = [
   '/assets_site/img/logo/logo_tp.png',
 ];
 
-const NEVER_CACHE = [/^\/admin/, /^\/login/, /^\/logout/, /^\/pub\//, /^\/sondage\//, /^\/comment/, /^\/newsletter/, /^\/recherche/, /^\/sitemap\.xml/, /^\/robots\.txt/];
+const NEVER_CACHE = [/^\/admin/, /^\/login/, /^\/logout/, /^\/pub\//, /^\/popup\//, /^\/sondage\//, /^\/comment/, /^\/newsletter/, /^\/recherche/, /^\/sitemap\.xml/, /^\/robots\.txt/];
 const THIRD_PARTY_SKIP = /googlesyndication|googletagmanager|google-analytics|doubleclick|adservice/;
 const CACHEABLE_CDN = /fonts\.googleapis\.com|fonts\.gstatic\.com|cdn\.jsdelivr\.net/;
 
