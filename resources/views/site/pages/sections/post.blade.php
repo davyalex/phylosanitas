@@ -1,81 +1,59 @@
-  <!-- ======= Post Grid Section ======= -->
-  <section id="posts" class="posts">
-    <div class="container" data-aos="fade-up">
-      <div class="row g-5">
+{{-- Accueil : articles récents (hors « À la une ») + newsletter + sidebar --}}
+<section class="section" aria-labelledby="recent-title">
+    <div class="container-xl">
+        <div class="layout">
 
-        {{-- First post --}}
-             {{-- <div class="col-lg-4">
-          <div class="post-entry-1 lg">
-            <a href="single-post.html"><img src="{{ asset($post_recent->getFirstMediaUrl('image'))}}" alt="" class="img-fluid"></a>
-            <div class="post-meta"><span class="date">{{ $post_recent['category']['title'] }}</span> <span class="mx-1">&bullet;</span> <span>{{ \Carbon\Carbon::parse($post_recent['created_at'])->diffForHumans() }}</span> &bullet; <i class="bi bi-eye-fill w-100" >2000</i></div>
-            <h2><a href="single-post.html">{{ $post_recent['title'] }}</a></h2> --}}
-            {{-- <p class="mb-4 d-block">{!! Str::words($post_recent['description'],3,'....') !!}</p> --}}
-
-            {{-- <div class="d-flex align-items-center author">
-              <div class="photo"><img src="{{ asset('assets_admin/img/avatar.jpg') }}" alt="" class="img-fluid"></div>
-              <div class="name">
-                <h3 class="m-0 p-0">{{ $post_recent['user']['roles'][0]['name'] }}</h3>
-              </div>
-            </div> --}}
-          {{-- </div>
-        </div> --}}
-       
-
-         {{-- First post --}}
-        <div class="col-lg-10">
-          <div class="row">
-
-              
-              @foreach ($post as $item)
-              <div class="col-lg-4 mb-0 border border-white">
-              <div class="post-entry-1 border mw-100 mh-300">
-                @if ($item->getFirstMediaUrl('image'))
-                <a href="/post/detail?slug={{ $item['slug'] }}"><img src="{{ asset($item->getFirstMediaUrl('image'))}}" alt="" class="img-fluid"style=" width:100%; height:200px; object-fit:cover"></a>
-                @else
-                <a href="/post/detail?slug={{ $item['slug'] }}">
-                  <img src="{{ asset('assets_site/img/medc.jpg')}}" alt="" class="img-fluid" style=" width:100%; height:200px; object-fit:cover"></a>
-                @endif
-                <div class="post-meta text-center "><span class="date text-capitalize "> {{ $item['category']['title'] }}</span>
-                     <span class="mx-1">&bullet;</span> <i class="bi bi-eye-fill w-100" >{{ views($item)->count(); }}</i>
-                     <span class="mx-1">&bullet;</span> <i class="bi bi-chat-left-quote w-100" >{{ $item->commentaires->count() }}</i>
-                     <br>
-                     <span class="text-lowercase">publié {{ \Carbon\Carbon::parse($item['created_at'])->diffForHumans() }}</span> 
-                     &bullet; 
-                    
+            <div class="layout__main">
+                @if($gridPosts->count())
+                    <div class="sec-head">
+                        <h2 id="recent-title" class="sec-head__title">Articles récents</h2>
+                        <a href="{{ route('post.list') }}" class="sec-head__link">Voir tout <i class="bi bi-arrow-right" aria-hidden="true"></i></a>
                     </div>
-                <h2 class="text-center text-justify"><a href="/post/detail?slug={{ $item['slug'] }}">{{ Str::limit($item['title'], 30, '...') }}</a></h2>
-              </div>
-           
+
+                    <div class="card-grid">
+                        @foreach($gridPosts as $item)
+                            <x-post-card :post="$item" />
+                        @endforeach
+                    </div>
+
+                    <div class="more-row">
+                        <a href="{{ route('post.list') }}" class="btn btn-outline-medical">Voir tous les articles <i class="bi bi-arrow-right" aria-hidden="true"></i></a>
+                    </div>
+                @elseif(($post ?? collect())->isEmpty())
+                    <div class="empty">
+                        <i class="bi bi-journal-x" aria-hidden="true"></i>
+                        <h2 id="recent-title">Aucun article pour le moment</h2>
+                        <p>Les premières publications arrivent bientôt.</p>
+                    </div>
+                @endif
+
+                {{-- Newsletter + contact --}}
+                <div class="cta-band">
+                    <div class="cta-band__news">
+                        <span class="cta-band__icon" aria-hidden="true"><i class="bi bi-envelope-heart"></i></span>
+                        <div>
+                            <h2 class="cta-band__title">Restez informé</h2>
+                            <p class="cta-band__text">Recevez les dernières actualités santé dans votre boîte mail.</p>
+                            <form action="{{ route('newsletter.store') }}" method="POST" class="inline-form">
+                                @csrf
+                                <label for="nl-email" class="visually-hidden">Votre adresse email</label>
+                                <input id="nl-email" type="email" name="email" placeholder="Votre adresse email" required autocomplete="email">
+                                <button type="submit" class="btn btn-medical">S'abonner</button>
+                            </form>
+                        </div>
+                    </div>
+                    <div class="cta-band__help">
+                        <h2 class="cta-band__title">Besoin d'aide&nbsp;?</h2>
+                        <p class="cta-band__text">Notre équipe médicale répond à toutes vos questions.</p>
+                        <a href="{{ route('contact') }}" class="btn btn-outline-medical">Nous contacter</a>
+                    </div>
+                </div>
             </div>
-            @endforeach
 
-         
-          
-            <!-- End Trending Section -->
-          </div>
+            <aside class="layout__side" aria-label="Compléments">
+                @include('site.pages.sections.sidebar', ['showRecent' => false])
+            </aside>
+
         </div>
-
-          <!--  Section right -->
-          <div class="col-lg-2">
-            <div class="aside-block">
-              <h3 class="aside-title">Tags &amp;Categories</h3>
-              <ul class="aside-tags list-unstyled">
-                @foreach ($category as $item)
-                <li><a class="text-capitalize" href="/post/category?category={{ $item['slug'] }}">{{ $item['title'] }} <span class="badge rounded-pill bg-info">{{ $item->posts->count() }}</span></a></li>
-                @endforeach
-               
-              </ul>
-            </div><!-- End Tags -->
-            
-          </div> 
-
-
-          
-
-
-          
-          
-
-      </div> <!-- End .row -->
     </div>
-  </section> <!-- End Post Grid Section -->
+</section>

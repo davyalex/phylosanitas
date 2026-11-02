@@ -3,6 +3,7 @@
 namespace App\Models;
 // use App\Models\Visits;
 use Awssat\Visits\Visits;
+use Spatie\Image\Manipulations;
 use Spatie\MediaLibrary\HasMedia;
 use CyrildeWit\EloquentViewable\View;
 use Spatie\Permission\Traits\HasRoles;
@@ -11,20 +12,21 @@ use CyrildeWit\EloquentViewable\Visitor;
 use Cviebrock\EloquentSluggable\Sluggable;
 use Spatie\MediaLibrary\InteractsWithMedia;
 use Spatie\Permission\Traits\HasPermissions;
-use Illuminate\Database\Eloquent\SoftDeletes;
 // use CyrildeWit\EloquentViewable\Contracts\Visitor;
 
+use Illuminate\Database\Eloquent\SoftDeletes;
 use CyrildeWit\EloquentViewable\Contracts\Viewable;
 use CyrildeWit\EloquentViewable\InteractsWithViews;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 // use CyrildeWit\EloquentViewable\Visitor;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
 
 
 
-class Post extends Model implements HasMedia,Viewable
+class Post extends Model implements HasMedia, Viewable
 {
     use HasFactory,
         SoftDeletes,
@@ -38,6 +40,7 @@ class Post extends Model implements HasMedia,Viewable
     protected $fillable = [
         'code',
         'title',
+        'meta_description',
         'slug',
         'tag',
         'description',
@@ -45,6 +48,7 @@ class Post extends Model implements HasMedia,Viewable
         'category_id',
         'user_id',
         'published',
+        'actualite_une', // Mettre une actualité à la une ....mettre en slide
         'created_at',
         'updated_at',
         'deleted_at',
@@ -89,7 +93,7 @@ class Post extends Model implements HasMedia,Viewable
     }
 
 
-   /**
+    /**
      * Get the instance of the user visits
      *
      * @return Visits
@@ -107,5 +111,30 @@ class Post extends Model implements HasMedia,Viewable
     public function visits()
     {
         return visits($this)->relation();
+    }
+
+
+    public function registerMediaConversions(Media $media = null): void
+    {
+        $this->addMediaConversion('optimized')
+            ->optimize()
+            ->format(Manipulations::FORMAT_JPG);  // Optionnel: changer le format si nécessaire
+            // ->quality(85);  // Ajuster la qualité
+
+        // Miniature légère pour les cards et listes (affichées entre 100 et 420px)
+        $this->addMediaConversion('thumb')
+            ->fit(Manipulations::FIT_MAX, 800, 800)
+            ->format(Manipulations::FORMAT_WEBP)
+            ->quality(78)
+            ->performOnCollections('image')
+            ->nonQueued();
+
+        // Version moyenne pour l'image de une et l'image d'article
+        $this->addMediaConversion('large')
+            ->fit(Manipulations::FIT_MAX, 1280, 1280)
+            ->format(Manipulations::FORMAT_WEBP)
+            ->quality(80)
+            ->performOnCollections('image')
+            ->nonQueued();
     }
 }

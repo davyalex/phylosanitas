@@ -15,8 +15,13 @@
   scroll-behavior: smooth;
 }
 
+html {
+  overflow-x: hidden;
+}
+
 body {
   color: rgba(var(--color-primary-rgb), 1);
+  overflow-x: hidden;
 }
 
 a {
@@ -94,6 +99,40 @@ section {
 .scroll-top.active {
   visibility: visible;
   opacity: 1;
+}
+
+/*--------------------------------------------------------------
+# Home button
+--------------------------------------------------------------*/
+.home-button {
+  position: fixed;
+  visibility: visible;
+  opacity: 1;
+  right: 15px;
+  bottom: 65px;
+  z-index: 99999;
+  background: #00A86B;
+  width: 40px;
+  height: 40px;
+  border-radius: 4px;
+  transition: all 0.4s;
+}
+
+.home-button i {
+  font-size: 20px;
+  color: #fff;
+  line-height: 0;
+}
+
+.home-button:hover {
+  background: rgba(0, 168, 107, 0.8);
+  color: #fff;
+}
+
+@media (min-width: 769px) {
+  .home-button {
+    display: none;
+  }
 }
 
 /*--------------------------------------------------------------
@@ -635,6 +674,13 @@ section {
 @media (max-width: 768px) {
   .img-bg {
     height: 200px;
+  }
+}
+
+@media (max-width: 576px) {
+  .img-bg {
+    min-height: 220px !important;
+    height: 220px !important;
   }
 }
 

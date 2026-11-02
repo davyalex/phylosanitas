@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
-use Hamcrest\Core\IsNot;
 use Illuminate\Http\Request;
 use Spatie\Permission\Models\Role;
 use Illuminate\Support\Facades\Auth;
@@ -12,222 +11,152 @@ use RealRashid\SweetAlert\Facades\Alert;
 
 class UserController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
     public function index()
     {
-        //
-        $user = User::with(['posts', 'roles'])
-        ->orderBy('created_at','desc')->get();
-        $role = Role::get();
-        return view('admin.pages.Auth.register', compact(['user', 'role']));
+        $user = User::with('roles')->withCount('posts')->orderBy('created_at', 'desc')->get();
+        $role = Role::orderBy('name')->get();
+        return view('admin.pages.Auth.register', compact('user', 'role'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
     public function store(Request $request)
     {
-        //
-        $validatedData = $request->validate([
-            'name' => 'required',
-            'phone' => 'required|unique:users',
-            'email' => 'unique:users',
-            'password' => 'required',
-            'role' => '',
-
+        $request->validate([
+            'name'     => 'required|string|max:100',
+            'phone'    => 'required|unique:users,phone',
+            'email'    => 'nullable|email|unique:users,email',
+            'password' => 'required|min:6',
+            'role'     => 'required|exists:roles,name',
         ]);
-        // dd($validatedData);
+
         $user = User::create([
-            'name' => $validatedData['name'],
-            'phone' => $validatedData['phone'],
-            'email' => $request->email,
-            'role' => $request->role,
-            'password' => Hash::make($validatedData['password']),
+            'name'     => $request->name,
+            'phone'    => $request->phone,
+            'email'    => $request->email,
+            'role'     => $request->role,
+            'password' => Hash::make($request->password),
         ]);
 
-        if ($request->role) {
-            $user->assignRole($request->role);
-        }
-        Alert::toast('utilisateur crée avec success', 'success');
+        $user->assignRole($request->role);
 
+        Alert::toast('Utilisateur créé avec succès', 'success');
         return back();
     }
 
-    /**
-     * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function show($id)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function edit($id)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
     public function update(Request $request, $id)
     {
+        $user = User::findOrFail($id);
 
-        //
-        $validatedData = $request->validate([
-            'name' => 'required',
-            'phone' => 'required',
-            'email' => '',
-            'password' => '',
-            'role' => '',
-
+        $request->validate([
+            'name'  => 'required|string|max:100',
+            'phone' => 'required|unique:users,phone,' . $id,
+            'email' => 'nullable|email|unique:users,email,' . $id,
+            'role'  => 'nullable|exists:roles,name',
         ]);
-        // dd($validatedData);
 
+        $data = [
+            'name'  => $request->name,
+            'phone' => $request->phone,
+            'email' => $request->email,
+            'role'  => $request->role,
+        ];
 
-        if ($request['password']) {
-            $user_update = tap(User::find($id))->update([
-                'name' => $validatedData['name'],
-                'phone' => $validatedData['phone'],
-                'email' => $request->email,
-                'role' => $request->role,
-                'password' => Hash::make($validatedData['password']),
-            ]);
-        } else {
-            $user_update = tap(User::find($id))->update([
-                'name' => $validatedData['name'],
-                'phone' => $validatedData['phone'],
-                'email' => $request->email,
-                'role' => $request->role,
-            ]);
+        if ($request->filled('password')) {
+            $data['password'] = Hash::make($request->password);
         }
 
-        if ($request->role) {
-            $user_update->syncRoles($request->role);
+        $user->update($data);
+
+        if ($request->filled('role')) {
+            $user->syncRoles($request->role);
         }
 
-        Alert::toast('utilisateur modifié avec success', 'success');
-
+        Alert::toast('Utilisateur modifié avec succès', 'success');
         return back();
     }
 
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
     public function destroy($id)
     {
-        //
-        $delete = User::find($id)->forceDelete();
-        Alert::toast('Utilisateur supprimé avec success', 'success');
+        $user = User::findOrFail($id);
+
+        if ($user->id === Auth::id()) {
+            Alert::toast('Vous ne pouvez pas supprimer votre propre compte.', 'warning');
+            return back();
+        }
+
+        $user->delete();
+        Alert::toast('Utilisateur supprimé avec succès', 'success');
         return back();
     }
 
     public function lock($id)
     {
-        //
-        $lock = User::find($id)->update(['active' => 'no']);
-        Alert::success('Les access de l\'utlisateur sont bloqués avec success');
+        User::findOrFail($id)->update(['active' => 'no']);
+        Alert::toast('Accès bloqué', 'warning');
         return back();
     }
 
     public function unlock($id)
     {
-        //
-        $unlock = User::find($id)->update(['active' => 'yes']);
-        Alert::success('Les access de l\'utlisateur sont debloqués avec success');
+        User::findOrFail($id)->update(['active' => 'yes']);
+        Alert::toast('Accès restauré', 'success');
         return back();
     }
 
-
     public function loginForm()
     {
-
-        if (Auth::check()) {
-            return redirect('admin/');
-        } else {
-            return view('admin.pages.Auth.login');
-        }
+        return Auth::check()
+            ? redirect('admin/')
+            : view('admin.pages.Auth.login');
     }
-
-
 
     public function login(Request $request)
     {
         $request->validate([
+            'phone'    => 'required|string',
             'password' => 'required|string',
-            'phone' => 'required|string',
         ]);
-        $credentials = $request->only('phone', 'password');
 
-        if (Auth::attempt($credentials)) {
-            Alert::success('Connexion réussi');
+        if (Auth::attempt($request->only('phone', 'password'))) {
+            $request->session()->regenerate();
+            Alert::success('Connexion réussie');
             return redirect()->intended('admin/');
         }
 
         Alert::error('Contact ou mot de passe incorrect');
-        return redirect('login');
+        return back()->withInput(['phone' => $request->phone]);
     }
 
-
-    public function logout()
+    public function logout(Request $request)
     {
         Auth::logout();
-        Alert::success('Deconnexion réussi');
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+        Alert::success('Déconnexion réussie');
         return redirect('login');
     }
 
-
-    public function profil($id){
-        $user = User::with('roles')->whereId($id)->first();
-        return view('admin.pages.Auth.profil',compact('user'));
+    public function profil($id)
+    {
+        $user = User::with('roles')->withCount('posts')->findOrFail($id);
+        return view('admin.pages.Auth.profil', compact('user'));
     }
 
+    public function newpassword(Request $request, $id)
+    {
+        $request->validate([
+            'password'    => 'required',
+            'newpassword' => 'required|min:6',
+        ]);
 
-    public function newpassword(Request $request, $id){
-        $user = User::whereId($id)->first();
-        $pwd = Hash::check($request['password'],$user['password']);
-        if (!$pwd) {
-            Alert::Error('votre ancien mot de passe est incorrect');
-            return back();
-        } else {
-            $update_pwd = User::find($id)->update(['password'=>Hash::make($request['newpassword'])]);
-            Alert::Success('votre mot de passe modifié avec success');
-            return back();
+        $user = User::findOrFail($id);
 
+        if (!Hash::check($request->password, $user->password)) {
+            Alert::error('Votre ancien mot de passe est incorrect.');
+            return back();
         }
-        
-        
+
+        $user->update(['password' => Hash::make($request->newpassword)]);
+        Alert::success('Mot de passe modifié avec succès');
+        return back();
     }
 }

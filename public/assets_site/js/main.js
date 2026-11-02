@@ -13,7 +13,13 @@ document.addEventListener('DOMContentLoaded', () => {
   const selectHeader = document.querySelector('#header');
   if (selectHeader) {
     document.addEventListener('scroll', () => {
-      window.scrollY > 100 ? selectHeader.classList.add('sticked') : selectHeader.classList.remove('sticked');
+      if (window.scrollY > 100) {
+        selectHeader.classList.add('sticked');
+        selectHeader.classList.add('header-scrolled');
+      } else {
+        selectHeader.classList.remove('sticked');
+        selectHeader.classList.remove('header-scrolled');
+      }
     });
   }
 

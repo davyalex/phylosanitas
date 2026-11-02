@@ -73,7 +73,7 @@
     </div>
     <div class="credits">
      
-      Crée par <a href="">Labodigit</a>
+      Crée par <a href="dolubux.com" target="_blank">dolubux</a>
     </div>
   </footer><!-- End Footer -->
 

@@ -10,15 +10,23 @@ use Spatie\MediaLibrary\HasMedia;
 
 class Actualite extends Model implements HasMedia
 {
-    use HasFactory,
-    SoftDeletes,
-        InteractsWithMedia;
+    use HasFactory, SoftDeletes, InteractsWithMedia;
 
-        protected $fillable = [
-            'title',
-            'description',
-            'created_at',
-            'updated_at',
-            'deleted_at',
-        ];
+    protected $fillable = [
+        'title',
+        'description',
+        'sous_titre',
+        'lien',
+        'texte_bouton',
+        'actif',
+        'ordre',
+        'created_at',
+        'updated_at',
+        'deleted_at',
+    ];
+
+    protected $casts = [
+        'actif' => 'boolean',
+        'ordre' => 'integer',
+    ];
 }
