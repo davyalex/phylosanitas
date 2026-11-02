@@ -110,16 +110,12 @@
 
                                     {{-- Supprimer --}}
                                     @if($item->id !== auth()->id())
-                                        <form action="{{ route('user.delete', $item->id) }}" method="POST">
+                                        <form action="{{ route('user.delete', $item->id) }}" method="POST"
+                                              data-confirm="Supprimer le compte de « {{ $item->name }} » ? Cette personne ne pourra plus se connecter.">
                                             @csrf
-                                            <button type="button"
-                                                    class="btn btn-sm btn-danger"
-                                                    data-bs-toggle="modal"
-                                                    data-bs-target="#confirmDelete{{ $item->id }}"
-                                                    title="Supprimer">
+                                            <button type="submit" class="btn btn-sm btn-danger" title="Supprimer" aria-label="Supprimer">
                                                 <i class="bi bi-trash"></i>
                                             </button>
-                                            @include('admin.partials.deleteConfirm')
                                         </form>
                                     @endif
                                 </div>

@@ -51,6 +51,11 @@
                         @endif
                     </div>
 
+                    {{-- À la une de l'accueil (articles uniquement) --}}
+                    @if (request('type') != 'sondage' && isset($une))
+                        @include('admin.pages.post._une', ['une' => $une, 'complement' => $complement ?? collect()])
+                    @endif
+
                     {{-- Contenu --}}
                     @if (request('type') == 'sondage')
                         @include('admin.pages.sondage.index')

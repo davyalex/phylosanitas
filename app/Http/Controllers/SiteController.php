@@ -43,6 +43,20 @@ class SiteController extends Controller
                 ->take(12)
                 ->get();
 
+            // « À la une » : les articles mis à la une (le plus récent = principal),
+            // places libres complétées par les derniers articles, puis le reste pour « Articles récents »
+            $une = Post::with($this->listWith())
+                ->select(self::LIST_SELECT)
+                ->withCount('commentaires')
+                ->withViewsCount()
+                ->where('published', 'public')
+                ->aLaUne()
+                ->take(Post::UNE_PLACES)
+                ->get();
+
+            $featured = $une->concat($post->whereNotIn('id', $une->pluck('id')))->take(Post::UNE_PLACES);
+            $post = $featured->concat($post->whereNotIn('id', $featured->pluck('id')))->values();
+
             // Carousel depuis la table dédiée ; fallback hero statique si vide
             $slide = CarouselSlide::with(['media' => fn($q) => $q->where('collection_name', 'image')])
                 ->where('actif', true)

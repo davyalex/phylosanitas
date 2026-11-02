@@ -617,6 +617,24 @@
   <i class="bi bi-arrow-up-short"></i>
 </a>
 
+{{-- Fenêtre de confirmation commune : <form data-confirm="Message" [data-confirm-title] [data-confirm-ok]> --}}
+<div class="modal fade" id="confirmModal" tabindex="-1" aria-labelledby="confirmModalTitle" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered confirm-modal">
+    <div class="modal-content">
+      <div class="modal-body text-center px-4 pt-4 pb-3">
+        <span class="confirm-modal__icon js-confirm-icon"><i class="bi bi-trash3"></i></span>
+        <h2 class="confirm-modal__title" id="confirmModalTitle">Confirmer la suppression</h2>
+        <p class="confirm-modal__text js-confirm-text"></p>
+        <p class="confirm-modal__warn js-confirm-warn"><i class="bi bi-exclamation-triangle me-1"></i>Cette action est définitive.</p>
+      </div>
+      <div class="modal-footer confirm-modal__footer">
+        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Annuler</button>
+        <button type="button" class="btn btn-danger js-confirm-ok">Supprimer</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 {{-- Scripts --}}
 <script src="{{ asset('assets_admin/vendor/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
 <script src="{{ asset('assets_admin/vendor/apexcharts/apexcharts.min.js') }}"></script>

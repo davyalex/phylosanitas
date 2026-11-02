@@ -39,7 +39,18 @@ class PostController extends Controller
                 ->orderBy('created_at', 'desc')
                 ->get();
 
-            return view('admin.pages.post.index', compact('post', 'sondage'));
+            // Aperçu de la une de l'accueil : articles mis à la une, puis complément automatique
+            $une = Post::with(['category', 'media'])->withViewsCount()->aLaUne()->take(Post::UNE_PLACES)->get();
+            $complement = Post::with(['category', 'media'])
+                ->where('published', 'public')
+                ->where('category_id', '!=', $category_sondage->id)
+                ->whereNotIn('id', $une->pluck('id'))
+                ->when(Category::where('slug', 'actualites')->value('id'), fn($q, $id) => $q->where('category_id', '!=', $id))
+                ->latest()
+                ->take(max(0, Post::UNE_PLACES - $une->count()))
+                ->get();
+
+            return view('admin.pages.post.index', compact('post', 'sondage', 'une', 'complement'));
         } catch (\Throwable $e) {
             Alert::error('Erreur', 'Impossible de charger les articles.');
             return redirect()->route('dashboard');
@@ -63,10 +74,30 @@ class PostController extends Controller
             'actualite'     => 'required|exists:posts,id',
         ]);
 
-        Post::whereId($request->actualite)->update(['actualite_une' => $request->actualite_une]);
+        $post = Post::with('category')->findOrFail($request->actualite);
+        $on   = (bool) $request->actualite_une;
+        $sortants = $post->mettreALaUne($on);
+        $this->flushUneCaches();
 
-        Alert::success('Statut modifié avec succès');
+        $titre = Str::limit($post->title ?: strip_tags($post->description), 60);
+        if (!$on) {
+            Alert::toast("« $titre » a été retiré de la une", 'info');
+        } elseif ($post->category && $post->category->slug === 'actualites') {
+            Alert::toast("« $titre » s'affiche dans le widget Actualités", 'success');
+        } else {
+            $msg = "« $titre » est maintenant l'article principal de la une";
+            if ($sortants->isNotEmpty()) {
+                $msg .= ' · « ' . Str::limit($sortants->first()->title, 40) . ' » a quitté la une';
+            }
+            Alert::toast($msg, 'success');
+        }
+
         return back();
+    }
+
+    private function flushUneCaches(): void
+    {
+        \Illuminate\Support\Facades\Cache::forget(\App\Providers\AppServiceProvider::CACHE_NEWS);
     }
 
     public function create()
@@ -119,12 +150,18 @@ class PostController extends Controller
             'category_id'      => $request->category,
             'lien'             => $request->lien,
             'published'        => $request->boolean('publier') ? 'public' : 'prive',
-            'actualite_une'    => $request->boolean('actualite_une'),
+            'actualite_une'    => 0,
             'user_id'          => Auth::id(),
         ]);
 
         if ($request->hasFile('image')) {
             $post->addMediaFromRequest('image')->toMediaCollection('image');
+        }
+
+        // À la une : devient l'article principal, le plus ancien des 4 quitte la une
+        if ($request->boolean('actualite_une')) {
+            $post->load('category')->mettreALaUne(true);
+            $this->flushUneCaches();
         }
 
         Alert::toast('Article créé avec succès', 'success');
@@ -296,6 +333,9 @@ class PostController extends Controller
         $this->validateArticle($request);
 
         $post = Post::findOrFail($id);
+        $etaitALaUne = (bool) $post->actualite_une;
+        $veutLaUne   = $request->has('actualite_une') ? $request->boolean('actualite_une') : $etaitALaUne;
+
         $post->update([
             'title'            => $request->title,
             'meta_description' => $request->meta_description,
@@ -303,13 +343,18 @@ class PostController extends Controller
             'category_id'      => $request->category,
             'lien'             => $request->lien,
             'published'        => $request->has('publier') ? ($request->boolean('publier') ? 'public' : 'prive') : $post->published,
-            'actualite_une'    => $request->has('actualite_une') ? $request->boolean('actualite_une') : $post->actualite_une,
             'user_id'          => Auth::id(),
         ]);
 
         if ($request->hasFile('image')) {
             $post->clearMediaCollection('image');
             $post->addMediaFromRequest('image')->toMediaCollection('image');
+        }
+
+        // Ne change la une que si la case a changé (sinon l'ordre de la une reste intact)
+        if ($veutLaUne !== $etaitALaUne) {
+            $post->load('category')->mettreALaUne($veutLaUne);
+            $this->flushUneCaches();
         }
 
         Alert::toast('Article modifié avec succès', 'success');

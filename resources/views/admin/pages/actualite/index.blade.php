@@ -107,16 +107,12 @@
                             </button>
 
                             {{-- Supprimer --}}
-                            <form action="{{ route('actualite.delete', $item->id) }}" method="POST" class="d-inline">
+                            <form action="{{ route('actualite.delete', $item->id) }}" method="POST" class="d-inline"
+                                  data-confirm="Supprimer cette diapositive du carrousel ?">
                                 @csrf
-                                <button type="button"
-                                        class="btn btn-sm btn-danger"
-                                        data-bs-toggle="modal"
-                                        data-bs-target="#confirmDeleteSlide{{ $item->id }}"
-                                        title="Supprimer">
+                                <button type="submit" class="btn btn-sm btn-danger" title="Supprimer" aria-label="Supprimer">
                                     <i class="bi bi-trash"></i>
                                 </button>
-                                @include('admin.partials.deleteConfirm')
                             </form>
                         </div>
                     </div>

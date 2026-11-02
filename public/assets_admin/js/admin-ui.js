@@ -75,14 +75,55 @@ document.addEventListener('DOMContentLoaded', function () {
     new bootstrap.Dropdown(btn, { popperConfig: function (cfg) { return Object.assign({}, cfg, { strategy: 'fixed' }); } });
   }, true);
 
-  /* Confirmation avant suppression : <form data-confirm="Message"> */
+  /* Confirmation avant suppression : <form data-confirm="Message">
+     Options : data-confirm-title="…", data-confirm-ok="Supprimer", data-confirm-tone="danger|warning" */
   // Délégation : fonctionne aussi pour les lignes redessinées par la pagination des tableaux
+  var confirmEl = document.getElementById('confirmModal');
+  var confirmModal = null, pendingForm = null;
+
+  function isDelete(form) {
+    var m = form.querySelector('input[name="_method"]');
+    return (m && /delete/i.test(m.value)) || /destroy|delete|supprim/i.test(form.action);
+  }
+
+  function askConfirm(form) {
+    var danger = (form.getAttribute('data-confirm-tone') || (isDelete(form) ? 'danger' : 'warning')) === 'danger';
+    confirmEl.querySelector('#confirmModalTitle').textContent = form.getAttribute('data-confirm-title') || (danger ? 'Confirmer la suppression' : 'Confirmer l\'action');
+    confirmEl.querySelector('.js-confirm-text').textContent = form.getAttribute('data-confirm');
+    confirmEl.querySelector('.js-confirm-warn').hidden = !danger;
+    confirmEl.querySelector('.js-confirm-icon').className = 'confirm-modal__icon js-confirm-icon' + (danger ? '' : ' is-warning');
+    confirmEl.querySelector('.js-confirm-icon i').className = 'bi ' + (danger ? 'bi-trash3' : 'bi-question-lg');
+    var ok = confirmEl.querySelector('.js-confirm-ok');
+    ok.textContent = form.getAttribute('data-confirm-ok') || (danger ? 'Supprimer' : 'Confirmer');
+    ok.className = 'btn js-confirm-ok ' + (danger ? 'btn-danger' : 'btn-primary');
+    pendingForm = form;
+    confirmModal.show();
+  }
+
+  if (confirmEl && window.bootstrap && bootstrap.Modal) {
+    confirmModal = new bootstrap.Modal(confirmEl);
+    confirmEl.querySelector('.js-confirm-ok').addEventListener('click', function () {
+      if (!pendingForm) return;
+      var form = pendingForm;
+      pendingForm = null;
+      form.dataset.confirmed = '1';
+      confirmModal.hide();
+      if (form.requestSubmit) form.requestSubmit(); else form.submit();
+    });
+    // Le bouton « Supprimer » prend le focus : Entrée confirme, Échap annule
+    confirmEl.addEventListener('shown.bs.modal', function () { confirmEl.querySelector('.js-confirm-ok').focus(); });
+    confirmEl.addEventListener('hidden.bs.modal', function () { pendingForm = null; });
+  }
+
   document.addEventListener('submit', function (e) {
     var form = e.target.closest('form[data-confirm]');
-    if (form && !window.confirm(form.getAttribute('data-confirm'))) {
-      e.preventDefault();
-      e.stopImmediatePropagation();
-    }
+    if (!form) return;
+    if (form.dataset.confirmed === '1') { delete form.dataset.confirmed; return; }
+
+    e.preventDefault();
+    e.stopImmediatePropagation();
+    if (confirmModal) askConfirm(form);
+    else if (window.confirm(form.getAttribute('data-confirm'))) { form.dataset.confirmed = '1'; form.submit(); }
   }, true);
 
   /* Empêche le double envoi d'un formulaire */
