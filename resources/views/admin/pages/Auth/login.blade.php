@@ -1,206 +1,156 @@
-
+@php
+    $site = $site ?? \App\Models\Setting::forViews();
+    $nom  = $site['nom'] ?? config('app.name');
+@endphp
 <!DOCTYPE html>
-<html lang="en">
-
+<html lang="fr">
 <head>
-  <meta charset="utf-8">
-  <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="robots" content="noindex, nofollow">
+    <meta name="theme-color" content="#0a2c52">
+    <title>Connexion — {{ $nom }} administration</title>
 
-  <title>{{ config('app.name') }}-Dashboard-@yield('title')</title>
-  <meta charset="utf-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="description" content="@yield('title')">
-  <meta property="og:image" content="@yield('image')">
-  <meta name="title" content="@yield('title')">
-  <meta name="url" content="@yield('url')">
-
-
-  <meta name="csrf-token" content="{{ csrf_token() }}">
-
-  <!-- Favicons -->
-  <link href="{{ asset('assets_admin/img/favicon.png') }}" rel="icon">
-  <link href="{{ asset('assets_admin/img/apple-touch-icon.png') }}" rel="apple-touch-icon">
-
-
-  <!-- Google Fonts -->
-  <link href="https://fonts.gstatic.com" rel="preconnect">
-  <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,600i,700,700i|Nunito:300,300i,400,400i,600,600i,700,700i|Poppins:300,300i,400,400i,500,500i,600,600i,700,700i" rel="stylesheet">
-
-  <link rel="stylesheet" type="text/css" 
-  href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
- <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/js/toastr.min.js"></script>
-
-<script src="{{ asset('resources/js/app.js') }}" defer></script>
-
- <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
- <!-- Vendor CSS Files -->
-  <link href="{{ asset('assets_admin/vendor/bootstrap/css/bootstrap.min.css') }}" rel="stylesheet">
-  <link href="{{ asset('assets_admin/vendor/bootstrap-icons/bootstrap-icons.css') }}" rel="stylesheet">
-  <link href="{{ asset('assets_admin/vendor/boxicons/css/boxicons.min.css') }}" rel="stylesheet">
-  <link href="{{ asset('assets_admin/vendor/quill/quill.snow.css') }}" rel="stylesheet">
-  <link href="{{ asset('assets_admin/vendor/quill/quill.bubble.css') }}" rel="stylesheet">
-  <link href="{{ asset('assets_admin/vendor/remixicon/remixicon.css') }}" rel="stylesheet">
-  <link href="{{ asset('assets_admin/vendor/simple-datatables/style.css') }}" rel="stylesheet">
-
-  <!-- Template Main CSS File -->
-  <link href="{{ asset('assets_admin/css/style.css') }}" rel="stylesheet">
-  <script src="{{ asset('assets_admin/js/jquery.min.js') }}"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert/2.1.0/sweetalert.min.js"></script>
-  <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/sweetalert/1.1.3/sweetalert.min.css">
-  
-
-  
+    <link rel="icon" href="{{ asset('assets_admin/img/favicon.png') }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="{{ asset('assets_admin/vendor/bootstrap/css/bootstrap.min.css') }}" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    <link href="{{ asset('assets_site/css/site-motion.css') }}?v={{ @filemtime(public_path('assets_site/css/site-motion.css')) }}" rel="stylesheet">
+    <link href="{{ asset('assets_admin/css/login.css') }}?v={{ @filemtime(public_path('assets_admin/css/login.css')) }}" rel="stylesheet">
 </head>
 <body>
-   @guest
-   @include('sweetalert::alert')
+<main class="auth">
 
-   <main>
-       <div class="container">
-   
-         <section class="section register min-vh-100 d-flex flex-column align-items-center justify-content-center py-4">
-           <div class="container">
-             <div class="row justify-content-center">
-               <div class="col-lg-4 col-md-6 d-flex flex-column align-items-center justify-content-center">
-   
-                 <div class="d-flex justify-content-center py-4">
-                   <a href="{{route('accueil')}}" class="logo d-flex align-items-center w-auto">
-                     <img src="{{asset('assets_site/img/logo/logo_fb.png')}}" alt="">
-                     {{-- <span class="d-none d-lg-block">PhyloSanitas</span> --}}
-                   </a>
-                 </div><!-- End Logo -->
-   
-                 <div class="card mb-3">
-   
-                   <div class="card-body">
-   
-                     <div class="pt-4 pb-2">
-                       <h5 class="card-title text-center pb-0 fs-4">Connexion Espace Admin</h5>
-                     </div>
-   
-                     <form class="row g-3 needs-validation" action="{{ route('login') }}" method="POST" novalidate>
-                           @csrf
-                       <div class="col-12">
-                         <label for="yourUsername" class="form-label">Telephone</label>
-                         <div class="input-group has-validation">
-                           <input type="text" name="phone" class="form-control" id="yourUsername" required>
-                           <div class="invalid-feedback">Entrez votre numero de telephone!</div>
-                         </div>
-                       </div>
-   
-                       <div class="col-12">
-                         <label for="yourPassword" class="form-label">Mot de passe</label>
-                         <input type="password" name="password" class="form-control" id="password" required>
-                         @include('admin.partials.hideShowPwd')
-                         <div class="invalid-feedback">Entrez votre mot de passe!</div>
-                       </div>
-   
-                       <div class="col-12">
-                         <button class="btn btn-primary w-100" type="submit">Connexion</button>
-                       </div>
-                       <div class="col-12">
-                         <p class="small mb-0 text-center text-bold"><a href="{{ route('accueil') }}">Retour au site web <i class="bi bi-arrow-90deg-right"></i></a></p>
-                       </div>
-                     </form>
-   
-                   </div>
-                 </div>
-   
-               
-   
-               </div>
-             </div>
-           </div>
-   
-         </section>
-   
-       </div>
-     </main><!-- End #main -->
-   @endguest
+    {{-- Panneau de marque (ordinateur) --}}
+    <aside class="auth__aside" aria-hidden="true">
+        <div class="auth__aside-inner">
+            <span class="auth__eyebrow"><i class="bi bi-shield-lock"></i> Espace d'administration</span>
+            <h2 class="auth__headline">Gérez {{ $nom }} en toute simplicité.</h2>
+            <p class="auth__lead">Articles, sondages, popups, publicités et configuration du site, au même endroit.</p>
 
+            <div class="auth__art"><x-health-art name="hospital" /></div>
 
+            <ul class="auth__features">
+                <li><i class="bi bi-journal-medical"></i> Publiez vos conseils santé</li>
+                <li><i class="bi bi-graph-up-arrow"></i> Suivez visites et lectures</li>
+                <li><i class="bi bi-megaphone"></i> Diffusez vos campagnes</li>
+            </ul>
+        </div>
+        <p class="auth__copy">© {{ date('Y') }} {{ $nom }}</p>
+    </aside>
 
+    {{-- Formulaire --}}
+    <section class="auth__main">
+        <div class="auth__card">
+            <a href="{{ route('accueil') }}" class="auth__logo" title="Retour au site">
+                <img src="{{ $site['logo'] }}" alt="{{ $nom }}" onerror="this.onerror=null;this.src='{{ asset('assets_site/img/logo/logo_tp.png') }}'">
+            </a>
 
+            <h1 class="auth__title">Connexion</h1>
+            <p class="auth__subtitle">Accédez au tableau de bord de {{ $nom }}.</p>
 
+            @if(session('status'))
+                <div class="auth__alert auth__alert--ok" role="status">
+                    <i class="bi bi-check-circle-fill" aria-hidden="true"></i><span>{{ session('status') }}</span>
+                </div>
+            @endif
 
-  <a href="#" class="back-to-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>
-  <!-- Vendor JS Files -->
-{{-- <script src="{{ asset('assets_admin/js/bootstrap.min.js') }}"></script> --}}
-  <script src="{{ asset('assets_admin/vendor/apexcharts/apexcharts.min.js') }}"></script>
-  <script src="{{ asset('assets_admin/vendor/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
-  <script src="{{ asset('assets_admin/vendor/chart.js/chart.min.js') }}"></script>
-  <script src="{{ asset('assets_admin/vendor/echarts/echarts.min.js') }}"></script>
-  <script src="{{ asset('assets_admin/vendor/quill/quill.min.js') }}"></script>
-  <script src="{{ asset('assets_admin/vendor/simple-datatables/simple-datatables.js') }}"></script>
-  <script src="{{ asset('assets_admin/vendor/tinymce/tinymce.min.js') }}"></script>
-  <script src="{{ asset('assets_admin/vendor/php-email-form/validate.js') }}"></script>
+            @if($errors->any())
+                <div class="auth__alert" role="alert">
+                    <i class="bi bi-exclamation-circle-fill" aria-hidden="true"></i>
+                    <span>{{ $errors->first('login') ?: $errors->first() }}</span>
+                </div>
+            @endif
 
-  <!-- Template Main JS File -->
-  <script src="{{ asset('assets_admin/js/main.js') }}"></script>
+            <form action="{{ route('login') }}" method="POST" class="auth__form" id="login-form" novalidate>
+                @csrf
+
+                <div class="auth__field">
+                    <label for="phone">Numéro de téléphone</label>
+                    <div class="auth__input @error('phone') is-invalid @enderror">
+                        <i class="bi bi-telephone" aria-hidden="true"></i>
+                        <input id="phone" type="tel" name="phone" value="{{ old('phone') }}" inputmode="tel"
+                               autocomplete="username" placeholder="Ex. 0700000000" required autofocus>
+                    </div>
+                    @error('phone')<p class="auth__error">{{ $message }}</p>@enderror
+                </div>
+
+                <div class="auth__field">
+                    <label for="password">Mot de passe</label>
+                    <div class="auth__input @error('password') is-invalid @enderror">
+                        <i class="bi bi-lock" aria-hidden="true"></i>
+                        <input id="password" type="password" name="password" autocomplete="current-password" placeholder="Votre mot de passe" required>
+                        <button type="button" class="auth__eye" id="toggle-pwd" aria-label="Afficher le mot de passe" aria-pressed="false">
+                            <i class="bi bi-eye" aria-hidden="true"></i>
+                        </button>
+                    </div>
+                    <p class="auth__caps" id="caps" hidden><i class="bi bi-capslock-fill" aria-hidden="true"></i> Majuscules activées</p>
+                    @error('password')<p class="auth__error">{{ $message }}</p>@enderror
+                </div>
+
+                <label class="auth__remember">
+                    <input type="checkbox" name="remember" value="1" class="form-check-input" {{ old('remember') ? 'checked' : '' }}>
+                    <span>Rester connecté sur cet appareil</span>
+                </label>
+
+                <button type="submit" class="auth__submit" id="login-submit">
+                    <span class="auth__submit-label">Se connecter</span>
+                    <i class="bi bi-arrow-right" aria-hidden="true"></i>
+                </button>
+            </form>
+
+            <p class="auth__help">Mot de passe oublié ? Contactez l'administrateur du site.</p>
+
+            <a href="{{ route('accueil') }}" class="auth__back"><i class="bi bi-arrow-left" aria-hidden="true"></i> Retour au site</a>
+        </div>
+    </section>
+</main>
 
 <script>
-  @if(Session::has('message'))
-  toastr.options =
-  {
-      "closeButton" : true,
-      "progressBar" : true,
-      "timeOut": "1000",
+(function () {
+    var pwd = document.getElementById('password');
+    var eye = document.getElementById('toggle-pwd');
+    eye.addEventListener('click', function () {
+        var show = pwd.type === 'password';
+        pwd.type = show ? 'text' : 'password';
+        eye.setAttribute('aria-pressed', show);
+        eye.setAttribute('aria-label', show ? 'Masquer le mot de passe' : 'Afficher le mot de passe');
+        eye.querySelector('i').className = 'bi ' + (show ? 'bi-eye-slash' : 'bi-eye');
+        pwd.focus();
+    });
 
-  }
-          toastr.success("{{ session('message') }}");
-  @endif
+    // Avertit si la touche Majuscule est verrouillée
+    var caps = document.getElementById('caps');
+    ['keydown', 'keyup'].forEach(function (ev) {
+        pwd.addEventListener(ev, function (e) {
+            if (e.getModifierState) caps.hidden = !e.getModifierState('CapsLock');
+        });
+    });
 
-  @if(Session::has('error'))
-  toastr.options =
-  {
-      "closeButton" : true,
-      "progressBar" : true,
-      "timeOut": "10000",
-  }
-          toastr.error("{{ session('error') }}");
-  @endif
+    // Champ vide : message clair ; sinon bouton en attente pour éviter le double envoi
+    var form = document.getElementById('login-form');
+    form.addEventListener('submit', function (e) {
+        var empty = Array.prototype.filter.call(form.querySelectorAll('input[required]'), function (i) { return !i.value.trim(); });
+        if (empty.length) {
+            e.preventDefault();
+            empty.forEach(function (i) { i.closest('.auth__input').classList.add('is-invalid'); });
+            empty[0].focus();
+            return;
+        }
+        var btn = document.getElementById('login-submit');
+        btn.disabled = true;
+        btn.querySelector('.auth__submit-label').textContent = 'Connexion…';
+    });
+    form.querySelectorAll('input').forEach(function (i) {
+        i.addEventListener('input', function () { var w = i.closest('.auth__input'); if (w) w.classList.remove('is-invalid'); });
+    });
 
-  @if(Session::has('info'))
-  toastr.options =
-  {
-      "closeButton" : true,
-      "progressBar" : true
-  }
-          toastr.info("{{ session('info') }}");
-  @endif
-
-  @if(Session::has('warning'))
-  toastr.options =
-  {
-      "closeButton" : true,
-      "progressBar" : true
-  }
-          toastr.warning("{{ session('warning') }}");
-  @endif
-
-
-
+    @if($errors->has('login'))
+        pwd.focus();
+    @endif
+})();
 </script>
-
-{{-- toastr.options = {
-"closeButton": false,
-"debug": false,
-"newestOnTop": false,
-"progressBar": true,
-"positionClass": "toast-top-right",
-"preventDuplicates": true,
-"onclick": null,
-"showDuration": "300",
-"hideDuration": "1000",
-"timeOut": "5000",
-"extendedTimeOut": "1000",
-"showEasing": "swing",
-"hideEasing": "linear",
-"showMethod": "fadeIn",
-"hideMethod": "fadeOut"
-} --}}
- 
-
 </body>
-
 </html>

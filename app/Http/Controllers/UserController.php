@@ -112,18 +112,28 @@ class UserController extends Controller
     public function login(Request $request)
     {
         $request->validate([
-            'phone'    => 'required|string',
+            'phone'    => 'required|string|max:30',
             'password' => 'required|string',
+        ], [
+            'phone.required'    => 'Entrez votre numéro de téléphone.',
+            'password.required' => 'Entrez votre mot de passe.',
         ]);
 
-        if (Auth::attempt($request->only('phone', 'password'))) {
+        // Le numéro peut être saisi avec espaces : on essaie tel quel puis sans espaces
+        $phone = trim($request->phone);
+        $remember = $request->boolean('remember');
+        $ok = Auth::attempt(['phone' => $phone, 'password' => $request->password], $remember)
+            || (str_contains($phone, ' ') && Auth::attempt(['phone' => str_replace(' ', '', $phone), 'password' => $request->password], $remember));
+
+        if ($ok) {
             $request->session()->regenerate();
-            Alert::success('Connexion réussie');
+            Alert::toast('Bienvenue ' . (Auth::user()->name ?? ''), 'success');
             return redirect()->intended('admin/');
         }
 
-        Alert::error('Contact ou mot de passe incorrect');
-        return back()->withInput(['phone' => $request->phone]);
+        return back()
+            ->withInput(['phone' => $request->phone, 'remember' => $remember])
+            ->withErrors(['login' => 'Numéro de téléphone ou mot de passe incorrect.']);
     }
 
     public function logout(Request $request)
@@ -131,8 +141,7 @@ class UserController extends Controller
         Auth::logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();
-        Alert::success('Déconnexion réussie');
-        return redirect('login');
+        return redirect('login')->with('status', 'Vous êtes bien déconnecté. À bientôt !');
     }
 
     public function profil($id)
