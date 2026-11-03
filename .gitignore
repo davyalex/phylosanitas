@@ -16,3 +16,7 @@ yarn-error.log
 /.fleet
 /.idea
 /.vscode
+
+# Notes locales (codes AdSense copiés depuis Google)
+/fichier-goofle-ads
+/fichier-google-ads
