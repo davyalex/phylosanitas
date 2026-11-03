@@ -17,7 +17,8 @@
 */
 
 return [
-    'client' => env('ADSENSE_CLIENT', 'ca-pub-6925205610540207'),
+    // « ?: » : une ligne ADSENSE_CLIENT= vide dans le .env garde quand même le bon identifiant
+    'client' => env('ADSENSE_CLIENT') ?: 'ca-pub-6925205610540207',
 
     'placeholders' => (bool) env('ADS_PLACEHOLDERS', true),
 
