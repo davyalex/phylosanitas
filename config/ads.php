@@ -27,4 +27,7 @@ return [
         'infeed'      => env('ADSENSE_SLOT_INFEED'),
         'inarticle'   => env('ADSENSE_SLOT_INARTICLE'),
     ],
+
+    // Bloc « In-feed » : valeur de data-ad-layout-key fournie par AdSense (ex. -fb+5w+4e-db+86)
+    'infeed_layout_key' => env('ADSENSE_INFEED_LAYOUT_KEY'),
 ];

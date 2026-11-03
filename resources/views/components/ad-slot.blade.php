@@ -14,7 +14,9 @@
     $client    = config('ads.client');
     $slot      = config("ads.slots.$format");
     $showHouse = config('ads.placeholders', true);
-    $adFormat  = $format === 'inarticle' ? 'fluid' : 'auto';
+    $layoutKey = $format === 'infeed' ? config('ads.infeed_layout_key') : null;
+    // In-article et In-feed (avec sa clé de mise en page) sont des annonces « fluid »
+    $adFormat  = ($format === 'inarticle' || $layoutKey) ? 'fluid' : 'auto';
 
     // Impression comptée après l'envoi de la page (aucun ralentissement)
     if ($custom) {
@@ -39,12 +41,13 @@
         @elseif($client && $slot)
             <div class="ad__frame">
                 <ins class="adsbygoogle"
-                     style="display:block"
+                     style="display:block{{ $format === 'inarticle' ? '; text-align:center;' : '' }}"
                      data-ad-client="{{ $client }}"
                      data-ad-slot="{{ $slot }}"
                      data-ad-format="{{ $adFormat }}"
                      @if($format === 'inarticle') data-ad-layout="in-article" @endif
-                     data-full-width-responsive="true"></ins>
+                     @if($layoutKey) data-ad-layout-key="{{ $layoutKey }}" @endif
+                     @unless($adFormat === 'fluid') data-full-width-responsive="true" @endunless></ins>
             </div>
             <script>(window.adsbygoogle = window.adsbygoogle || []).push({});</script>
         @else
