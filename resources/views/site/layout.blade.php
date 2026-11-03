@@ -125,6 +125,8 @@
 
     @stack('head')
 
+    {{-- Google AdSense : vérification du site (meta) + script des annonces --}}
+    <meta name="google-adsense-account" content="{{ config('ads.client') }}">
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client={{ config('ads.client') }}" crossorigin="anonymous"></script>
 </head>
 
