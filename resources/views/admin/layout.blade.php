@@ -504,36 +504,11 @@
     {{-- ── Services lecteurs ── --}}
     <div class="sb-section-label">Services lecteurs</div>
 
-    @if(config('sante.modules.questions'))
-    <a href="{{ route('question.index') }}"
-       class="sb-link {{ request()->routeIs('question.*') ? 'active' : '' }}">
-      <span class="sb-icon"><i class="bi bi-chat-heart"></i></span>
-      Le médecin répond
-      @if(($admin_badges['questions'] ?? 0) > 0)<span class="sb-badge sb-badge--alert" title="Questions en attente">{{ $admin_badges['questions'] }}</span>@endif
-    </a>
-    @endif
-
     <a href="{{ route('quiz.index') }}"
        class="sb-link {{ request()->routeIs('quiz.*') ? 'active' : '' }}">
       <span class="sb-icon"><i class="bi bi-patch-question"></i></span>
       Quiz vrai / faux
     </a>
-
-    @if(config('sante.modules.maladies'))
-    <a href="{{ route('maladie.index') }}"
-       class="sb-link {{ request()->routeIs('maladie.*') ? 'active' : '' }}">
-      <span class="sb-icon"><i class="bi bi-journal-medical"></i></span>
-      Maladies de A à Z
-    </a>
-    @endif
-
-    @if(config('sante.modules.dossiers'))
-    <a href="{{ route('dossier.index') }}"
-       class="sb-link {{ request()->routeIs('dossier.*') ? 'active' : '' }}">
-      <span class="sb-icon"><i class="bi bi-collection-play"></i></span>
-      Dossiers
-    </a>
-    @endif
 
     <a href="{{ route('journee.index') }}"
        class="sb-link {{ request()->routeIs('journee.*') ? 'active' : '' }}">
@@ -543,8 +518,8 @@
 
     <a href="{{ route('etablissement.index') }}"
        class="sb-link {{ request()->routeIs('etablissement.*') ? 'active' : '' }}">
-      <span class="sb-icon"><i class="bi bi-geo-alt"></i></span>
-      {{ config('sante.modules.annuaire') ? 'Annuaire santé' : 'Pharmacies de garde' }}
+      <span class="sb-icon"><i class="bi bi-moon-stars"></i></span>
+      Pharmacies de garde
       @if(($admin_badges['gardes'] ?? 0) > 0)<span class="sb-badge" title="Pharmacies de garde aujourd'hui">{{ $admin_badges['gardes'] }}</span>@endif
     </a>
 
@@ -572,13 +547,6 @@
       Newsletter
     </a>
 
-    @if(config('sante.modules.notifications'))
-    <a href="{{ route('push.admin') }}"
-       class="sb-link {{ request()->routeIs('push.*') ? 'active' : '' }}">
-      <span class="sb-icon"><i class="bi bi-bell"></i></span>
-      Notifications
-    </a>
-    @endif
     @endrole
 
     {{-- ── Administration ── --}}

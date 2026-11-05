@@ -1,54 +1,26 @@
 {{--
     Accueil, sous « Quand consulter ? » : deux cartes toujours remplies qui comblent la colonne face à la barre latérale.
-    1re carte : maladies fréquentes si le module est actif, sinon les prochaines journées santé du calendrier.
+    1re carte : les prochaines journées santé du calendrier.
     2e carte : outils santé.
 --}}
 @php
-    $avecMaladies = config('sante.modules.maladies');
-
-    $fiches = $avecMaladies ? Cache::remember('home_maladies', 1800, function () {
-        try {
-            return \App\Models\Maladie::publiees()->orderBy('nom')->get(['nom', 'slug']);
-        } catch (\Throwable) {
-            return collect();
-        }
-    }) : collect();
-
     // Journée en cours, puis les prochaines (on complète avec l'année suivante en fin d'année)
     $journees = collect();
-    if (!$avecMaladies) {
-        try {
-            $g = \App\Models\JourneeSante::calendrierAnnee();
-            $journees = $g['en_cours']->concat($g['a_venir']);
-            if ($journees->count() < 3) {
-                $suivante = \App\Models\JourneeSante::calendrierAnnee(now()->addYear()->startOfYear());
-                $journees = $journees->concat($suivante['en_cours'])->concat($suivante['a_venir']);
-            }
-            $journees = $journees->take(3);
-        } catch (\Throwable) {}
-    }
+    try {
+        $g = \App\Models\JourneeSante::calendrierAnnee();
+        $journees = $g['en_cours']->concat($g['a_venir']);
+        if ($journees->count() < 3) {
+            $suivante = \App\Models\JourneeSante::calendrierAnnee(now()->addYear()->startOfYear());
+            $journees = $journees->concat($suivante['en_cours'])->concat($suivante['a_venir']);
+        }
+        $journees = $journees->take(3);
+    } catch (\Throwable) {}
 
     $outils = config('sante.outils', []);
 @endphp
 
 <div class="reperes">
-    @if($fiches->count())
-        <section class="reperes__card" aria-labelledby="rep-maladies">
-            <div class="reperes__head">
-                <span class="reperes__icon" aria-hidden="true"><i class="bi bi-journal-medical"></i></span>
-                <div>
-                    <h2 class="reperes__title" id="rep-maladies">Maladies fréquentes</h2>
-                    <p class="reperes__sub">Symptômes, prévention et quand consulter</p>
-                </div>
-            </div>
-            <div class="chips-wrap">
-                @foreach($fiches->take(10) as $m)
-                    <a href="{{ route('maladies.show', $m->slug) }}" class="chip">{{ $m->nom }}</a>
-                @endforeach
-            </div>
-            <a href="{{ route('maladies.index') }}" class="reperes__more">Toutes les maladies de A à Z <i class="bi bi-arrow-right" aria-hidden="true"></i></a>
-        </section>
-    @elseif($journees->count())
+    @if($journees->count())
         <section class="reperes__card" aria-labelledby="rep-journees">
             <div class="reperes__head">
                 <span class="reperes__icon" aria-hidden="true"><i class="bi bi-calendar-heart"></i></span>

@@ -165,28 +165,9 @@ class SiteController extends Controller
                     ->get()
             );
 
-            // Dossier thématique dont l'article fait partie : précédent / suivant
-            $dossierNav = null;
-            try {
-                $dossier = !config('sante.modules.dossiers') ? null : $post->dossiers()->where('dossiers.actif', true)->first();
-                if ($dossier) {
-                    $etapes = $dossier->postsPublies()->get(['posts.id', 'posts.title', 'posts.slug'])->values();
-                    $i = $etapes->search(fn($p) => $p->id === $post->id);
-                    if ($i !== false && $etapes->count() > 1) {
-                        $dossierNav = (object) [
-                            'dossier' => $dossier,
-                            'rang'    => $i + 1,
-                            'total'   => $etapes->count(),
-                            'prev'    => $etapes[$i - 1] ?? null,
-                            'next'    => $etapes[$i + 1] ?? null,
-                        ];
-                    }
-                }
-            } catch (\Throwable) {}
-
             $mon_avis = $request->session()->get("avis.{$post->id}");
 
-            return view('site.pages.detail', compact('post', 'statistic_sondage', 'sondage_total', 'my_vote', 'related', 'dossierNav', 'mon_avis'));
+            return view('site.pages.detail', compact('post', 'statistic_sondage', 'sondage_total', 'my_vote', 'related', 'mon_avis'));
         } catch (\Symfony\Component\HttpKernel\Exception\HttpExceptionInterface $e) {
             throw $e; // vraie 404 pour les moteurs de recherche
         } catch (\Throwable) {
@@ -276,10 +257,7 @@ class SiteController extends Controller
             // Services santé
             $services = [
                 'quiz'      => \App\Models\Quiz::enLigne()->get(['slug', 'updated_at']),
-                'maladies'  => config('sante.modules.maladies') ? \App\Models\Maladie::publiees()->get(['slug', 'updated_at']) : collect(),
-                'dossiers'  => config('sante.modules.dossiers') ? \App\Models\Dossier::enLigne()->get(['slug', 'updated_at']) : collect(),
-                'questions' => config('sante.modules.questions') ? \App\Models\QuestionLecteur::publiees()->get(['slug', 'updated_at']) : collect(),
-                'auteurs'   => \App\Models\User::where('profil_public', true)->whereNotNull('slug')->get(['slug', 'updated_at']),
+                'auteurs'   =>\App\Models\User::where('profil_public', true)->whereNotNull('slug')->get(['slug', 'updated_at']),
                 'outils'    => array_keys(config('sante.outils', [])),
             ];
 

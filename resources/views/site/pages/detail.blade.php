@@ -164,24 +164,6 @@
                         </section>
                     @endif
 
-                    @if($dossierNav ?? null)
-                        <nav class="dnav" aria-label="Dossier : {{ $dossierNav->dossier->titre }}">
-                            <div class="dnav__head">
-                                <span><i class="bi bi-collection-play" aria-hidden="true"></i> Dossier : <strong>{{ $dossierNav->dossier->titre }}</strong> · article {{ $dossierNav->rang }} sur {{ $dossierNav->total }}</span>
-                                <a href="{{ route('dossiers.show', $dossierNav->dossier->slug) }}">Voir tout le dossier</a>
-                            </div>
-                            <div class="dnav__progress" aria-hidden="true">@for($k = 1; $k <= $dossierNav->total; $k++)<span class="{{ $k <= $dossierNav->rang ? 'is-done' : '' }}"></span>@endfor</div>
-                            <div class="dnav__links">
-                                @if($dossierNav->prev)
-                                    <a href="{{ route('post.detail', ['slug' => $dossierNav->prev->slug]) }}" class="dnav__link"><small><i class="bi bi-arrow-left" aria-hidden="true"></i> Précédent</small>{{ Str::limit($dossierNav->prev->title, 80) }}</a>
-                                @endif
-                                @if($dossierNav->next)
-                                    <a href="{{ route('post.detail', ['slug' => $dossierNav->next->slug]) }}" class="dnav__link dnav__link--next"><small>Suivant <i class="bi bi-arrow-right" aria-hidden="true"></i></small>{{ Str::limit($dossierNav->next->title, 80) }}</a>
-                                @endif
-                            </div>
-                        </nav>
-                    @endif
-
                     @if($site['avertissement'] ?? null)
                         <aside class="notice" aria-label="Avertissement médical">
                             <i class="bi bi-info-circle" aria-hidden="true"></i>
@@ -210,7 +192,7 @@
                             </div>
                             <p class="helpful__thanks js-helpful-thanks" role="status" hidden>
                                 <span class="js-helpful-yes">Merci ! Partagez-le à un proche qui pourrait en avoir besoin.</span>
-                                <span class="js-helpful-no" hidden>Merci pour votre retour, il nous aide à améliorer nos articles.@if(config('sante.modules.questions')) Une question restée sans réponse ? <a href="{{ route('questions.index') }}#poser">Posez-la au médecin</a>.@endif</span>
+                                <span class="js-helpful-no" hidden>Merci pour votre retour, il nous aide à améliorer nos articles.</span>
                             </p>
                         </div>
                     @endunless

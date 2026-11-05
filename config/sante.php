@@ -9,37 +9,13 @@
 | et mis à jour si le programme national change.
 */
 
-/*
-| Modules activables. Masqués = absents du site et du menu d'administration,
-| pages publiques en 404 ; le code et les données sont conservés.
-| Pour réactiver : MODULE_xxx=true dans .env (puis php artisan config:clear).
-*/
-$modules = [
-    'dossiers'      => (bool) env('MODULE_DOSSIERS', false),
-    'notifications' => (bool) env('MODULE_NOTIFICATIONS', false),
-    // « Le médecin répond » : masqué en attendant le futur forum
-    'questions'     => (bool) env('MODULE_QUESTIONS', false),
-    // Pages publiques de l'annuaire et de l'abécédaire des maladies (l'administration de l'annuaire
-    // reste active : elle gère les pharmacies de garde)
-    'annuaire'      => (bool) env('MODULE_ANNUAIRE', false),
-    'maladies'      => (bool) env('MODULE_MALADIES', false),
-];
-
 /* Rubriques « Services santé » : menu, pied de page, accueil, liens rapides */
 $services = [
     'garde'           => ['label' => 'Pharmacies de garde',     'icon' => 'moon-stars',        'texte' => 'Les pharmacies ouvertes la nuit et le week-end, cette semaine.'],
-    'questions.index' => ['label' => 'Le médecin répond',       'icon' => 'chat-heart',        'texte' => 'Posez votre question, un professionnel de santé vous répond.'],
     'quiz.liste'      => ['label' => 'Quiz vrai ou faux',       'icon' => 'patch-question',    'texte' => 'Démêlez le vrai du faux sur les idées reçues en santé.'],
     'outils.index'    => ['label' => 'Outils santé',            'icon' => 'calculator',        'texte' => 'IMC, besoin en eau et calendrier du cycle menstruel.'],
-    'maladies.index'  => ['label' => 'Maladies de A à Z',       'icon' => 'journal-medical',   'texte' => 'Symptômes, prévention et quand consulter, en clair.'],
-    'dossiers.index'  => ['label' => 'Dossiers',                'icon' => 'collection-play',   'texte' => 'Des parcours de lecture pour tout comprendre sur un sujet.'],
-    'annuaire'        => ['label' => 'Annuaire santé',          'icon' => 'geo-alt',           'texte' => 'Pharmacies de garde, hôpitaux et numéros d\'urgence.'],
     'calendrier'      => ['label' => 'Calendrier santé',        'icon' => 'calendar-heart',    'texte' => 'Les grandes journées et campagnes de santé de l\'année.'],
 ];
-if (!$modules['dossiers']) unset($services['dossiers.index']);
-if (!$modules['questions']) unset($services['questions.index']);
-if (!$modules['annuaire']) unset($services['annuaire']);
-if (!$modules['maladies']) unset($services['maladies.index']);
 
 /*
 | Outils santé. 'actif' => false : outil masqué (page en 404, absent des listes),
@@ -89,8 +65,6 @@ $outils = [
 ];
 
 return [
-
-    'modules'  => $modules,
 
     'services' => $services,
 

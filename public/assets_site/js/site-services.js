@@ -1,7 +1,7 @@
 /**
  * PhyloSanitas — Services santé (site public)
  * Menu « Services santé », bandeau des journées santé, avis sur les articles,
- * abonnement aux notifications, quiz de l'accueil, filtre de l'abécédaire.
+ * quiz de l'accueil.
  */
 document.addEventListener('DOMContentLoaded', function () {
   'use strict';
@@ -108,87 +108,6 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   });
 
-  /* ---------- Notifications (Web Push) ---------- */
-  (function () {
-    var buttons = document.querySelectorAll('.js-push-btn');
-    var cards = document.querySelectorAll('.js-push-card');
-    if (!buttons.length && !cards.length) return;
-    if (!('serviceWorker' in navigator) || !('PushManager' in window) || !('Notification' in window)) return;
-    if (Notification.permission === 'denied') return;
-
-    var b64ToBytes = function (s) {
-      var pad = '='.repeat((4 - s.length % 4) % 4);
-      var raw = atob((s + pad).replace(/-/g, '+').replace(/_/g, '/'));
-      var out = new Uint8Array(raw.length);
-      for (var i = 0; i < raw.length; i++) out[i] = raw.charCodeAt(i);
-      return out;
-    };
-
-    var render = function (on, busy) {
-      buttons.forEach(function (b) {
-        b.hidden = false;
-        b.disabled = !!busy;
-        b.classList.toggle('is-on', on);
-        var l = b.querySelector('.js-push-label');
-        if (l) l.textContent = on ? 'Notifications activées' : 'Recevoir les nouveaux articles';
-        b.setAttribute('aria-pressed', on ? 'true' : 'false');
-      });
-      cards.forEach(function (c) {
-        c.hidden = false;
-        c.classList.toggle('is-on', on);
-        var t = c.querySelector('.js-push-title'), s = c.querySelector('.js-push-text'), b = c.querySelector('.js-push-toggle');
-        if (t) t.textContent = on ? 'Vous recevez nos nouveaux articles' : 'Ne manquez aucun conseil santé';
-        if (s) s.textContent = on ? 'Une notification à chaque nouvel article. Vous pouvez arrêter à tout moment.' : 'Recevez une notification à chaque nouvel article, même site fermé.';
-        if (b) { b.disabled = !!busy; b.textContent = on ? 'Arrêter' : 'Activer'; b.className = 'btn btn-sm js-push-toggle ' + (on ? 'btn-outline-medical' : 'btn-medical'); }
-      });
-    };
-
-    navigator.serviceWorker.ready.then(function (reg) {
-      return reg.pushManager.getSubscription().then(function (sub) {
-        var subscribed = !!sub;
-        render(subscribed);
-
-        var toggle = function () {
-          render(subscribed, true);
-          var job;
-          if (subscribed) {
-            job = reg.pushManager.getSubscription().then(function (s) {
-              if (!s) return;
-              var endpoint = s.endpoint;
-              return s.unsubscribe().then(function () { return postJSON('/push/desabonnement', { endpoint: endpoint }); });
-            }).then(function () { subscribed = false; });
-          } else {
-            job = Notification.requestPermission().then(function (perm) {
-              if (perm !== 'granted') throw new Error('refus');
-              return fetch('/push/cle', { headers: { Accept: 'application/json' } });
-            }).then(function (r) { return r.json(); }).then(function (d) {
-              if (!d.cle) throw new Error('cle');
-              return reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: b64ToBytes(d.cle) });
-            }).then(function (s) {
-              return postJSON('/push/abonnement', s.toJSON());
-            }).then(function (r) {
-              if (!r.ok) throw new Error('serveur');
-              subscribed = true;
-            });
-          }
-          job.catch(function () {}).then(function () {
-            render(subscribed);
-            if (Notification.permission === 'denied') {
-              buttons.forEach(function (b) { b.hidden = true; });
-              cards.forEach(function (c) { c.hidden = true; });
-            }
-          });
-        };
-
-        buttons.forEach(function (b) { b.addEventListener('click', toggle); });
-        cards.forEach(function (c) {
-          var b = c.querySelector('.js-push-toggle');
-          if (b) b.addEventListener('click', toggle);
-        });
-      });
-    }).catch(function () {});
-  })();
-
   /* ---------- Quiz de l'accueil : réponse immédiate ---------- */
   document.querySelectorAll('.js-quiz-teaser').forEach(function (box) {
     var answer = box.getAttribute('data-answer') === '1';
@@ -203,24 +122,4 @@ document.addEventListener('DOMContentLoaded', function () {
       });
     });
   });
-
-  /* ---------- Abécédaire : filtre instantané ---------- */
-  var azInput = document.querySelector('.js-az-filter');
-  if (azInput) {
-    var norm = function (s) { return (s || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, ''); };
-    var items = document.querySelectorAll('.js-az-item');
-    var groups = document.querySelectorAll('.js-az-group');
-    var empty = document.querySelector('.js-az-empty');
-    azInput.addEventListener('input', function () {
-      var q = norm(azInput.value.trim());
-      items.forEach(function (it) { it.hidden = q !== '' && norm(it.getAttribute('data-search')).indexOf(q) === -1; });
-      var any = false;
-      groups.forEach(function (g) {
-        var visible = g.querySelectorAll('.js-az-item:not([hidden])').length > 0;
-        g.hidden = !visible;
-        any = any || visible;
-      });
-      if (empty) empty.classList.toggle('is-visible', !any);
-    });
-  }
 });

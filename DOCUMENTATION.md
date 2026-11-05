@@ -17,7 +17,7 @@ Ce document présente le site PhyloSanitas : son contexte, toutes ses fonctionna
 7. [Rôles et droits](#7-rôles-et-droits)
 8. [Référencement (SEO) et crédibilité médicale](#8-référencement-seo-et-crédibilité-médicale)
 9. [Revenus : publicités et AdSense](#9-revenus--publicités-et-adsense)
-10. [Application installable et notifications](#10-application-installable-pwa-et-notifications)
+10. [Application installable](#10-application-installable-pwa)
 11. [Sécurité et protection anti-robots](#11-sécurité-et-protection-anti-robots)
 12. [Technique](#12-technique)
 13. [Mise en production](#13-mise-en-production)
@@ -34,7 +34,7 @@ Ce document présente le site PhyloSanitas : son contexte, toutes ses fonctionna
 - **Public visé** : le grand public ivoirien et francophone d'Afrique de l'Ouest, souvent sur téléphone et parfois avec une connexion faible.
 - **Objectifs** :
   - informer de façon fiable et accessible (prévention, maladies courantes, actualités santé) ;
-  - fidéliser les lecteurs grâce à des services utiles (questions au médecin, outils, annuaire…) ;
+  - fidéliser les lecteurs grâce à des services utiles (pharmacies de garde, outils, quiz…) ;
   - générer des revenus (Google AdSense et espaces publicitaires vendus en direct).
 - **Particularités** :
   - la santé est un sujet « sensible » pour Google (YMYL) : la crédibilité (auteur, relecture médicale, sources) pèse sur le référencement ;
@@ -49,8 +49,8 @@ Ce document présente le site PhyloSanitas : son contexte, toutes ses fonctionna
 |---|---|
 | Contenus | Articles, catégories, sondages, actualités, « À la une », commentaires, recherche |
 | Services santé (en ligne) | Pharmacies de garde, quiz vrai/faux, outils santé (IMC, besoin en eau, cycle menstruel), calendrier santé |
-| Services santé (masqués, réactivables) | Le médecin répond, maladies de A à Z, annuaire santé public, dossiers, notifications |
-| Communication | Infos flash, popups d'information, bandeau des journées santé, newsletter, notifications |
+| Services santé (retirés, à réintégrer) | Le médecin répond, maladies de A à Z, annuaire santé (hôpitaux, urgences), dossiers, notifications |
+| Communication | Infos flash, popups d'information, bandeau des journées santé, newsletter |
 | Crédibilité | Pages auteur, « Relu par un médecin », sources, date de mise à jour, avertissement médical |
 | Revenus | Google AdSense, publicités en direct avec statistiques de clics |
 | Technique | Application installable (PWA), mode hors connexion, plan du site, données structurées, cache |
@@ -63,29 +63,28 @@ Ce document présente le site PhyloSanitas : son contexte, toutes ses fonctionna
 
 Les barres « Thématiques » et « Services » défilent horizontalement, avec des **flèches gauche / droite** qui n'apparaissent que lorsque tout ne tient pas sur une ligne. Le service de la page en cours est centré automatiquement.
 
-### Modules masqués pour le moment
+### Modules retirés (à réintégrer plus tard)
 
-Plusieurs modules sont développés mais **masqués**. Leurs pages publiques renvoient une erreur 404 et ils n'apparaissent ni dans les menus, ni dans le plan du site. Le code et les données sont conservés.
+Cinq modules ont été développés puis **retirés du projet** le 5 novembre 2026 (code, vues, routes, migrations), pour ne mettre en ligne que les services utilisés :
 
-| Module | Variable `.env` | Remarque |
-|---|---|---|
-| Dossiers | `MODULE_DOSSIERS` | Absent aussi de l'administration |
-| Notifications | `MODULE_NOTIFICATIONS` | Aucune notification n'est envoyée |
-| Le médecin répond | `MODULE_QUESTIONS` | Sera remplacé par un futur forum ; les boutons « Poser une question » mènent aux pharmacies de garde |
-| Maladies de A à Z | `MODULE_MALADIES` | Absent aussi de l'administration ; les 13 fiches restent en base |
-| Annuaire santé | `MODULE_ANNUAIRE` | L'administration reste active sous le nom « Pharmacies de garde » et ne gère **que les pharmacies** (garde, import) : hôpitaux, cliniques et numéros d'urgence y sont invisibles et inaccessibles, mais restent en base |
+| Module | Contenu |
+|---|---|
+| Le médecin répond | Questions des lecteurs, réponses publiées (sera peut-être remplacé par un forum) |
+| Maladies de A à Z | Abécédaire, 13 fiches prêtes (AVC, asthme, paludisme, diabète…) |
+| Dossiers | Parcours de lecture regroupant plusieurs articles |
+| Annuaire santé | Page publique, hôpitaux, cliniques, laboratoires, numéros d'urgence (seules les **pharmacies** sont gardées) |
+| Notifications (Web Push) | Abonnement des lecteurs, envoi depuis l'administration, envoi automatique des nouveaux articles |
 
-Pour réactiver un module, ajouter dans le fichier `.env` du serveur :
+**Pour les réintégrer** : tout est conservé dans l'historique git, au commit `0fb58d5` (branche `master`, ou `03de35b` sur `v3-2026`). Par exemple :
 
+```bash
+git show 0fb58d5 --stat                                         # liste des fichiers de cette version
+git checkout 0fb58d5 -- app/Http/Controllers/MaladieController.php app/Models/Maladie.php \
+    resources/views/site/pages/maladies resources/views/admin/pages/maladie \
+    database/migrations/2026_11_03_100200_create_maladies_table.php
 ```
-MODULE_DOSSIERS=true
-MODULE_NOTIFICATIONS=true
-MODULE_QUESTIONS=true
-MODULE_MALADIES=true
-MODULE_ANNUAIRE=true
-```
 
-puis lancer `php artisan config:clear` (ou `php artisan optimize`). Le réglage se trouve dans `config/sante.php` (clé `modules`).
+Il faut ensuite remettre les routes, l'entrée de menu, la rubrique dans `config/sante.php` (`services`) et le plan du site (voir la version `0fb58d5` de `routes/web.php`, `admin/layout.blade.php` et `SiteController::sitemap`).
 
 ---
 
@@ -98,7 +97,7 @@ puis lancer `php artisan config:clear` (ou `php artisan optimize`). Le réglage 
 4. **À la une** : 1 article principal + 3 secondaires (4 places, gérées depuis la liste des articles).
 5. Bandeau publicitaire.
 6. **Services santé** : tuiles vers les services + une question de **quiz jouable directement** (tirée au hasard dans le dernier quiz en ligne).
-7. **Articles récents**, newsletter, encadré **« Quand faut-il consulter ? »** (numéro d'urgence), puis **Journées santé** (les 3 prochaines dates du calendrier ; **Maladies fréquentes** si ce module est réactivé) et **Outils santé** ; barre latérale à droite.
+7. **Articles récents**, newsletter, encadré **« Quand faut-il consulter ? »** (numéro d'urgence), puis **Journées santé** (les 3 prochaines dates du calendrier) et **Outils santé** ; barre latérale à droite.
 8. **Prévention** : 4 bons réflexes illustrés (manger, bouger, se vacciner, se dépister).
 
 ### Articles (`/articles`, `/articles/{catégorie}`, `/article/{adresse}`)
@@ -112,8 +111,7 @@ puis lancer `php artisan config:clear` (ou `php artisan optimize`). Le réglage 
   - avertissement médical ;
   - partage (Facebook, WhatsApp, X, copie du lien) ;
   - **« Cet article vous a-t-il aidé ? »** ;
-  - **navigation de dossier** (précédent / suivant) si l'article fait partie d'un dossier ;
-  - bloc de fin de lecture (poser une question, s'abonner aux notifications) ;
+  - bloc de fin de lecture (pharmacies de garde, autre article, numéro d'urgence) ;
   - commentaires ;
   - **« À lire aussi »** : la même catégorie en priorité.
 - Les anciennes adresses (`/post?category=…`, `/post/detail?slug=…`) redirigent définitivement vers les nouvelles, ce qui conserve le référencement.
@@ -157,13 +155,17 @@ C'est le service consulté presque chaque jour : il est mis en avant partout.
 - pharmacies regroupées par quartier, avec une **recherche instantanée** par quartier ou par nom ;
 - chaque fiche affiche un bouton d'appel et un lien Itinéraire ;
 - bouton **« Partager la liste » sur WhatsApp**, qui envoie un message prêt avec la liste et les numéros ;
-- s'il n'y a pas de garde enregistrée, un message invite à revenir et renvoie vers toutes les pharmacies de l'annuaire.
+- s'il n'y a pas de garde enregistrée, un message invite à revenir et rappelle le numéro d'urgence.
 
 Les données viennent de l'annuaire. La liste du jour est gardée en cache 10 minutes et se met à jour dès qu'une garde est enregistrée. Elles peuvent être saisies à la main (voir §6) ou **importées depuis Google Drive**, automatiquement ou à la main, comme ci-dessous.
 
 La page se présente en **tableau** : Abidjan d'abord, groupé par commune, puis les villes de l'intérieur. Une recherche instantanée accepte plusieurs mots (« cocody riviera »), et une liste déroulante permet de choisir la ville, avec une adresse propre à chaque ville (`?ville=Bouake`). Sur téléphone, chaque pharmacie devient une carte compacte avec un grand bouton d'appel.
 
-#### Import depuis Google Drive (tâche planifiée Claude)
+#### Import de la liste de la semaine (manuel, pour l'instant)
+
+Chaque semaine, dans *Admin > Pharmacies de garde > Importer la liste de la semaine*, choisir le fichier (CSV, Excel ou JSON) puis **Importer et publier**. La période est lue dans le nom du fichier (ex. `pharmacies_de_garde_CI_2026-10-31_au_11-06.csv`). Le compte rendu du dernier import s'affiche au-dessus du bouton.
+
+#### Import depuis Google Drive (pour plus tard : le code est en place, le bloc de l'administration a été retiré)
 
 **Le principe :**
 1. Une **tâche planifiée Claude**, reliée au Google Drive, récupère chaque semaine la liste des pharmacies de garde et dépose un fichier dans un **dossier Google Drive** (un nouveau fichier chaque semaine, ou toujours le même : les deux fonctionnent).
@@ -219,20 +221,7 @@ Le champ « Lien du dossier » de l'administration est facultatif : s'il est rem
 
 ⚠️ Avant de reprendre automatiquement la liste d'un site tiers, obtenir son **autorisation**. Ce site se réserve les droits sur son contenu. Prévoir alors la mention de la source avec un lien sur la page.
 
-### 4.1 Le médecin répond (`/le-medecin-repond`) — *masqué pour le moment, un forum est prévu (voir §2)*
-Quand le module est masqué, les boutons « Poser une question » du site sont remplacés par des liens vers les pharmacies de garde.
-
-- Le lecteur pose une question avec :
-  - un prénom ou pseudo ;
-  - une tranche d'âge (facultatif) ;
-  - un email (facultatif, jamais publié) ;
-  - son accord pour une publication anonyme.
-- L'équipe répond dans l'administration, puis publie. La question et la réponse paraissent **sans le nom du lecteur**.
-- Chaque réponse a sa propre page (`/le-medecin-repond/{adresse}`), avec un compteur de lectures et des données structurées « Questions-réponses » pour Google.
-- On peut rechercher dans les réponses.
-- Les boutons « Poser une question » du site (fin d'article, « Quand consulter ? ») mènent ici.
-
-### 4.2 Quiz « Vrai ou faux ? » (`/quiz`)
+### 4.1 Quiz « Vrai ou faux ? » (`/quiz`)
 - Chaque quiz est une série d'affirmations. Pour chacune, le lecteur répond « vrai » ou « faux », puis voit l'explication et, si prévu, un lien vers un article.
 - En fin de partie :
   - score ;
@@ -242,7 +231,7 @@ Quand le module est masqué, les boutons « Poser une question » du site sont r
   - bouton « Rejouer ».
 - Le nombre de participants et le score moyen sont visibles dans l'administration.
 
-### 4.3 Outils santé (`/outils-sante`)
+### 4.2 Outils santé (`/outils-sante`)
 Les calculs se font dans le navigateur : **rien n'est envoyé ni enregistré**.
 
 | Outil | Adresse | Principe |
@@ -253,32 +242,7 @@ Les calculs se font dans le navigateur : **rien n'est envoyé ni enregistré**.
 
 Les seuils de l'IMC sont dans `config/sante.php`. Les outils **date d'accouchement** et **vaccins de l'enfant** sont masqués : pour les remettre, passer leur `'actif'` à `true` dans `config/sante.php` (clé `outils`).
 
-### 4.4 Maladies de A à Z (`/maladies`) — *masqué pour le moment (voir §2)*
-- Index alphabétique avec navigation par lettre et **filtre instantané** (fonctionne aussi avec les autres noms d'une maladie, sans tenir compte des accents).
-- Chaque fiche contient :
-  - un résumé ;
-  - les symptômes ;
-  - les causes et facteurs de risque ;
-  - la prévention ;
-  - le traitement ;
-  - **« Quand consulter ? »**, mis en évidence ;
-  - le médecin relecteur et la date de mise à jour ;
-  - le partage ;
-  - les **articles liés**, retrouvés automatiquement grâce aux mots-clés de la fiche.
-- Données structurées « page médicale » pour Google.
-
-### 4.5 Dossiers thématiques (`/dossiers`) — *masqué pour le moment (voir §2)*
-- Un dossier regroupe plusieurs articles dans un ordre de lecture (par exemple « Tout comprendre sur l'hypertension »).
-- La page du dossier présente un parcours numéroté, un bouton « Commencer la lecture » et le temps de lecture total.
-- Dans chaque article du dossier, une barre de progression et des liens **précédent / suivant** guident le lecteur.
-
-### 4.6 Annuaire santé (`/annuaire-sante`) — *page publique masquée pour le moment (voir §2)*
-- **Numéros d'urgence** en haut de page : un appui lance l'appel.
-- **Pharmacies de garde** de la période en cours, mises en avant.
-- Filtres par nom ou quartier, type et ville. Pastilles par type.
-- Chaque fiche affiche l'adresse, les horaires, un bouton d'appel et un lien **Itinéraire** (Google Maps).
-
-### 4.7 Calendrier santé (`/calendrier-sante`)
+### 4.3 Calendrier santé (`/calendrier-sante`)
 - Les journées mondiales et les campagnes mensuelles de l'année en cours, classées en trois parties :
   1. **En ce moment** : la journée du jour et la campagne du mois (par exemple Novembre bleu) ;
   2. **À venir** : le reste de l'année, regroupé par mois, avec « Demain » ou « Dans 11 jours ». En fin d'année, quand il n'y a plus rien à venir, les premières journées de l'année suivante s'affichent ;
@@ -288,7 +252,7 @@ Les seuils de l'IMC sont dans `config/sante.php`. Les outils **date d'accoucheme
   - quelques jours avant (réglable) ;
   - tout le mois pour une campagne mensuelle.
 
-### 4.8 Pages auteur (`/auteur/{adresse}`)
+### 4.4 Pages auteur (`/auteur/{adresse}`)
 Photo, fonction, biographie, nombre d'articles écrits et relus, liste des articles. La page n'est visible que si le profil public du compte est activé.
 
 ---
@@ -298,8 +262,7 @@ Photo, fonction, biographie, nombre d'articles écrits et relus, liste des artic
 | Outil | Où | Fonctionnement |
 |---|---|---|
 | « Cet article vous a-t-il aidé ? » | Page article | Oui ou Non, un avis par visiteur et par article. Le pourcentage de « oui » s'affiche dans *Admin > Articles > Détail* |
-| Notifications (*masquées pour le moment*) | Fin d'article et pied de page | « Recevoir les nouveaux articles » : une notification à chaque nouvel article, même site fermé (voir §10) |
-| Partage WhatsApp | Articles, fiches, quiz, dossiers, réponses | Lien de partage prérempli |
+| Partage WhatsApp | Articles, quiz, pharmacies de garde | Lien de partage prérempli |
 | Newsletter | Accueil et barre latérale | Inscription par email, export dans l'administration |
 | Commentaires | Articles | Publiés directement, modérables depuis le détail de l'article |
 
@@ -325,32 +288,19 @@ Accès : `/login`, puis `/admin`.
 - **Popups** : affiche, bouton, pages, fréquence, délai, période, statistiques d'affichage et de clics.
 
 ### Services lecteurs
-- **Le médecin répond** :
-  - trois onglets : *À traiter*, *Publiées*, *Sans suite* ;
-  - pour chaque question : corriger le texte, donner un **titre court** (obligatoire pour publier), écrire la réponse, choisir le thème et le médecin ;
-  - actions : « Enregistrer le brouillon » ou « Publier la réponse », puis « Retirer du site », « Classer sans suite » ou « Supprimer » ;
-  - le menu affiche le nombre de questions en attente.
 - **Quiz vrai / faux** : titre, introduction, affirmations (bonne réponse, explication, article lié), réordonnables. Les participants et le score moyen sont indiqués.
-- **Maladies de A à Z** : fiches avec une rubrique par champ, une ligne par élément ; médecin relecteur ; mots-clés pour les articles liés ; publiée ou brouillon.
-- **Dossiers** (*masqué pour le moment*) : titre, introduction, articles ajoutés puis réordonnés (au moins 2), position, en ligne ou masqué.
 - **Journées santé** : nom, jour et mois (ou « Tout le mois »), message du bandeau, lien, couleur, nombre de jours d'annonce, actif. Le bandeau affiché en ce moment est indiqué en haut de la page.
-- **Pharmacies de garde** (*Annuaire santé* quand le module est réactivé) :
-  - fiches des pharmacies (tant que l'annuaire est masqué, pas de type à choisir : hôpitaux, cliniques et numéros d'urgence n'apparaissent pas) ; avec le module actif, fiches de tous les types ;
-  - **import depuis Google Drive** (état de la liaison par compte de service, lien du dossier facultatif, import automatique ou immédiat) et **envoi d'un fichier** depuis l'ordinateur (voir §4.0) ;
-  - **bloc « Pharmacies de garde »** : cocher les pharmacies, choisir les dates, enregistrer (option : retirer la garde des autres) ;
-  - bouton pour retirer une garde ;
-  - masquer un établissement fermé ;
+- **Pharmacies de garde** :
+  - fiches des pharmacies (nom, téléphones, ville, commune, repère, lien Google Maps, coordonnées GPS, horaires, garde) ;
+  - **« Importer la liste de la semaine »** : envoi du fichier depuis l'ordinateur, puis compte rendu du dernier import (voir §4.0) ;
+  - **bloc « Pharmacies de garde »** : cocher les pharmacies, choisir les dates, enregistrer (option : retirer la garde des autres, avec confirmation) ;
+  - boutons pour retirer une garde ou masquer une pharmacie fermée, chacun avec une confirmation ;
   - le menu affiche le nombre de pharmacies de garde aujourd'hui.
 
 ### Audience et revenus (administrateurs)
 - **Publicités** : bannière image ou code, emplacement, période, statistiques.
 - **Messages** : messages de contact, avec les statuts non lu et traité.
 - **Newsletter** : liste des abonnés et export.
-- **Notifications** (*masqué pour le moment*) :
-  - nombre d'appareils abonnés ;
-  - envoi manuel (titre, texte, page à ouvrir) ;
-  - réglage « Notifier chaque nouvel article » ;
-  - historique avec le nombre d'appareils atteints.
 
 ### Administration (administrateurs)
 - **Utilisateurs** : création, rôles, blocage.
@@ -368,18 +318,18 @@ Accès : `/login`, puis `/admin`.
 | Fonction | Webmaster | Administrateur |
 |---|---|---|
 | Articles, sondages, infos flash, popups | ✅ | ✅ |
-| Services lecteurs (questions, quiz, maladies, dossiers, journées, annuaire) | ✅ | ✅ |
+| Services lecteurs (quiz, journées santé, pharmacies de garde) | ✅ | ✅ |
 | Son propre profil public | ✅ | ✅ |
 | Profil public des autres comptes | ❌ | ✅ |
-| Catégories, publicités, messages, newsletter, notifications | ❌ | ✅ |
+| Catégories, publicités, messages, newsletter | ❌ | ✅ |
 | Utilisateurs, carrousel, configuration | ❌ | ✅ |
 
 ---
 
 ## 8. Référencement (SEO) et crédibilité médicale
 
-- **Adresses lisibles** : `/article/…`, `/maladies/…`, `/dossiers/…`, `/le-medecin-repond/…`, etc.
-- **Plan du site** `/sitemap.xml` : articles, catégories et toutes les pages des services (quiz, fiches, dossiers, réponses, outils, pages auteur). Il est recalculé au plus tard toutes les heures.
+- **Adresses lisibles** : `/article/…`, `/quiz/…`, `/outils-sante/…`, `/auteur/…`, etc.
+- **Plan du site** `/sitemap.xml` : articles, catégories et toutes les pages des services (pharmacies de garde, quiz, outils, calendrier, pages auteur). Il est recalculé au plus tard toutes les heures.
 - **robots.txt** dynamique (administration, connexion et recherche exclues).
 - **Balises** : titre, description, URL canonique, Open Graph et Twitter sur chaque page. Les pages de recherche et les pages 2 et suivantes sont en « noindex ».
 - **Données structurées (schema.org)** :
@@ -387,10 +337,8 @@ Accès : `/login`, puis `/admin`.
 | Page | Type de données |
 |---|---|
 | Article | Article, avec auteur, relecteur et sources |
-| Fiche maladie | MedicalWebPage / MedicalCondition |
-| Réponse du médecin | QAPage |
+| Pharmacies de garde | ItemList de Pharmacy (adresse, téléphone, GPS) |
 | Quiz | Quiz |
-| Dossier | ItemList |
 | Outil | WebApplication |
 | Page auteur | ProfilePage |
 | Partout | Fil d'Ariane |
@@ -415,51 +363,37 @@ Accès : `/login`, puis `/admin`.
 |---|---|
 | `leaderboard` | Accueil, sous « À la une » |
 | `rectangle` | Barre latérale de toutes les pages |
-| `infeed` | Dans les listes (articles, réponses du médecin) |
+| `infeed` | Dans les listes d'articles |
 | `inarticle` | Après le 3e paragraphe d'un article |
 
 - Une publicité vendue en direct (*Admin > Publicités*) remplace AdSense sur son emplacement pendant sa période. Les clics sont comptés via `/pub/{id}`.
-- Les services santé augmentent le temps passé sur le site et le nombre de pages vues (quiz, parcours de dossier, fiches liées), ce qui fait progresser les revenus publicitaires.
+- Les services santé augmentent le temps passé sur le site et le nombre de pages vues (pharmacies de garde, quiz, outils), ce qui fait progresser les revenus publicitaires.
 
 ---
 
-## 10. Application installable (PWA) et notifications
+## 10. Application installable (PWA)
 
-### Application installable
 - Manifeste `/manifest.webmanifest`, généré à partir de la configuration.
 - Le **service worker** `public/sw.js` :
   - pages : réseau d'abord, copie locale si pas de connexion, sinon page « hors connexion » ;
   - fichiers CSS, JS, images et polices : servis depuis le cache puis mis à jour en arrière-plan ;
-  - jamais en cache : administration, connexion, formulaires, publicités, `/push/…` ;
+  - jamais en cache : administration, connexion, formulaires, publicités ;
   - **changer `VERSION`** dans `sw.js` force la mise à jour chez tous les visiteurs (actuellement `ps-v2`).
 - Une bannière « Installer PhyloSanitas » est proposée au visiteur.
-
-### Notifications (Web Push) — *masquées pour le moment (voir §2)*
-- **Sans bibliothèque externe** (`app/Services/WebPush.php`) :
-  1. le serveur envoie une notification **vide**, signée avec la norme VAPID ;
-  2. le service worker se réveille et lit la dernière notification sur `/push/derniere` ;
-  3. il l'affiche ; un clic ouvre la bonne page.
-- Ce choix évite d'ajouter une dépendance Composer qui exigerait une version récente de PHP sur le serveur.
-- **Clés VAPID** : créées automatiquement au premier besoin et enregistrées dans les paramètres (`vapid_public`, `vapid_private`). **Ne pas les supprimer** : tous les abonnements seraient perdus.
-- **Envoi automatique** à la première publication d'un article (sauf les sondages), une seule fois par article. Il se désactive dans *Admin > Notifications*.
-- Les appareils désabonnés ou introuvables sont supprimés automatiquement.
-- Compatibilité :
-  - Android (Chrome, Edge, Firefox…) et ordinateurs : oui ;
-  - iPhone : seulement si le site est **installé sur l'écran d'accueil** (iOS 16.4 et plus).
-- Les notifications exigent le **HTTPS** en production.
+- Les notifications (Web Push) ont été retirées (voir §2) ; elles exigeront le HTTPS et une extension OpenSSL capable de créer des clés EC.
 
 ---
 
 ## 11. Sécurité et protection anti-robots
 
-- Les formulaires publics (commentaires, contact, newsletter, sondages, questions au médecin) sont protégés par :
+- Les formulaires publics (commentaires, contact, newsletter, sondages) sont protégés par :
   - un **champ piège** invisible (composant `<x-honeypot />`) ;
   - un **délai minimum** de 3 secondes entre l'affichage et l'envoi ;
   - le refus des messages bourrés de liens ;
   - une **limite d'envois** (5 par minute et 30 par heure par adresse IP).
 - La connexion est limitée à 5 tentatives par minute.
-- Les avis, le score des quiz et les abonnements aux notifications ont leur propre limite d'envois.
-- Les réponses du médecin et les biographies sont affichées en texte échappé (pas de HTML injecté).
+- Les avis et le score des quiz ont leur propre limite d'envois.
+- Les biographies sont affichées en texte échappé (pas de HTML injecté).
 - Les emails des lecteurs ne sont jamais publiés.
 
 ---
@@ -483,24 +417,20 @@ Accès : `/login`, puis `/admin`.
 | Gabarit public | `resources/views/site/layout.blade.php` |
 | Gabarit d'administration | `resources/views/admin/layout.blade.php` |
 | Styles du site | `public/assets_site/css/site.css`, `site-motion.css`, `site-services.css` (services santé) |
-| Scripts du site | `public/assets_site/js/site.js`, `site-services.js` (menu Services, bandeau, avis, notifications, filtre A-Z, quiz de l'accueil) |
+| Scripts du site | `public/assets_site/js/site.js`, `site-services.js` (menu Services, bandeau, avis, quiz de l'accueil) |
 | Administration | `public/assets_admin/css/admin-ui.css`, `public/assets_admin/js/admin-ui.js` |
 | Contenus fixes des services | `config/sante.php` (liste des services, outils, seuils IMC, calendrier vaccinal) |
-| Envoi des notifications | `app/Services/WebPush.php` |
 | Import des pharmacies de garde | `app/Services/GardesImport.php` (lecture des fichiers, contrôles, publication), `app/Services/GoogleDrive.php` (accès lecture seule : compte de service via `.env`, ou OAuth), réglages `drive` de `config/sante.php` |
 
 ### Contrôleurs des nouveaux modules
 
 | Contrôleur | Rôle |
 |---|---|
-| `QuestionLecteurController` | Le médecin répond |
 | `QuizController` | Quiz |
 | `OutilController` | Outils santé |
-| `MaladieController` | Maladies de A à Z |
-| `DossierController` | Dossiers |
 | `JourneeSanteController` | Calendrier et bandeau |
-| `EtablissementController` | Annuaire |
-| `EngagementController` | Avis sur les articles et notifications |
+| `EtablissementController` | Pharmacies de garde (page publique, fiches, import) |
+| `EngagementController` | Avis sur les articles |
 | `AuteurController` | Pages et profils auteur |
 
 ### Tables ajoutées le 3 novembre 2026
@@ -508,13 +438,9 @@ Accès : `/login`, puis `/admin`.
 | Table | Contenu |
 |---|---|
 | `quizzes`, `quiz_questions` | Quiz et affirmations |
-| `maladies` | Fiches maladies |
 | `journees_sante` | Calendrier santé |
-| `dossiers`, `dossier_post` | Dossiers et leurs articles |
-| `questions_lecteurs` | Le médecin répond |
 | `avis_articles` | « Cet article vous a-t-il aidé ? » |
-| `etablissements` | Annuaire santé |
-| `push_abonnes`, `push_messages` | Notifications |
+| `etablissements` | Pharmacies et période de garde, avec coordonnées GPS (colonne `type` gardée pour l'annuaire à venir) |
 
 Colonnes ajoutées :
 - `users` : `slug`, `titre_pro`, `bio`, `photo`, `est_medecin`, `profil_public` ;
@@ -537,24 +463,20 @@ php artisan migrate --force                       # crée les tables des service
 php artisan optimize:clear && php artisan optimize
 ```
 
-Les migrations du 3 novembre 2026 **n'ajoutent que des tables et des colonnes facultatives**. Elles installent aussi des **contenus par défaut**, pour que les pages soient remplies dès la mise en ligne :
+Aucun seeder à lancer (`db:seed` recréerait les comptes et articles de démonstration). Les migrations des services santé (3 novembre 2026) installent elles-mêmes les **contenus par défaut** :
 
 | Service | Contenu fourni | Où le modifier |
 |---|---|---|
-| Outils santé | IMC, besoin en eau, cycle menstruel (grossesse et vaccins masqués) | `config/sante.php` |
-| Calendrier santé | 13 journées et campagnes (cancer, tuberculose, paludisme, tabac, don de sang, hépatite, cœur, Octobre rose, santé mentale, Novembre bleu, diabète, sida…) | *Admin > Journées santé* |
-| Maladies de A à Z (module masqué) | 13 fiches prêtes : AVC, asthme, choléra, dengue, diabète, drépanocytose, fièvre typhoïde, hépatite B, hypertension, obésité, paludisme, tuberculose, VIH / sida | *Admin > Maladies de A à Z* |
-| Annuaire santé (page publique masquée) | 3 numéros d'urgence ; CHU de Cocody, Treichville, Yopougon, Angré et Bouaké, Hôpital Mère-Enfant de Bingerville, Institut de Cardiologie d'Abidjan, Institut Pasteur, CNTS, INHP | *Admin > Annuaire santé* |
 | Quiz | « Idées reçues sur la santé » (8 affirmations), en ligne | *Admin > Quiz* |
-
-Ces contenus ne sont jamais ajoutés en double, même si la migration est relancée.
+| Calendrier santé | 13 journées et campagnes (cancer, tuberculose, paludisme, tabac, don de sang, hépatite, cœur, Octobre rose, santé mentale, Novembre bleu, diabète, sida…) | *Admin > Journées santé* |
+| Outils santé | IMC, besoin en eau, cycle menstruel (grossesse et vaccins masqués), sans table | `config/sante.php` |
 
 Vérifications après la mise en ligne :
-1. Le site est en HTTPS (indispensable pour l'application installable et, plus tard, pour les notifications).
-2. Remplir le profil public des rédacteurs et des médecins.
-3. Relier **Google Drive** : clé JSON du compte de service dans `storage/app/private/`, `GOOGLE_DRIVE_FICHIER_IDENTIFIANTS` et `GOOGLE_DRIVE_DOSSIER_ID` dans le `.env`, dossier partagé avec le compte de service (§4.0). Les hôpitaux de l'annuaire seront à compléter le jour où l'annuaire est réactivé.
+1. Le site est en HTTPS (indispensable pour l'application installable).
+2. Importer la liste de la semaine dans *Admin > Pharmacies de garde*, puis vérifier `/pharmacies-de-garde`.
+3. Remplir le profil public des rédacteurs et des médecins.
 4. Soumettre `/sitemap.xml` dans Google Search Console.
-5. Le jour où les notifications sont réactivées : vérifier que *Admin > Notifications* n'affiche pas d'erreur de clés. Sinon, l'extension PHP OpenSSL du serveur ne sait pas créer de clés EC.
+5. Plus tard, pour automatiser l'import : relier **Google Drive** (clé JSON du compte de service dans `storage/app/private/`, `GOOGLE_DRIVE_FICHIER_IDENTIFIANTS` et `GOOGLE_DRIVE_DOSSIER_ID` dans le `.env`, voir §4.0). Le bloc Drive de l'administration a été retiré : il faudra le remettre depuis le commit `0fb58d5`.
 
 ---
 
@@ -563,10 +485,8 @@ Vérifications après la mise en ligne :
 ⚠️ Ces contenus ont été pré-rédigés et sont **en ligne par défaut**. Ils **doivent être relus par un médecin** ; tout contenu peut être corrigé ou repassé en brouillon depuis l'administration.
 
 - [ ] **Quiz « Idées reçues sur la santé »** (8 affirmations), dans *Admin > Quiz*.
-- [ ] **Les 13 fiches maladies**, dans *Admin > Maladies de A à Z*. Indiquer le médecin relecteur sur chacune.
-- [ ] **Hôpitaux et centres de l'annuaire** (quand l'annuaire sera réactivé) : vérifier les quartiers et ajouter les téléphones (*Admin > Annuaire santé*).
 - [ ] **Calendrier vaccinal de l'enfant** (`config/sante.php`, clé `vaccins`). Il est indicatif, basé sur le PEV de Côte d'Ivoire ; à corriger si le programme national a évolué (vaccin antipaludique, hépatite B à la naissance, âge du 2e rougeole-rubéole…).
-- [ ] **Numéros d'urgence** (quand l'annuaire sera réactivé) : SAMU 185, sapeurs-pompiers 180, police secours 170, dans *Admin > Annuaire santé*.
+- [ ] **Numéro d'urgence** affiché sur le site (185 par défaut), dans *Admin > Configuration*.
 - [ ] **Textes des outils** (IMC, grossesse, hydratation) : repères généraux, avec un avertissement affiché sur chaque page.
 - [ ] **Dates des journées santé** (*Admin > Journées santé*).
 
@@ -576,20 +496,20 @@ Vérifications après la mise en ligne :
 
 | Fréquence | Tâche |
 |---|---|
-| Chaque semaine (idéalement le lundi matin) | Vérifier que l'import des **pharmacies de garde** a réussi (*Admin > Pharmacies de garde*, compte rendu du dernier import), sinon les saisir avec le bloc « Pharmacies de garde ». C'est la page la plus consultée : une liste en retard fait perdre des visiteurs. Vérifier ensuite la page `/pharmacies-de-garde` |
-| Plusieurs fois par semaine | Traiter les **questions des lecteurs** (badge rouge dans le menu) |
-| Chaque mois | Ajouter une **fiche maladie** et un **quiz** ; créer un **dossier** quand un thème compte 3 articles ou plus |
+| Chaque semaine (avant le samedi, début de la garde) | **Importer la liste des pharmacies de garde** (*Admin > Pharmacies de garde > Importer la liste de la semaine*) et vérifier le compte rendu, puis la page `/pharmacies-de-garde`. C'est la page la plus consultée : une liste en retard fait perdre des visiteurs |
+| Chaque mois | Ajouter un **quiz** |
 | Avant chaque campagne | Vérifier la journée dans le calendrier ; ajouter un popup ou une info flash si besoin |
 | À chaque article | Renseigner l'auteur, « Relu par » et les sources |
-| Chaque trimestre | Relire les fiches maladies (la date de mise à jour s'affiche) et les numéros de l'annuaire |
+| Chaque trimestre | Relire les textes des outils santé et le calendrier des journées |
 
 ---
 
 ## 16. Évolutions prévues
 
 - **Espace étudiants / Thèses** (reporté) : résumés de thèses dans la catégorie « Thèses » et formulaire pour que les étudiants proposent la leur, avec validation dans l'administration.
+- **Réintégrer les modules retirés** (voir §2) : le médecin répond (ou un forum), maladies de A à Z, dossiers, annuaire santé, notifications.
+- **Automatiser l'import des pharmacies de garde** depuis Google Drive.
 - Pistes possibles :
   - envoi automatique de la newsletter ;
-  - notification par email au lecteur quand sa question reçoit une réponse ;
-  - carte interactive de l'annuaire ;
+  - carte des pharmacies de garde (les coordonnées GPS sont déjà enregistrées) ;
   - quiz par catégorie.

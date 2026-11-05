@@ -64,7 +64,6 @@
                 <h2>La liste de cette semaine arrive bientôt</h2>
                 <p>Notre équipe met à jour les pharmacies de garde chaque semaine. Revenez dans quelques heures.</p>
                 <div class="d-flex flex-wrap gap-2 justify-content-center">
-                    @if(config('sante.modules.annuaire'))<a href="{{ route('annuaire', ['type' => 'pharmacie']) }}" class="btn btn-medical">Voir toutes les pharmacies</a>@endif
                     <a href="{{ $site['urgence_href'] }}" class="btn btn-outline-medical"><i class="bi bi-telephone" aria-hidden="true"></i> Urgence : {{ $site['urgence'] }}</a>
                 </div>
             </div>

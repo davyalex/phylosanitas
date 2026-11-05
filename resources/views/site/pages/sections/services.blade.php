@@ -9,7 +9,7 @@
             <div>
                 <span class="eyebrow"><i class="bi bi-grid" aria-hidden="true"></i>Services santé</span>
                 <h2 id="svc-title" class="home-svc__title">Plus qu'un blog : des services pour votre santé</h2>
-                <p class="home-svc__lead">Questions au médecin, outils de calcul, fiches maladies, pharmacies de garde… gratuits et accessibles à tous.</p>
+                <p class="home-svc__lead">Pharmacies de garde, outils de calcul, quiz, calendrier santé… gratuits et accessibles à tous.</p>
             </div>
         </div>
 

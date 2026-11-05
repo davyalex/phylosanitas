@@ -124,10 +124,6 @@ class Post extends Model implements HasMedia, Viewable
         return $this->belongsTo(User::class, 'reviewer_id');
     }
 
-    public function dossiers(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
-    {
-        return $this->belongsToMany(Dossier::class, 'dossier_post')->withPivot('ordre');
-    }
 
     /** Sources saisies une par ligne → [['texte' => …, 'url' => …|null]] */
     public function listeSources(): array

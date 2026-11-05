@@ -10,46 +10,10 @@ use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Str;
 use RealRashid\SweetAlert\Facades\Alert;
 
-/** Annuaire santé (pharmacies de garde, hôpitaux, numéros d'urgence…) */
+/** Pharmacies de garde : page publique, fiches des pharmacies et import de la liste de la semaine */
 class EtablissementController extends Controller
 {
     /* ====================== Site public ====================== */
-
-    public function annuaire(Request $request)
-    {
-        abort_unless(config('sante.modules.annuaire'), 404);
-
-        $type  = array_key_exists($request->type, Etablissement::TYPES) ? $request->type : null;
-        $ville = $request->filled('ville') ? (string) $request->ville : null;
-        $q     = trim((string) $request->q);
-
-        $urgences = Etablissement::actifs()->where('type', 'urgence')->orderBy('id')->get();
-
-        $deGarde = Etablissement::actifs()->deGarde()
-            ->when($ville, fn($w) => $w->where('ville', $ville))
-            ->orderBy('ville')->orderBy('quartier')->orderBy('nom')
-            ->get();
-
-        $etablissements = Etablissement::actifs()
-            ->where('type', '!=', 'urgence')
-            ->when($type, fn($w) => $w->where('type', $type))
-            ->when($ville, fn($w) => $w->where('ville', $ville))
-            ->when($q !== '', fn($w) => $w->where(fn($s) => $s
-                ->where('nom', 'LIKE', "%{$q}%")
-                ->orWhere('quartier', 'LIKE', "%{$q}%")
-                ->orWhere('adresse', 'LIKE', "%{$q}%")))
-            ->orderBy('ville')->orderBy('nom')
-            ->paginate(24)
-            ->withQueryString();
-
-        $villes = Etablissement::actifs()->whereNotNull('ville')->where('ville', '!=', '')
-            ->distinct()->orderBy('ville')->pluck('ville');
-
-        $parType = Etablissement::actifs()->where('type', '!=', 'urgence')
-            ->selectRaw('type, count(*) as n')->groupBy('type')->pluck('n', 'type');
-
-        return view('site.pages.annuaire', compact('urgences', 'deGarde', 'etablissements', 'villes', 'parType', 'type', 'ville', 'q'));
-    }
 
     /** Page dédiée aux pharmacies de garde (la plus consultée) : /pharmacies-de-garde?ville=… */
     public function pharmaciesDeGarde(Request $request)
@@ -85,50 +49,38 @@ class EtablissementController extends Controller
 
     /* ====================== Administration ====================== */
 
-    /** Module annuaire masqué : l'administration ne gère que les pharmacies */
-    public static function pharmaciesSeules(): bool
-    {
-        return !config('sante.modules.annuaire');
-    }
-
-    /** Hôpitaux, cliniques, urgences… inaccessibles tant que l'annuaire est masqué */
+    /** Seules les pharmacies sont gérées (une ancienne fiche d'un autre type n'est pas modifiable) */
     private function verifierType(Etablissement $etablissement): void
     {
-        abort_if(self::pharmaciesSeules() && $etablissement->type !== 'pharmacie', 404);
+        abort_if($etablissement->type !== 'pharmacie', 404);
     }
 
     public function index(Request $request)
     {
-        $type = self::pharmaciesSeules() ? 'pharmacie'
-            : (array_key_exists($request->type, Etablissement::TYPES) ? $request->type : null);
-
-        $etablissements = Etablissement::when($type, fn($w) => $w->where('type', $type))
+        $etablissements = Etablissement::where('type', 'pharmacie')
             ->when($request->filled('q'), fn($w) => $w->where('nom', 'LIKE', '%' . $request->q . '%'))
-            ->orderByRaw("type = 'urgence' DESC")
-            ->orderBy('type')->orderBy('ville')->orderBy('nom')
+            ->orderBy('ville')->orderBy('nom')
             ->paginate(40)
             ->withQueryString();
 
         $nbGarde = Etablissement::actifs()->deGarde()->count();
         $pharmacies = Etablissement::actifs()->where('type', 'pharmacie')->orderBy('ville')->orderBy('nom')->get(['id', 'nom', 'type', 'ville', 'quartier', 'garde_debut', 'garde_fin']);
 
-        return view('admin.pages.etablissement.index', compact('etablissements', 'type', 'nbGarde', 'pharmacies'));
+        return view('admin.pages.etablissement.index', compact('etablissements', 'nbGarde', 'pharmacies'));
     }
 
     public function create()
     {
-        $type = self::pharmaciesSeules() ? 'pharmacie' : request('type', 'pharmacie');
-
-        return view('admin.pages.etablissement.form', ['etab' => new Etablissement(['actif' => true, 'type' => $type])]);
+        return view('admin.pages.etablissement.form', ['etab' => new Etablissement(['actif' => true, 'type' => 'pharmacie'])]);
     }
 
     public function store(Request $request)
     {
         Etablissement::create($this->validated($request));
 
-        Alert::toast(self::pharmaciesSeules() ? 'Pharmacie ajoutée' : 'Établissement ajouté', 'success');
+        Alert::toast('Pharmacie ajoutée', 'success');
         return $request->boolean('encore')
-            ? redirect()->route('etablissement.create', ['type' => $request->type])
+            ? redirect()->route('etablissement.create')
             : redirect()->route('etablissement.index');
     }
 
@@ -144,7 +96,7 @@ class EtablissementController extends Controller
         $this->verifierType($etablissement);
         $etablissement->update($this->validated($request));
 
-        Alert::toast(self::pharmaciesSeules() ? 'Pharmacie modifiée' : 'Établissement modifié', 'success');
+        Alert::toast('Pharmacie modifiée', 'success');
         return redirect()->route('etablissement.index');
     }
 
@@ -153,7 +105,7 @@ class EtablissementController extends Controller
         $this->verifierType($etablissement);
         $etablissement->update(['actif' => !$etablissement->actif]);
 
-        Alert::toast($etablissement->actif ? 'Affiché sur le site' : 'Masqué du site', 'info');
+        Alert::toast($etablissement->actif ? 'Affichée sur le site' : 'Masquée du site', 'info');
         return back();
     }
 
@@ -162,7 +114,7 @@ class EtablissementController extends Controller
         $this->verifierType($etablissement);
         $etablissement->delete();
 
-        Alert::toast(self::pharmaciesSeules() ? 'Pharmacie supprimée' : 'Établissement supprimé', 'success');
+        Alert::toast('Pharmacie supprimée', 'success');
         return back();
     }
 
@@ -323,15 +275,12 @@ class EtablissementController extends Controller
 
     private function validated(Request $request): array
     {
-        if (self::pharmaciesSeules()) $request->merge(['type' => 'pharmacie']);
-
         $data = $request->validate([
             'nom'         => 'required|string|max:150',
-            'type'        => 'required|in:' . implode(',', array_keys(Etablissement::TYPES)),
             'ville'       => 'nullable|string|max:100',
             'quartier'    => 'nullable|string|max:100',
             'adresse'     => 'nullable|string|max:255',
-            'telephone'   => 'nullable|string|max:40|required_if:type,urgence',
+            'telephone'   => 'nullable|string|max:40',
             'telephone_2' => 'nullable|string|max:40',
             'horaires'    => 'nullable|string|max:150',
             'maps_url'    => 'nullable|url|max:500',
@@ -342,7 +291,6 @@ class EtablissementController extends Controller
             'garde_fin'   => 'nullable|date|after_or_equal:garde_debut|required_with:garde_debut',
         ], [
             'nom.required'            => 'Indiquez le nom.',
-            'telephone.required_if'   => 'Un numéro d\'urgence doit avoir un numéro de téléphone.',
             'maps_url.url'            => 'Le lien Google Maps doit commencer par https://',
             'latitude.*'              => 'Latitude invalide (nombre entre -90 et 90, ex. 5.35438), à indiquer avec la longitude.',
             'longitude.*'             => 'Longitude invalide (nombre entre -180 et 180, ex. -4.03046), à indiquer avec la latitude.',
@@ -351,7 +299,7 @@ class EtablissementController extends Controller
 
         $data['ville'] = $data['ville'] ? mb_convert_case(trim($data['ville']), MB_CASE_TITLE) : null;
         $data['actif'] = $request->boolean('actif');
-        if ($data['type'] !== 'pharmacie') $data['garde_debut'] = $data['garde_fin'] = null;
+        $data['type']  = 'pharmacie';
 
         return $data;
     }

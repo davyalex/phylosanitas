@@ -62,7 +62,6 @@ class PostController extends Controller
         $post = Post::findOrFail($id);
         $nouveauStatut = $post->published === 'prive' ? 'public' : 'prive';
         $post->update(['published' => $nouveauStatut]);
-        \App\Services\WebPush::notifierArticle($post->load('category'));
 
         Alert::success('Statut modifié avec succès');
         return back();
@@ -169,7 +168,6 @@ class PostController extends Controller
             $this->flushUneCaches();
         }
 
-        \App\Services\WebPush::notifierArticle($post->load('category'));
 
         Alert::toast('Article créé avec succès', 'success');
         return redirect()->route('post');
@@ -371,7 +369,6 @@ class PostController extends Controller
             $this->flushUneCaches();
         }
 
-        \App\Services\WebPush::notifierArticle($post->load('category'));
 
         Alert::toast('Article modifié avec succès', 'success');
         return redirect()->route('post');
