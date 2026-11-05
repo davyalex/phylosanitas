@@ -51,7 +51,11 @@
                 <a href="{{ $site['urgence_href'] ?? 'tel:185' }}" class="btn btn-urgent">
                     <i class="bi bi-telephone-fill" aria-hidden="true"></i> Urgence : {{ $site['urgence'] ?? '185' }}
                 </a>
-                <a href="{{ route('contact') }}" class="btn btn-ghost-light">Poser une question <i class="bi bi-arrow-right" aria-hidden="true"></i></a>
+                @if(config('sante.modules.questions'))
+                    <a href="{{ route('questions.index') }}#poser" class="btn btn-ghost-light">Poser une question <i class="bi bi-arrow-right" aria-hidden="true"></i></a>
+                @else
+                    <a href="{{ route('garde') }}" class="btn btn-ghost-light">Pharmacies de garde <i class="bi bi-arrow-right" aria-hidden="true"></i></a>
+                @endif
             </div>
         </div>
     </div>

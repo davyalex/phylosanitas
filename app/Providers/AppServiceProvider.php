@@ -74,9 +74,11 @@ class AppServiceProvider extends ServiceProvider
                         'flash'    => \App\Models\FlashInfo::visible()->count(),
                         'pubs'     => \App\Models\Publicite::diffusable()->count(),
                         'popups'   => \App\Models\Popup::diffusable()->count(),
+                        'questions'=> config('sante.modules.questions') ? \App\Models\QuestionLecteur::where('statut', 'nouvelle')->count() : 0,
+                        'gardes'   => \App\Models\Etablissement::actifs()->deGarde()->count(),
                     ];
                 } catch (\Throwable) {
-                    return ['messages' => 0, 'flash' => 0, 'pubs' => 0, 'popups' => 0];
+                    return ['messages' => 0, 'flash' => 0, 'pubs' => 0, 'popups' => 0, 'questions' => 0, 'gardes' => 0];
                 }
             }));
         });
@@ -87,6 +89,12 @@ class AppServiceProvider extends ServiceProvider
                 'flash_infos' => \App\Models\FlashInfo::forSite(),
                 'site_visits' => \App\Http\Middleware\CountSiteVisit::totals(),
                 'site_popup'  => \App\Models\Popup::forSite(),
+                'journee_sante' => \App\Models\JourneeSante::pourBandeau(),
+                'gardes_jour'   => (function () {
+                    // Import automatique depuis la feuille Google Sheets (au plus toutes les 6 h, après l'envoi de la page)
+                    \App\Services\GardesImport::verifierEnArrierePlan();
+                    return \App\Models\Etablissement::gardesDuJour();
+                })(),
             ]);
         });
     }

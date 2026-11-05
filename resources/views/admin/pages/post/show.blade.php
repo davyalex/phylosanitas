@@ -179,6 +179,18 @@
                 <li><div class="mini-list__main"><span class="mini-list__sub">Adresse</span><a href="{{ route('post.detail', ['slug' => $post->slug]) }}" target="_blank" rel="noopener" class="mini-list__title">/article/{{ $post->slug }}</a></div></li>
                 <li><div class="mini-list__main"><span class="mini-list__sub">Première lecture</span><span class="mini-list__title">{{ $stats['first'] ? \Carbon\Carbon::parse($stats['first'])->translatedFormat('d M Y à H:i') : '—' }}</span></div></li>
                 <li><div class="mini-list__main"><span class="mini-list__sub">Dernière lecture</span><span class="mini-list__title">{{ $stats['last'] ? \Carbon\Carbon::parse($stats['last'])->translatedFormat('d M Y à H:i') : '—' }}</span></div></li>
+                @unless($isPoll)
+                    @php $nbAvis = ($avis['oui'] ?? 0) + ($avis['non'] ?? 0); @endphp
+                    <li><div class="mini-list__main"><span class="mini-list__sub">« Cet article vous a-t-il aidé ? »</span>
+                        <span class="mini-list__title">
+                            @if($nbAvis)
+                                <strong class="text-success">{{ round($avis['oui'] / $nbAvis * 100) }}&nbsp;% oui</strong>
+                                · {{ $avis['oui'] }} oui · {{ $avis['non'] }} non
+                            @else
+                                Pas encore d'avis
+                            @endif
+                        </span></div></li>
+                @endunless
                 @if($post->lien)
                     <li><div class="mini-list__main"><span class="mini-list__sub">Source externe</span><a href="{{ $post->lien }}" target="_blank" rel="noopener" class="mini-list__title">{{ $post->lien }}</a></div></li>
                 @endif

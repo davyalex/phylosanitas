@@ -7,7 +7,7 @@
  *
  * Changer VERSION force la mise à jour des fichiers en cache chez tous les visiteurs.
  */
-const VERSION = 'ps-v1';
+const VERSION = 'ps-v2';
 const STATIC_CACHE = `${VERSION}-static`;
 const PAGES_CACHE = `${VERSION}-pages`;
 const OFFLINE_URL = '/hors-ligne';
@@ -17,11 +17,13 @@ const PRECACHE = [
   OFFLINE_URL,
   '/assets_site/css/site.css',
   '/assets_site/js/site.js',
+  '/assets_site/css/site-services.css',
+  '/assets_site/js/site-services.js',
   '/assets_site/img/android-chrome-192x192.png',
   '/assets_site/img/logo/logo_tp.png',
 ];
 
-const NEVER_CACHE = [/^\/admin/, /^\/login/, /^\/logout/, /^\/pub\//, /^\/popup\//, /^\/sondage\//, /^\/comment/, /^\/newsletter/, /^\/recherche/, /^\/sitemap\.xml/, /^\/robots\.txt/];
+const NEVER_CACHE = [/^\/admin/, /^\/login/, /^\/logout/, /^\/pub\//, /^\/popup\//, /^\/sondage\//, /^\/comment/, /^\/newsletter/, /^\/recherche/, /^\/sitemap\.xml/, /^\/robots\.txt/, /^\/push\//];
 const THIRD_PARTY_SKIP = /googlesyndication|googletagmanager|google-analytics|doubleclick|adservice/;
 const CACHEABLE_CDN = /fonts\.googleapis\.com|fonts\.gstatic\.com|cdn\.jsdelivr\.net/;
 
@@ -101,4 +103,43 @@ self.addEventListener('fetch', (event) => {
   if (/^\/(assets_site|storage|vendor)\//.test(url.pathname) || /\.(css|js|woff2?|png|jpe?g|webp|svg|gif|ico)$/.test(url.pathname)) {
     event.respondWith(handleAsset(request, event));
   }
+});
+
+/* ---------- Notifications (Web Push) ----------
+ * Le serveur envoie une notification sans contenu : on lit la dernière sur /push/derniere puis on l'affiche. */
+self.addEventListener('push', (event) => {
+  event.waitUntil((async () => {
+    let data = null;
+    try {
+      const res = await fetch('/push/derniere', { cache: 'no-store', credentials: 'omit' });
+      if (res.ok) data = await res.json();
+    } catch (e) { /* hors connexion : message générique */ }
+    data = data || { titre: 'PhyloSanitas', corps: 'De nouveaux conseils santé vous attendent.', url: '/', tag: 'ps' };
+
+    await self.registration.showNotification(data.titre, {
+      body: data.corps || '',
+      icon: '/assets_site/img/android-chrome-192x192.png',
+      badge: '/assets_site/img/favicon-32x32.png',
+      tag: data.tag,
+      lang: 'fr',
+      data: { url: data.url || '/' },
+    });
+  })());
+});
+
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+  const target = new URL(event.notification.data && event.notification.data.url || '/', self.location.origin);
+  target.searchParams.set('source', 'notification');
+
+  event.waitUntil((async () => {
+    const wins = await clients.matchAll({ type: 'window', includeUncontrolled: true });
+    for (const w of wins) {
+      if (new URL(w.url).origin === target.origin && 'navigate' in w) {
+        await w.focus();
+        return w.navigate(target.href);
+      }
+    }
+    return clients.openWindow(target.href);
+  })());
 });

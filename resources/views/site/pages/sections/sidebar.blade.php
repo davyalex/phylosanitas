@@ -13,6 +13,15 @@
         </a>
     @endauth
 
+    {{-- Masqués sur l'accueil, qui a déjà ses propres blocs gardes et services --}}
+    @if($showGarde ?? true)
+        @include('site.pages.components.garde')
+    @endif
+
+    @if($showServices ?? true)
+        @include('site.pages.components.services')
+    @endif
+
     @if(count($actualite_externe ?? []))
         @include('site.pages.components.actualite')
     @endif

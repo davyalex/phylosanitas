@@ -7,7 +7,12 @@
     $isPoll    = strtolower($post->category->title ?? '') === 'sondage';
     $shareUrl  = route('post.detail', ['slug' => $post->slug]);
     $imageUrl  = $post->getFirstMediaUrl('image') ? url($post->getFirstMediaUrl('image')) : asset('assets_site/img/logo/logo_tp.png');
-    $related   = isset($post_last) ? $post_last->where('id', '!=', $post->id)->take(3) : collect();
+    $related   = (isset($related) && $related->count()) ? $related : (isset($post_last) ? $post_last->where('id', '!=', $post->id)->take(3) : collect());
+    // Auteur et relecteur affichés seulement si leur profil public est activé (Admin > Mon profil > Profil public)
+    $auteur    = ($post->user && $post->user->profil_public) ? $post->user : null;
+    $relecteur = ($post->reviewer && $post->reviewer->profil_public) ? $post->reviewer : null;
+    $majLe     = \Carbon\Carbon::parse($post->updated_at ?? $post->created_at);
+    $sources   = $post->listeSources();
 @endphp
 
 @extends('site.layout')
@@ -28,7 +33,7 @@
 {!! json_encode([
     '@context' => 'https://schema.org',
     '@graph'   => array_values(array_filter([
-        [
+        array_filter([
             '@type'            => $isPoll ? 'WebPage' : 'Article',
             '@id'              => $shareUrl . '#article',
             'mainEntityOfPage' => $shareUrl,
@@ -40,9 +45,13 @@
             'inLanguage'       => 'fr-FR',
             'wordCount'        => $wordCount,
             'articleSection'   => $post->category->title ?? null,
-            'author'           => ['@type' => 'Organization', 'name' => config('app.name'), 'url' => url('/')],
+            'author'           => $auteur
+                ? array_filter(['@type' => 'Person', 'name' => $auteur->nom_public, 'jobTitle' => $auteur->titre_pro, 'url' => route('auteur.show', $auteur->slug)])
+                : ['@type' => 'Organization', 'name' => config('app.name'), 'url' => url('/')],
+            'reviewedBy'       => $relecteur ? array_filter(['@type' => 'Person', 'name' => $relecteur->nom_public, 'jobTitle' => $relecteur->titre_pro, 'url' => route('auteur.show', $relecteur->slug)]) : null,
+            'citation'         => $sources ? array_map(fn($s) => $s['url'] ?: $s['texte'], $sources) : null,
             'publisher'        => ['@id' => url('/') . '#organization'],
-        ],
+        ], fn($v) => $v !== null),
         [
             '@type'           => 'BreadcrumbList',
             'itemListElement' => array_values(array_filter([
@@ -89,8 +98,27 @@
 
                         <h1 class="article__title">{{ $title }}</h1>
 
+                        @if($auteur || $relecteur)
+                            <div class="byline">
+                                @if($auteur)
+                                    <div class="byline__person">
+                                        <span class="avatar">@if($auteur->photoUrl())<img src="{{ $auteur->photoUrl() }}" alt="" loading="lazy">@else{{ $auteur->initiales() }}@endif</span>
+                                        <span>Par <a href="{{ route('auteur.show', $auteur->slug) }}" rel="author">{{ $auteur->nom_public }}</a>@if($auteur->titre_pro)<small>{{ $auteur->titre_pro }}</small>@endif</span>
+                                    </div>
+                                @endif
+                                @if($relecteur && (!$auteur || $relecteur->id !== $auteur->id))
+                                    <span class="byline__reviewed"><i class="bi bi-patch-check-fill" aria-hidden="true"></i>Relu par&nbsp;<a href="{{ route('auteur.show', $relecteur->slug) }}">{{ $relecteur->nom_public }}</a>@if($relecteur->titre_pro), {{ Str::lcfirst($relecteur->titre_pro) }}@endif</span>
+                                @elseif($relecteur)
+                                    <span class="byline__reviewed"><i class="bi bi-patch-check-fill" aria-hidden="true"></i>Rédigé par un professionnel de santé</span>
+                                @endif
+                            </div>
+                        @endif
+
                         <div class="meta meta--lg">
                             <time datetime="{{ \Carbon\Carbon::parse($post->created_at)->toDateString() }}"><i class="bi bi-calendar3" aria-hidden="true"></i>{{ \Carbon\Carbon::parse($post->created_at)->translatedFormat('d F Y') }}</time>
+                            @if($majLe->gt(\Carbon\Carbon::parse($post->created_at)->addDay()))
+                                <span class="updated"><i class="bi bi-arrow-repeat" aria-hidden="true"></i>Mis à jour le {{ $majLe->translatedFormat('d F Y') }}</span>
+                            @endif
                             <span><i class="bi bi-eye" aria-hidden="true"></i>{{ number_format($post->views_count ?? 0, 0, ',', ' ') }} vue{{ ($post->views_count ?? 0) > 1 ? 's' : '' }}</span>
                             <a href="#comments"><i class="bi bi-chat-left-text" aria-hidden="true"></i>{{ $post->commentaires_count }} commentaire{{ $post->commentaires_count > 1 ? 's' : '' }}</a>
                         </div>
@@ -125,12 +153,67 @@
                         </a>
                     @endif
 
+                    @if(count($sources))
+                        <section class="sources" aria-labelledby="sources-title">
+                            <h2 id="sources-title"><i class="bi bi-journal-bookmark" aria-hidden="true"></i>Sources</h2>
+                            <ol>
+                                @foreach($sources as $src)
+                                    <li>@if($src['url'])<a href="{{ $src['url'] }}" target="_blank" rel="noopener nofollow">{{ $src['texte'] }}</a>@else{{ $src['texte'] }}@endif</li>
+                                @endforeach
+                            </ol>
+                        </section>
+                    @endif
+
+                    @if($dossierNav ?? null)
+                        <nav class="dnav" aria-label="Dossier : {{ $dossierNav->dossier->titre }}">
+                            <div class="dnav__head">
+                                <span><i class="bi bi-collection-play" aria-hidden="true"></i> Dossier : <strong>{{ $dossierNav->dossier->titre }}</strong> · article {{ $dossierNav->rang }} sur {{ $dossierNav->total }}</span>
+                                <a href="{{ route('dossiers.show', $dossierNav->dossier->slug) }}">Voir tout le dossier</a>
+                            </div>
+                            <div class="dnav__progress" aria-hidden="true">@for($k = 1; $k <= $dossierNav->total; $k++)<span class="{{ $k <= $dossierNav->rang ? 'is-done' : '' }}"></span>@endfor</div>
+                            <div class="dnav__links">
+                                @if($dossierNav->prev)
+                                    <a href="{{ route('post.detail', ['slug' => $dossierNav->prev->slug]) }}" class="dnav__link"><small><i class="bi bi-arrow-left" aria-hidden="true"></i> Précédent</small>{{ Str::limit($dossierNav->prev->title, 80) }}</a>
+                                @endif
+                                @if($dossierNav->next)
+                                    <a href="{{ route('post.detail', ['slug' => $dossierNav->next->slug]) }}" class="dnav__link dnav__link--next"><small>Suivant <i class="bi bi-arrow-right" aria-hidden="true"></i></small>{{ Str::limit($dossierNav->next->title, 80) }}</a>
+                                @endif
+                            </div>
+                        </nav>
+                    @endif
+
                     @if($site['avertissement'] ?? null)
                         <aside class="notice" aria-label="Avertissement médical">
                             <i class="bi bi-info-circle" aria-hidden="true"></i>
                             <p>{{ $site['avertissement'] }}</p>
                         </aside>
                     @endif
+
+                    @if($auteur && $auteur->bio)
+                        <aside class="author-box" aria-label="À propos de l'auteur">
+                            <span class="avatar avatar--md">@if($auteur->photoUrl())<img src="{{ $auteur->photoUrl() }}" alt="" loading="lazy">@else{{ $auteur->initiales() }}@endif</span>
+                            <div>
+                                <span class="author-box__label">L'auteur</span>
+                                <h2><a href="{{ route('auteur.show', $auteur->slug) }}">{{ $auteur->nom_public }}</a></h2>
+                                @if($auteur->titre_pro)<span class="muted small">{{ $auteur->titre_pro }}</span>@endif
+                                <p>{{ Str::limit($auteur->bio, 220) }}</p>
+                            </div>
+                        </aside>
+                    @endif
+
+                    @unless($isPoll)
+                        <div class="helpful js-helpful" data-url="{{ route('post.avis', $post->id) }}">
+                            <p class="helpful__q" id="helpful-q">Cet article vous a-t-il aidé ?</p>
+                            <div class="helpful__btns" role="group" aria-labelledby="helpful-q">
+                                <button type="button" class="helpful__btn" data-utile="1" aria-pressed="{{ ($mon_avis ?? null) === true ? 'true' : 'false' }}"><i class="bi bi-hand-thumbs-up" aria-hidden="true"></i>Oui</button>
+                                <button type="button" class="helpful__btn" data-utile="0" aria-pressed="{{ ($mon_avis ?? null) === false ? 'true' : 'false' }}"><i class="bi bi-hand-thumbs-down" aria-hidden="true"></i>Non</button>
+                            </div>
+                            <p class="helpful__thanks js-helpful-thanks" role="status" hidden>
+                                <span class="js-helpful-yes">Merci ! Partagez-le à un proche qui pourrait en avoir besoin.</span>
+                                <span class="js-helpful-no" hidden>Merci pour votre retour, il nous aide à améliorer nos articles.@if(config('sante.modules.questions')) Une question restée sans réponse ? <a href="{{ route('questions.index') }}#poser">Posez-la au médecin</a>.@endif</span>
+                            </p>
+                        </div>
+                    @endunless
 
                     <footer class="share">
                         <span class="share__label">Partager</span>

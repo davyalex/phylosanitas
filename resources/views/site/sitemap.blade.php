@@ -30,6 +30,33 @@
             @endif
         </url>
     @endforeach
+    {{-- Services santé --}}
+    @foreach(array_keys(config('sante.services', [])) as $r)
+        <url>
+            <loc>{{ route($r) }}</loc>
+            <changefreq>{{ in_array($r, ['garde', 'questions.index', 'annuaire']) ? 'daily' : 'weekly' }}</changefreq>
+            <priority>{{ $r === 'garde' ? '0.9' : '0.7' }}</priority>
+        </url>
+    @endforeach
+    @foreach($services['outils'] ?? [] as $o)
+        <url><loc>{{ route('outils.show', $o) }}</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+    @endforeach
+    @foreach([
+        'quiz.jouer'      => $services['quiz'] ?? [],
+        'maladies.show'   => $services['maladies'] ?? [],
+        'dossiers.show'   => $services['dossiers'] ?? [],
+        'questions.show'  => $services['questions'] ?? [],
+        'auteur.show'     => $services['auteurs'] ?? [],
+    ] as $r => $items)
+        @foreach($items as $it)
+            <url>
+                <loc>{{ route($r, $it->slug) }}</loc>
+                @if($it->updated_at)<lastmod>{{ \Carbon\Carbon::parse($it->updated_at)->toAtomString() }}</lastmod>@endif
+                <changefreq>monthly</changefreq>
+                <priority>{{ $r === 'auteur.show' ? '0.4' : '0.6' }}</priority>
+            </url>
+        @endforeach
+    @endforeach
     <url>
         <loc>{{ route('contact') }}</loc>
         <changefreq>yearly</changefreq>

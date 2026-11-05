@@ -16,6 +16,15 @@ use App\Http\Controllers\PubliciteController;
 use App\Http\Controllers\PopupController;
 use App\Http\Controllers\MessageController;
 use App\Http\Controllers\SettingController;
+use App\Http\Controllers\QuizController;
+use App\Http\Controllers\OutilController;
+use App\Http\Controllers\MaladieController;
+use App\Http\Controllers\DossierController;
+use App\Http\Controllers\JourneeSanteController;
+use App\Http\Controllers\EtablissementController;
+use App\Http\Controllers\QuestionLecteurController;
+use App\Http\Controllers\EngagementController;
+use App\Http\Controllers\AuteurController;
 
 /*
 |--------------------------------------------------------------------------
@@ -116,8 +125,84 @@ Route::middleware('auth')->prefix('admin')->group(function () {
         Route::delete('{popup}',         'destroy')->name('destroy');
     });
 
+    /** Profil public d'un auteur / médecin relecteur */
+    Route::post('user/{user}/profil-public', [AuteurController::class, 'updateProfil'])->name('user.profil-public');
+
+    /** Services lecteurs */
+    Route::controller(QuestionLecteurController::class)->prefix('questions')->name('question.')->group(function () {
+        Route::get('/',                      'index')->name('index');
+        Route::get('{question}',             'edit')->name('edit');
+        Route::put('{question}',             'update')->name('update');
+        Route::patch('{question}/rejeter',   'rejeter')->name('rejeter');
+        Route::patch('{question}/depublier', 'depublier')->name('depublier');
+        Route::delete('{question}',          'destroy')->name('destroy');
+    });
+
+    Route::controller(QuizController::class)->prefix('quiz')->name('quiz.')->group(function () {
+        Route::get('/',                'index')->name('index');
+        Route::get('create',           'create')->name('create');
+        Route::post('/',               'store')->name('store');
+        Route::get('{quiz}/edit',      'edit')->name('edit');
+        Route::put('{quiz}',           'update')->name('update');
+        Route::patch('{quiz}/toggle',  'toggle')->name('toggle');
+        Route::delete('{quiz}',        'destroy')->name('destroy');
+    });
+
+    Route::controller(MaladieController::class)->prefix('maladies')->name('maladie.')->group(function () {
+        Route::get('/',                   'index')->name('index');
+        Route::get('create',              'create')->name('create');
+        Route::post('/',                  'store')->name('store');
+        Route::get('{maladie}/edit',      'edit')->name('edit');
+        Route::put('{maladie}',           'update')->name('update');
+        Route::patch('{maladie}/toggle',  'toggle')->name('toggle');
+        Route::delete('{maladie}',        'destroy')->name('destroy');
+    });
+
+    Route::controller(DossierController::class)->prefix('dossiers')->name('dossier.')->group(function () {
+        Route::get('/',                   'index')->name('index');
+        Route::get('create',              'create')->name('create');
+        Route::post('/',                  'store')->name('store');
+        Route::get('{dossier}/edit',      'edit')->name('edit');
+        Route::put('{dossier}',           'update')->name('update');
+        Route::patch('{dossier}/toggle',  'toggle')->name('toggle');
+        Route::delete('{dossier}',        'destroy')->name('destroy');
+    });
+
+    Route::controller(JourneeSanteController::class)->prefix('journees-sante')->name('journee.')->group(function () {
+        Route::get('/',                   'index')->name('index');
+        Route::post('/',                  'store')->name('store');
+        Route::put('{journee}',           'update')->name('update');
+        Route::patch('{journee}/toggle',  'toggle')->name('toggle');
+        Route::delete('{journee}',        'destroy')->name('destroy');
+    });
+
+    Route::controller(EtablissementController::class)->prefix('annuaire')->name('etablissement.')->group(function () {
+        Route::get('/',                             'index')->name('index');
+        Route::get('create',                        'create')->name('create');
+        Route::post('/',                            'store')->name('store');
+        Route::post('garde',                        'garde')->name('garde');
+        Route::post('import',                       'importer')->name('import');
+        Route::put('import',                        'reglagesImport')->name('import.reglages');
+        Route::post('import/fichier',               'importerFichier')->name('import.fichier');
+        Route::get('drive/connecter',               'driveConnecter')->name('drive.connect');
+        Route::get('drive/callback',                'driveCallback')->name('drive.callback');
+        Route::delete('drive',                      'driveDeconnecter')->name('drive.disconnect');
+        Route::get('{etablissement}/edit',          'edit')->name('edit');
+        Route::put('{etablissement}',               'update')->name('update');
+        Route::patch('{etablissement}/toggle',      'toggle')->name('toggle');
+        Route::patch('{etablissement}/fin-garde',   'finGarde')->name('fin-garde');
+        Route::delete('{etablissement}',            'destroy')->name('destroy');
+    });
+
     /** Administrateurs uniquement */
     Route::middleware('role:administrateur')->group(function () {
+
+        /** Notifications envoyées aux lecteurs abonnés */
+        Route::controller(EngagementController::class)->prefix('notifications')->name('push.')->group(function () {
+            Route::get('/',          'admin')->name('admin');
+            Route::post('envoyer',   'envoyer')->name('envoyer');
+            Route::put('reglages',   'reglages')->name('reglages');
+        });
 
         /** Publicités */
         Route::controller(PubliciteController::class)->prefix('publicites')->name('publicite.')->group(function () {
@@ -197,6 +282,43 @@ route::get('robots.txt', function () {
         'Sitemap: ' . route('sitemap'),
     ];
     return response(implode("\n", $lines) . "\n", 200, ['Content-Type' => 'text/plain; charset=UTF-8']);
+});
+
+/********************************************************************* */
+// Services lecteurs (site public)
+
+route::controller(QuizController::class)->group(function () {
+    route::get('quiz', 'liste')->name('quiz.liste');
+    route::get('quiz/{slug}', 'jouer')->name('quiz.jouer')->where('slug', '[a-z0-9\-]+');
+    route::post('quiz/{quiz}/score', 'score')->name('quiz.score')->middleware('throttle:20,1');
+});
+
+route::get('outils-sante', [OutilController::class, 'index'])->name('outils.index');
+route::get('outils-sante/{outil}', [OutilController::class, 'show'])->name('outils.show')->where('outil', '[a-z\-]+');
+
+route::get('maladies', [MaladieController::class, 'liste'])->name('maladies.index');
+route::get('maladies/{slug}', [MaladieController::class, 'fiche'])->name('maladies.show')->where('slug', '[a-z0-9\-]+');
+
+route::get('dossiers', [DossierController::class, 'liste'])->name('dossiers.index');
+route::get('dossiers/{slug}', [DossierController::class, 'voir'])->name('dossiers.show')->where('slug', '[a-z0-9\-]+');
+
+route::get('calendrier-sante', [JourneeSanteController::class, 'calendrier'])->name('calendrier');
+route::get('annuaire-sante', [EtablissementController::class, 'annuaire'])->name('annuaire');
+route::get('pharmacies-de-garde', [EtablissementController::class, 'pharmaciesDeGarde'])->name('garde');
+route::get('auteur/{slug}', [AuteurController::class, 'voir'])->name('auteur.show')->where('slug', '[a-z0-9\-]+');
+
+route::controller(QuestionLecteurController::class)->group(function () {
+    route::get('le-medecin-repond', 'liste')->name('questions.index');
+    route::post('le-medecin-repond', 'envoyer')->name('questions.store')->middleware(['throttle:forms', 'antispam']);
+    route::get('le-medecin-repond/{slug}', 'voir')->name('questions.show')->where('slug', '[a-z0-9\-]+');
+});
+
+route::controller(EngagementController::class)->group(function () {
+    route::post('article/{post}/avis', 'avis')->name('post.avis')->middleware('throttle:20,1')->whereNumber('post');
+    route::get('push/cle', 'cle')->name('push.cle');
+    route::post('push/abonnement', 'abonner')->name('push.abonner')->middleware('throttle:10,1');
+    route::post('push/desabonnement', 'desabonner')->name('push.desabonner')->middleware('throttle:10,1');
+    route::get('push/derniere', 'derniere')->name('push.derniere');
 });
 
 // Clic sur une publicité (compté puis redirigé vers l'annonceur)

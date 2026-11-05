@@ -17,3 +17,10 @@ use Illuminate\Support\Facades\Artisan;
 Artisan::command('inspire', function () {
     $this->comment(Inspiring::quote());
 })->purpose('Display an inspiring quote');
+
+// Pharmacies de garde : import depuis la feuille Google Sheets (voir DOCUMENTATION.md)
+Artisan::command('gardes:import', function () {
+    $r = \App\Services\GardesImport::importer('commande');
+    $r['ok'] ? $this->info($r['message']) : $this->error($r['message']);
+    return $r['ok'] ? 0 : 1;
+})->purpose('Importe les pharmacies de garde depuis Google Drive (nouveau fichier uniquement)');

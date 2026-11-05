@@ -62,6 +62,7 @@ class PostController extends Controller
         $post = Post::findOrFail($id);
         $nouveauStatut = $post->published === 'prive' ? 'public' : 'prive';
         $post->update(['published' => $nouveauStatut]);
+        \App\Services\WebPush::notifierArticle($post->load('category'));
 
         Alert::success('Statut modifié avec succès');
         return back();
@@ -107,7 +108,9 @@ class PostController extends Controller
             ->when($type === 'sondage', fn($q) => $q->whereTitle('sondage'))
             ->get();
 
-        return view('admin.pages.post.add', compact('category'));
+        $redacteurs = $this->redacteurs();
+
+        return view('admin.pages.post.add', compact('category', 'redacteurs'));
     }
 
     public function store(Request $request)
@@ -151,7 +154,9 @@ class PostController extends Controller
             'lien'             => $request->lien,
             'published'        => $request->boolean('publier') ? 'public' : 'prive',
             'actualite_une'    => 0,
-            'user_id'          => Auth::id(),
+            'user_id'          => $request->input('auteur') ?: Auth::id(),
+            'reviewer_id'      => $request->input('reviewer') ?: null,
+            'sources'          => $request->sources,
         ]);
 
         if ($request->hasFile('image')) {
@@ -163,6 +168,8 @@ class PostController extends Controller
             $post->load('category')->mettreALaUne(true);
             $this->flushUneCaches();
         }
+
+        \App\Services\WebPush::notifierArticle($post->load('category'));
 
         Alert::toast('Article créé avec succès', 'success');
         return redirect()->route('post');
@@ -255,7 +262,9 @@ class PostController extends Controller
             ];
         }
 
-        return view('admin.pages.post.show', compact('post', 'isPoll', 'stats', 'chart', 'countries', 'comments', 'poll'));
+        $avis = \App\Models\AvisArticle::totaux($post->id);
+
+        return view('admin.pages.post.show', compact('post', 'isPoll', 'stats', 'chart', 'countries', 'comments', 'poll', 'avis'));
     }
 
     /** Modération : supprimer un commentaire depuis la page détail */
@@ -281,7 +290,9 @@ class PostController extends Controller
             ->whereSlug($slug)
             ->firstOrFail();
 
-        return view('admin.pages.post.edit', compact('post', 'category'));
+        $redacteurs = $this->redacteurs();
+
+        return view('admin.pages.post.edit', compact('post', 'category', 'redacteurs'));
     }
 
     public function editSondage($id)
@@ -343,7 +354,10 @@ class PostController extends Controller
             'category_id'      => $request->category,
             'lien'             => $request->lien,
             'published'        => $request->has('publier') ? ($request->boolean('publier') ? 'public' : 'prive') : $post->published,
-            'user_id'          => Auth::id(),
+            // L'auteur ne change plus à chaque modification : il est choisi dans le formulaire
+            'user_id'          => $request->input('auteur') ?: ($post->user_id ?: Auth::id()),
+            'reviewer_id'      => $request->input('reviewer') ?: null,
+            'sources'          => $request->sources,
         ]);
 
         if ($request->hasFile('image')) {
@@ -356,6 +370,8 @@ class PostController extends Controller
             $post->load('category')->mettreALaUne($veutLaUne);
             $this->flushUneCaches();
         }
+
+        \App\Services\WebPush::notifierArticle($post->load('category'));
 
         Alert::toast('Article modifié avec succès', 'success');
         return redirect()->route('post');
@@ -372,6 +388,13 @@ class PostController extends Controller
         return back();
     }
 
+    /** Comptes proposés comme auteur / relecteur (médecins en premier) */
+    private function redacteurs()
+    {
+        return \App\Models\User::orderByDesc('est_medecin')->orderBy('name')
+            ->get(['id', 'name', 'titre_pro', 'est_medecin', 'profil_public']);
+    }
+
     private function validateArticle(Request $request): void
     {
         $request->validate([
@@ -380,6 +403,9 @@ class PostController extends Controller
             'category'         => 'required|exists:categories,id',
             'lien'             => 'nullable|url',
             'image'            => 'nullable|image|max:5120',
+            'auteur'           => 'nullable|exists:users,id',
+            'reviewer'         => 'nullable|exists:users,id',
+            'sources'          => 'nullable|string|max:3000',
         ], [
             'title.required'         => 'Le titre est obligatoire.',
             'category.required'      => 'Choisissez une catégorie.',

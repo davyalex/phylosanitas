@@ -14,7 +14,9 @@
 @if($topics->count())
 <nav class="topics" aria-label="Thématiques santé">
     <div class="container-xl">
-        <div class="topics__track">
+        <div class="hscroll js-hscroll">
+        <button type="button" class="hscroll__btn hscroll__btn--prev js-hscroll-prev" aria-label="Défiler vers la gauche" hidden><i class="bi bi-chevron-left" aria-hidden="true"></i></button>
+        <div class="topics__track js-hscroll-track">
             <span class="topics__label">Thématiques</span>
             @foreach($topics as $cat)
                 <a href="{{ route('post.list', ['category' => $cat->slug]) }}" class="chip">
@@ -22,10 +24,20 @@
                     @if($cat->posts_count)<span class="chip__count">{{ $cat->posts_count }}</span>@endif
                 </a>
             @endforeach
+            <span class="topics__sep" aria-hidden="true"></span>
+            <span class="topics__label">Services</span>
+            @foreach(config('sante.services', []) as $route => $s)
+                <a href="{{ route($route) }}" class="chip chip--svc"><i class="bi bi-{{ $s['icon'] }}" aria-hidden="true"></i>{{ $s['label'] }}</a>
+            @endforeach
+        </div>
+        <button type="button" class="hscroll__btn hscroll__btn--next js-hscroll-next" aria-label="Défiler vers la droite" hidden><i class="bi bi-chevron-right" aria-hidden="true"></i></button>
         </div>
     </div>
 </nav>
 @endif
+
+{{-- ②bis Pharmacies de garde (consultées presque chaque jour) --}}
+@include('site.pages.sections.garde')
 
 {{-- ③ À la une : 1 article principal + 3 secondaires --}}
 @if($post->count())
@@ -83,10 +95,13 @@
 </div>
 @endif
 
-{{-- ⑤ Prévention : bons réflexes illustrés --}}
-@include('site.pages.sections.prevention')
+{{-- ⑤ Services santé + quiz du moment --}}
+@include('site.pages.sections.services')
 
 {{-- ⑥ Articles récents + newsletter + « Quand consulter ? » + Sidebar --}}
 @include('site.pages.sections.post', ['gridPosts' => $gridPosts ?? collect()])
+
+{{-- ⑦ Prévention : bons réflexes illustrés --}}
+@include('site.pages.sections.prevention')
 
 @endsection
