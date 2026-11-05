@@ -417,6 +417,8 @@ class GardesImport
             $val = fn($k) => isset($index[$k]) ? trim((string) ($c[$index[$k]] ?? '')) : '';
 
             $nom = self::titre($val('pharmacie'));
+            // Abréviations courantes (« Phcie Magnificat », « Pharm. du Plateau ») : même fiche que « Pharmacie … »
+            $nom = trim(preg_replace('/^(?:ph(?:ar)?cie|phie|pcie|pharm\.|ph\.)\s*/iu', 'Pharmacie ', $nom));
             if ($nom === '' || mb_strlen($nom) < 3) continue;
             if (!Str::of($nom)->ascii()->lower()->startsWith('pharmacie')) $nom = 'Pharmacie ' . $nom;
 
@@ -440,9 +442,15 @@ class GardesImport
             $adresse = Str::limit($val('adresse'), 255, '') ?: null;
             if ($adresse && in_array(self::cle($adresse), [self::cle((string) $quartier), self::cle($ville)], true)) $adresse = null;
 
-            // Lien d'itinéraire gardé seulement sans GPS, et s'il ne s'agit pas d'une simple recherche (refaite par le site)
+            // Sans colonnes GPS : coordonnées lues dans le lien (« ?q=5.43835,-4.03056 », « destination=… », « @5.4,-4.0 »)
             $maps = $val('maps');
-            $maps = !$lat && preg_match('#^https://[^\s]+$#', $maps) && !str_contains($maps, '/maps/search') ? Str::limit($maps, 500, '') : null;
+            if (!$lat && preg_match('/(?:[?&](?:q|query|destination|daddr|ll|center)=|@)(-?\d{1,2}(?:\.\d+)?)(?:,|%2C)\s*(-?\d{1,3}(?:\.\d+)?)/i', $maps, $g)) {
+                [$lat, $lng] = self::coordonnees($g[1], $g[2]);
+            }
+
+            // Lien d'itinéraire gardé seulement sans GPS, et s'il ne s'agit pas d'une simple recherche par nom (refaite par le site)
+            $recherche = str_contains($maps, '/maps/search') || preg_match('/[?&](?:q|query)=/i', $maps);
+            $maps = !$lat && !$recherche && preg_match('#^https://[^\s]+$#', $maps) ? Str::limit($maps, 500, '') : null;
 
             $lignes[] = [
                 'nom'        => Str::limit($nom, 150, ''),
@@ -737,13 +745,19 @@ class GardesImport
         }, $t);
 
         $mois = implode('|', array_keys(self::MOIS));
-        preg_match_all('/(\d{4})-(\d{2})-(\d{2})|\b(\d{1,2})[\/.](\d{1,2})(?:[\/.](\d{2,4}))?\b|\b(\d{1,2})(?:er)?\s+(' . $mois . ')(?:\s+(\d{4}))?/', $t, $all, PREG_SET_ORDER);
+
+        // « du 2 au 8 novembre 2026 » : le premier jour reprend le mois écrit une seule fois
+        $t = preg_replace('/\b(\d{1,2})(?:er)?\s+au\s+(\d{1,2})(?:er)?\s+(' . $mois . ')\b/', '$1 $3 au $2 $3', $t);
+
+        // AAAA-MM-JJ | JJ/MM(/AAAA) | « 2 novembre (2026) » | JJ-MM-AAAA (« semaine du 31-10-2026 au 06-11-2026 »)
+        preg_match_all('/(\d{4})-(\d{2})-(\d{2})|\b(\d{1,2})[\/.](\d{1,2})(?:[\/.](\d{2,4}))?\b|\b(\d{1,2})(?:er)?\s+(' . $mois . ')(?:\s+(\d{4}))?|\b(\d{1,2})-(\d{1,2})-(\d{4})\b/', $t, $all, PREG_SET_ORDER);
 
         $brut = [];
         foreach ($all as $m) {
-            if (!empty($m[1]))     $brut[] = [(int) $m[1], (int) $m[2], (int) $m[3]];
-            elseif (!empty($m[4])) $brut[] = [isset($m[6]) && $m[6] !== '' ? (strlen($m[6]) === 2 ? 2000 + (int) $m[6] : (int) $m[6]) : null, (int) $m[5], (int) $m[4]];
-            else                   $brut[] = [isset($m[9]) && $m[9] !== '' ? (int) $m[9] : null, self::MOIS[$m[8]], (int) $m[7]];
+            if (!empty($m[1]))      $brut[] = [(int) $m[1], (int) $m[2], (int) $m[3]];
+            elseif (!empty($m[4]))  $brut[] = [isset($m[6]) && $m[6] !== '' ? (strlen($m[6]) === 2 ? 2000 + (int) $m[6] : (int) $m[6]) : null, (int) $m[5], (int) $m[4]];
+            elseif (!empty($m[10])) $brut[] = [(int) $m[12], (int) $m[11], (int) $m[10]];
+            else                    $brut[] = [isset($m[9]) && $m[9] !== '' ? (int) $m[9] : null, self::MOIS[$m[8]], (int) $m[7]];
         }
 
         // Années manquantes : celle de la date suivante (« du 31 octobre au 6 novembre 2026 »), sinon l'année en cours
