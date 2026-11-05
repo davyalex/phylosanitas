@@ -703,7 +703,8 @@ a.tag:hover { background: #d3eee1; color: #05613f; }
 
 .prose {
   padding: clamp(1.5rem, 1rem + 2vw, 2.5rem) clamp(1.125rem, .8rem + 2.5vw, 3rem);
-  font-size: 1.0625rem; line-height: 1.75; color: #24364d; max-width: calc(70ch + 6rem); overflow-wrap: anywhere;
+  /* Pas de largeur maximale : le texte occupe toute la largeur de la carte de l'article */
+  font-size: 1.0625rem; line-height: 1.75; color: #24364d; overflow-wrap: anywhere;
 }
 .prose > :first-child { margin-top: 0; }
 .prose p { margin: 0 0 1.25em; }
