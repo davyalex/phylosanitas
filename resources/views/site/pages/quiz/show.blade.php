@@ -83,7 +83,7 @@
 
             <aside class="disclaimer" aria-label="Avertissement">
                 <i class="bi bi-info-circle" aria-hidden="true"></i>
-                <p>Ce quiz informe et ne remplace pas l'avis d'un professionnel de santé.@if(config('sante.modules.questions')) Une question sur votre situation ? <a href="{{ route('questions.index') }}">Le médecin vous répond</a>.@endif</p>
+                <p>Ce quiz informe et ne remplace pas l'avis d'un professionnel de santé.</p>
             </aside>
         </div>
 

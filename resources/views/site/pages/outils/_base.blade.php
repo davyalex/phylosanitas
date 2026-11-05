@@ -55,7 +55,7 @@
 
         <aside class="disclaimer" aria-label="Avertissement">
             <i class="bi bi-info-circle" aria-hidden="true"></i>
-            <p>Ce résultat est un repère général et ne remplace pas l'avis d'un professionnel de santé.@if(config('sante.modules.questions')) Une question ? <a href="{{ route('questions.index') }}">Le médecin vous répond</a>.@endif</p>
+            <p>Ce résultat est un repère général et ne remplace pas l'avis d'un professionnel de santé.</p>
         </aside>
 
         <div class="mini-head"><h2>Autres outils</h2></div>

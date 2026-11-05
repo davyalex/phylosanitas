@@ -5,19 +5,13 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-/** Annuaire santé : pharmacie, hôpital, clinique, laboratoire, numéro d'urgence… */
+/**
+ * Pharmacie (et sa période de garde). La colonne « type » est gardée pour accueillir plus tard
+ * les autres établissements de l'annuaire santé (hôpitaux, cliniques…) ; pour l'instant : « pharmacie ».
+ */
 class Etablissement extends Model
 {
     use SoftDeletes;
-
-    public const TYPES = [
-        'pharmacie'    => ['label' => 'Pharmacie',         'pluriel' => 'Pharmacies',         'icon' => 'capsule'],
-        'hopital'      => ['label' => 'Hôpital / CHU',     'pluriel' => 'Hôpitaux',           'icon' => 'hospital'],
-        'clinique'     => ['label' => 'Clinique',          'pluriel' => 'Cliniques',          'icon' => 'building-add'],
-        'centre_sante' => ['label' => 'Centre de santé',   'pluriel' => 'Centres de santé',   'icon' => 'heart-pulse'],
-        'laboratoire'  => ['label' => 'Laboratoire',       'pluriel' => 'Laboratoires',       'icon' => 'eyedropper'],
-        'urgence'      => ['label' => 'Numéro d\'urgence', 'pluriel' => 'Numéros d\'urgence', 'icon' => 'telephone-plus'],
-    ];
 
     protected $fillable = [
         'nom', 'type', 'ville', 'quartier', 'adresse', 'telephone', 'telephone_2',
@@ -106,7 +100,7 @@ class Etablissement extends Model
         if ($this->latitude !== null && $this->longitude !== null) {
             return 'https://www.google.com/maps/dir/?api=1&destination=' . $this->latitude . ',' . $this->longitude;
         }
-        if ($this->type === 'urgence' || (!$this->adresse && !$this->quartier)) return null;
+        if (!$this->adresse && !$this->quartier) return null;
 
         $q = implode(', ', array_filter([$this->nom, $this->adresse, $this->quartier, $this->ville]));
 

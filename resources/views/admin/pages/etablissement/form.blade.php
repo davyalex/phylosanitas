@@ -1,11 +1,7 @@
 @extends('admin.layout')
-@php
-    // Module annuaire masqué : formulaire réservé aux pharmacies
-    $seules  = \App\Http\Controllers\EtablissementController::pharmaciesSeules();
-    $ajouter = $seules ? 'Ajouter une pharmacie' : 'Ajouter à l\'annuaire';
-@endphp
+@php $ajouter = 'Ajouter une pharmacie'; @endphp
 @section('title', $etab->exists ? 'Modifier' : $ajouter)
-@section('breadcrumb')<li class="breadcrumb-item"><a href="{{ route('etablissement.index') }}">{{ $seules ? 'Pharmacies de garde' : 'Annuaire santé' }}</a></li>@endsection
+@section('breadcrumb')<li class="breadcrumb-item"><a href="{{ route('etablissement.index') }}">Pharmacies de garde</a></li>@endsection
 
 @section('page_header')
 <div class="page-bar">
@@ -17,8 +13,6 @@
 @endsection
 
 @section('content')
-@php $type = old('type', $etab->type ?? 'pharmacie'); @endphp
-
 <form action="{{ $etab->exists ? route('etablissement.update', $etab) : route('etablissement.store') }}" method="POST" data-once>
     @csrf
     @if($etab->exists) @method('PUT') @endif
@@ -26,20 +20,6 @@
     <div class="form-shell">
         <div class="d-flex flex-column gap-3">
             <section class="fsec">
-                @if($seules)
-                    <input type="hidden" name="type" value="pharmacie">
-                @else
-                    <span class="form-label d-block">Type <span class="req">*</span></span>
-                    <div class="d-flex flex-wrap gap-2 mb-3">
-                        @foreach(\App\Models\Etablissement::TYPES as $key => $t)
-                            <label class="choice flex-grow-0">
-                                <input class="form-check-input" type="radio" name="type" value="{{ $key }}" {{ $type === $key ? 'checked' : '' }}>
-                                <span><strong><i class="bi bi-{{ $t['icon'] }} me-1"></i>{{ $t['label'] }}</strong></span>
-                            </label>
-                        @endforeach
-                    </div>
-                @endif
-
                 <label for="et-nom" class="form-label">Nom <span class="req">*</span></label>
                 <input id="et-nom" name="nom" value="{{ old('nom', $etab->nom) }}" class="form-control form-control-lg @error('nom') is-invalid @enderror" maxlength="150" required placeholder="Ex. : Pharmacie du Plateau">
                 @error('nom')<div class="invalid-feedback">{{ $message }}</div>@enderror
@@ -57,7 +37,7 @@
                 </div>
             </section>
 
-            <section class="fsec" data-show-when="type!=urgence">
+            <section class="fsec">
                 <h2 class="fsec__title"><i class="bi bi-geo-alt"></i>Adresse</h2>
                 <div class="row g-3">
                     <div class="col-md-6">
@@ -99,7 +79,7 @@
                     </div>
                     <div class="col-md-6">
                         <label for="et-notes" class="form-label">Précision</label>
-                        <input id="et-notes" name="notes" value="{{ old('notes', $etab->notes) }}" class="form-control" maxlength="255" placeholder="{{ $seules ? 'Ouverte 24 h/24, accès par la rue…' : 'Urgences pédiatriques, maternité…' }}">
+                        <input id="et-notes" name="notes" value="{{ old('notes', $etab->notes) }}" class="form-control" maxlength="255" placeholder="Ouverte 24 h/24, accès par la rue…">
                     </div>
                 </div>
             </section>
@@ -109,12 +89,12 @@
             <section class="fsec">
                 <h2 class="fsec__title"><i class="bi bi-eye"></i>Affichage</h2>
                 <div class="switch-row">
-                    <div class="switch-row__text"><strong>Visible sur le site</strong><span>Désactivez si l'établissement a fermé</span></div>
+                    <div class="switch-row__text"><strong>Visible sur le site</strong><span>Désactivez si la pharmacie a fermé</span></div>
                     <input class="form-check-input" type="checkbox" role="switch" name="actif" value="1" {{ old('actif', $etab->actif ?? true) ? 'checked' : '' }} aria-label="Visible sur le site">
                 </div>
             </section>
 
-            <section class="fsec" data-show-when="type=pharmacie">
+            <section class="fsec">
                 <h2 class="fsec__title"><i class="bi bi-moon-stars"></i>Garde</h2>
                 <div class="mb-2">
                     <label for="et-gd" class="form-label">Du</label>

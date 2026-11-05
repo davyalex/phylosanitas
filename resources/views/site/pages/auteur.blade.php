@@ -63,7 +63,7 @@
                 @if($auteur->bio)
                     <section class="panel mt-0" aria-labelledby="bio-title">
                         <h2 class="panel__title" id="bio-title">À propos</h2>
-                        <div class="prose">{!! \App\Models\QuestionLecteur::enParagraphes($auteur->bio) !!}</div>
+                        <div class="prose">@foreach(preg_split('/\R{2,}/u', trim((string) $auteur->bio)) as $bloc)@if(trim($bloc) !== '')<p>{!! nl2br(e(trim($bloc))) !!}</p>@endif @endforeach</div>
                     </section>
                 @endif
 

@@ -34,7 +34,7 @@
     @foreach(array_keys(config('sante.services', [])) as $r)
         <url>
             <loc>{{ route($r) }}</loc>
-            <changefreq>{{ in_array($r, ['garde', 'questions.index', 'annuaire']) ? 'daily' : 'weekly' }}</changefreq>
+            <changefreq>{{ $r === 'garde' ? 'daily' : 'weekly' }}</changefreq>
             <priority>{{ $r === 'garde' ? '0.9' : '0.7' }}</priority>
         </url>
     @endforeach
@@ -43,9 +43,6 @@
     @endforeach
     @foreach([
         'quiz.jouer'      => $services['quiz'] ?? [],
-        'maladies.show'   => $services['maladies'] ?? [],
-        'dossiers.show'   => $services['dossiers'] ?? [],
-        'questions.show'  => $services['questions'] ?? [],
         'auteur.show'     => $services['auteurs'] ?? [],
     ] as $r => $items)
         @foreach($items as $it)

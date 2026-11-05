@@ -2,12 +2,11 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 /**
- * Annuaire santé : pharmacies (avec période de garde), hôpitaux, cliniques,
- * centres de santé, laboratoires et numéros d'urgence.
+ * Pharmacies et leur période de garde, avec coordonnées GPS pour l'itinéraire.
+ * La colonne « type » accueillera plus tard les autres établissements de l'annuaire santé.
  */
 return new class extends Migration
 {
@@ -16,7 +15,7 @@ return new class extends Migration
         Schema::create('etablissements', function (Blueprint $table) {
             $table->id();
             $table->string('nom', 150);
-            $table->enum('type', ['pharmacie', 'hopital', 'clinique', 'centre_sante', 'laboratoire', 'urgence']);
+            $table->string('type', 30)->default('pharmacie');
             $table->string('ville', 100)->nullable();
             $table->string('quartier', 100)->nullable();
             $table->string('adresse', 255)->nullable();
@@ -24,6 +23,8 @@ return new class extends Migration
             $table->string('telephone_2', 40)->nullable();
             $table->string('horaires', 150)->nullable();
             $table->string('maps_url', 500)->nullable();
+            $table->decimal('latitude', 10, 7)->nullable();
+            $table->decimal('longitude', 10, 7)->nullable();
             $table->string('notes', 255)->nullable();
             $table->date('garde_debut')->nullable();
             $table->date('garde_fin')->nullable();
@@ -34,19 +35,6 @@ return new class extends Migration
             $table->index(['actif', 'type', 'ville']);
             $table->index(['garde_debut', 'garde_fin']);
         });
-
-        // Numéros d'urgence nationaux (Côte d'Ivoire) — à vérifier par l'équipe
-        $now = now();
-        foreach ([
-            ['SAMU — urgences médicales', '185', 'Urgence médicale, malaise, accident grave'],
-            ['Sapeurs-pompiers (GSPM)', '180', 'Incendie, accident, secours à personne'],
-            ['Police secours', '170', 'Agression, danger immédiat'],
-        ] as [$nom, $tel, $notes]) {
-            DB::table('etablissements')->insert([
-                'nom' => $nom, 'type' => 'urgence', 'telephone' => $tel, 'notes' => $notes,
-                'horaires' => '24 h/24', 'actif' => true, 'created_at' => $now, 'updated_at' => $now,
-            ]);
-        }
     }
 
     public function down(): void

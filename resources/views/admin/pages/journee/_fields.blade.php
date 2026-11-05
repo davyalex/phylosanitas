@@ -37,8 +37,8 @@
 
 <div class="mb-3">
     <label class="form-label" for="{{ $pfx }}-lien">Lien (facultatif)</label>
-    <input id="{{ $pfx }}-lien" name="lien" value="{{ $val('lien') }}" class="form-control {{ $isNew && $errors->has('lien') ? 'is-invalid' : '' }}" maxlength="500" placeholder="/article/…  ou  /dossiers/…">
-    <div class="form-text">Article ou dossier sur le sujet. Vide = recherche sur le site.</div>
+    <input id="{{ $pfx }}-lien" name="lien" value="{{ $val('lien') }}" class="form-control {{ $isNew && $errors->has('lien') ? 'is-invalid' : '' }}" maxlength="500" placeholder="/article/…">
+    <div class="form-text">Article sur le sujet. Vide = recherche sur le site.</div>
 </div>
 
 <div class="row g-2">

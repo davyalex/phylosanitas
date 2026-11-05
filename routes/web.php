@@ -18,11 +18,8 @@ use App\Http\Controllers\MessageController;
 use App\Http\Controllers\SettingController;
 use App\Http\Controllers\QuizController;
 use App\Http\Controllers\OutilController;
-use App\Http\Controllers\MaladieController;
-use App\Http\Controllers\DossierController;
 use App\Http\Controllers\JourneeSanteController;
 use App\Http\Controllers\EtablissementController;
-use App\Http\Controllers\QuestionLecteurController;
 use App\Http\Controllers\EngagementController;
 use App\Http\Controllers\AuteurController;
 
@@ -129,15 +126,6 @@ Route::middleware('auth')->prefix('admin')->group(function () {
     Route::post('user/{user}/profil-public', [AuteurController::class, 'updateProfil'])->name('user.profil-public');
 
     /** Services lecteurs */
-    Route::controller(QuestionLecteurController::class)->prefix('questions')->name('question.')->group(function () {
-        Route::get('/',                      'index')->name('index');
-        Route::get('{question}',             'edit')->name('edit');
-        Route::put('{question}',             'update')->name('update');
-        Route::patch('{question}/rejeter',   'rejeter')->name('rejeter');
-        Route::patch('{question}/depublier', 'depublier')->name('depublier');
-        Route::delete('{question}',          'destroy')->name('destroy');
-    });
-
     Route::controller(QuizController::class)->prefix('quiz')->name('quiz.')->group(function () {
         Route::get('/',                'index')->name('index');
         Route::get('create',           'create')->name('create');
@@ -146,26 +134,6 @@ Route::middleware('auth')->prefix('admin')->group(function () {
         Route::put('{quiz}',           'update')->name('update');
         Route::patch('{quiz}/toggle',  'toggle')->name('toggle');
         Route::delete('{quiz}',        'destroy')->name('destroy');
-    });
-
-    Route::controller(MaladieController::class)->prefix('maladies')->name('maladie.')->group(function () {
-        Route::get('/',                   'index')->name('index');
-        Route::get('create',              'create')->name('create');
-        Route::post('/',                  'store')->name('store');
-        Route::get('{maladie}/edit',      'edit')->name('edit');
-        Route::put('{maladie}',           'update')->name('update');
-        Route::patch('{maladie}/toggle',  'toggle')->name('toggle');
-        Route::delete('{maladie}',        'destroy')->name('destroy');
-    });
-
-    Route::controller(DossierController::class)->prefix('dossiers')->name('dossier.')->group(function () {
-        Route::get('/',                   'index')->name('index');
-        Route::get('create',              'create')->name('create');
-        Route::post('/',                  'store')->name('store');
-        Route::get('{dossier}/edit',      'edit')->name('edit');
-        Route::put('{dossier}',           'update')->name('update');
-        Route::patch('{dossier}/toggle',  'toggle')->name('toggle');
-        Route::delete('{dossier}',        'destroy')->name('destroy');
     });
 
     Route::controller(JourneeSanteController::class)->prefix('journees-sante')->name('journee.')->group(function () {
@@ -196,13 +164,6 @@ Route::middleware('auth')->prefix('admin')->group(function () {
 
     /** Administrateurs uniquement */
     Route::middleware('role:administrateur')->group(function () {
-
-        /** Notifications envoyées aux lecteurs abonnés */
-        Route::controller(EngagementController::class)->prefix('notifications')->name('push.')->group(function () {
-            Route::get('/',          'admin')->name('admin');
-            Route::post('envoyer',   'envoyer')->name('envoyer');
-            Route::put('reglages',   'reglages')->name('reglages');
-        });
 
         /** Publicités */
         Route::controller(PubliciteController::class)->prefix('publicites')->name('publicite.')->group(function () {
@@ -296,30 +257,12 @@ route::controller(QuizController::class)->group(function () {
 route::get('outils-sante', [OutilController::class, 'index'])->name('outils.index');
 route::get('outils-sante/{outil}', [OutilController::class, 'show'])->name('outils.show')->where('outil', '[a-z\-]+');
 
-route::get('maladies', [MaladieController::class, 'liste'])->name('maladies.index');
-route::get('maladies/{slug}', [MaladieController::class, 'fiche'])->name('maladies.show')->where('slug', '[a-z0-9\-]+');
-
-route::get('dossiers', [DossierController::class, 'liste'])->name('dossiers.index');
-route::get('dossiers/{slug}', [DossierController::class, 'voir'])->name('dossiers.show')->where('slug', '[a-z0-9\-]+');
-
 route::get('calendrier-sante', [JourneeSanteController::class, 'calendrier'])->name('calendrier');
-route::get('annuaire-sante', [EtablissementController::class, 'annuaire'])->name('annuaire');
 route::get('pharmacies-de-garde', [EtablissementController::class, 'pharmaciesDeGarde'])->name('garde');
 route::get('auteur/{slug}', [AuteurController::class, 'voir'])->name('auteur.show')->where('slug', '[a-z0-9\-]+');
 
-route::controller(QuestionLecteurController::class)->group(function () {
-    route::get('le-medecin-repond', 'liste')->name('questions.index');
-    route::post('le-medecin-repond', 'envoyer')->name('questions.store')->middleware(['throttle:forms', 'antispam']);
-    route::get('le-medecin-repond/{slug}', 'voir')->name('questions.show')->where('slug', '[a-z0-9\-]+');
-});
-
-route::controller(EngagementController::class)->group(function () {
-    route::post('article/{post}/avis', 'avis')->name('post.avis')->middleware('throttle:20,1')->whereNumber('post');
-    route::get('push/cle', 'cle')->name('push.cle');
-    route::post('push/abonnement', 'abonner')->name('push.abonner')->middleware('throttle:10,1');
-    route::post('push/desabonnement', 'desabonner')->name('push.desabonner')->middleware('throttle:10,1');
-    route::get('push/derniere', 'derniere')->name('push.derniere');
-});
+// « Cet article vous a-t-il aidé ? »
+route::post('article/{post}/avis', [EngagementController::class, 'avis'])->name('post.avis')->middleware('throttle:20,1')->whereNumber('post');
 
 // Clic sur une publicité (compté puis redirigé vers l'annonceur)
 route::get('pub/{publicite}', [PubliciteController::class, 'click'])->name('publicite.click');

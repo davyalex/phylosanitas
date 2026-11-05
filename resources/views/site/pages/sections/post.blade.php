@@ -53,7 +53,7 @@
                 {{-- Quand consulter ? (hôpital animé + chiffres) : remplit la colonne à côté de la sidebar --}}
                 @include('site.pages.sections.consulter')
 
-                {{-- Maladies fréquentes + outils santé : comble la colonne face à la barre latérale --}}
+                {{-- Journées santé + outils santé : comble la colonne face à la barre latérale --}}
                 @include('site.pages.sections.reperes')
             </div>
 

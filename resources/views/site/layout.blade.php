@@ -418,11 +418,6 @@
                             <li><a href="{{ route($route) }}">{{ $s['label'] }}</a></li>
                         @endforeach
                     </ul>
-                    @if(config('sante.modules.notifications'))
-                        <button type="button" class="footer__notify js-push-btn" hidden>
-                            <i class="bi bi-bell" aria-hidden="true"></i><span class="js-push-label">Recevoir les nouveaux articles</span>
-                        </button>
-                    @endif
                 </div>
 
                 <div>

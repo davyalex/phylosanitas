@@ -42,7 +42,7 @@ return new class extends Migration
             'titre'      => 'Idées reçues sur la santé',
             'slug'       => 'idees-recues-sur-la-sante',
             'intro'      => 'Vrai ou faux ? Testez vos connaissances sur les idées reçues les plus répandues.',
-            'actif'      => false,
+            'actif'      => true,
             'created_at' => $now,
             'updated_at' => $now,
         ]);

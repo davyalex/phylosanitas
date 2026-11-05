@@ -74,11 +74,10 @@ class AppServiceProvider extends ServiceProvider
                         'flash'    => \App\Models\FlashInfo::visible()->count(),
                         'pubs'     => \App\Models\Publicite::diffusable()->count(),
                         'popups'   => \App\Models\Popup::diffusable()->count(),
-                        'questions'=> config('sante.modules.questions') ? \App\Models\QuestionLecteur::where('statut', 'nouvelle')->count() : 0,
                         'gardes'   => \App\Models\Etablissement::actifs()->deGarde()->count(),
                     ];
                 } catch (\Throwable) {
-                    return ['messages' => 0, 'flash' => 0, 'pubs' => 0, 'popups' => 0, 'questions' => 0, 'gardes' => 0];
+                    return ['messages' => 0, 'flash' => 0, 'pubs' => 0, 'popups' => 0, 'gardes' => 0];
                 }
             }));
         });

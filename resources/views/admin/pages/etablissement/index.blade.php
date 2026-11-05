@@ -1,54 +1,37 @@
 @extends('admin.layout')
-@php
-    // Module annuaire masqué : seules les pharmacies sont gérées ici
-    $seules = \App\Http\Controllers\EtablissementController::pharmaciesSeules();
-    $titre  = $seules ? 'Pharmacies de garde' : 'Annuaire santé';
-@endphp
-@section('title', $titre)
+@section('title', 'Pharmacies de garde')
 
 @section('page_header')
 <div class="page-bar">
     <div>
-        <h1 class="page-bar__title">{{ $titre }}</h1>
-        <p class="page-bar__sub">{{ $seules ? 'Les pharmacies et leurs périodes de garde.' : 'Pharmacies, hôpitaux, cliniques, laboratoires et numéros d\'urgence.' }} <strong>Mettez à jour les pharmacies de garde chaque semaine</strong> : une information périmée fait perdre la confiance des lecteurs.</p>
+        <h1 class="page-bar__title">Pharmacies de garde</h1>
+        <p class="page-bar__sub">Les pharmacies et leurs périodes de garde. <strong>Mettez à jour les pharmacies de garde chaque semaine</strong> : une information périmée fait perdre la confiance des lecteurs.</p>
     </div>
     <div class="page-bar__actions">
-        <a href="{{ config('sante.modules.annuaire') ? route('annuaire') : route('garde') }}" target="_blank" rel="noopener" class="btn btn-outline-secondary"><i class="bi bi-box-arrow-up-right me-1"></i>Voir sur le site</a>
-        <a href="{{ route('etablissement.create', ['type' => $type ?: 'pharmacie']) }}" class="btn btn-primary"><i class="bi bi-plus-lg me-1"></i>{{ $seules ? 'Ajouter une pharmacie' : 'Ajouter' }}</a>
+        <a href="{{ route('garde') }}" target="_blank" rel="noopener" class="btn btn-outline-secondary"><i class="bi bi-box-arrow-up-right me-1"></i>Voir sur le site</a>
+        <a href="{{ route('etablissement.create') }}" class="btn btn-primary"><i class="bi bi-plus-lg me-1"></i>Ajouter une pharmacie</a>
     </div>
 </div>
 @endsection
 
 @section('content')
-@php $types = \App\Models\Etablissement::TYPES; @endphp
-
 <div class="row g-4">
     <div class="col-xl-8 order-2 order-xl-1">
-        @unless($seules)
-            <nav class="tabs-pill" aria-label="Filtrer par type">
-                <a href="{{ route('etablissement.index') }}" class="{{ !$type ? 'is-active' : '' }}">Tous</a>
-                @foreach($types as $key => $t)
-                    <a href="{{ route('etablissement.index', ['type' => $key]) }}" class="{{ $type === $key ? 'is-active' : '' }}"><i class="bi bi-{{ $t['icon'] }} me-1"></i>{{ $t['pluriel'] }}</a>
-                @endforeach
-            </nav>
-        @endunless
-
         <div class="panel-a">
             <div class="panel-a__head">
                 @php $nb = $etablissements->total(); @endphp
-                <h2 class="panel-a__title"><i class="bi bi-{{ $seules ? 'capsule' : 'geo-alt' }}"></i>{{ $nb }} {{ $seules ? 'pharmacie' : 'fiche' }}{{ $nb > 1 ? 's' : '' }}</h2>
+                <h2 class="panel-a__title"><i class="bi bi-capsule"></i>{{ $nb }} pharmacie{{ $nb > 1 ? 's' : '' }}</h2>
                 <form method="GET" role="search">
-                    @if($type && !$seules)<input type="hidden" name="type" value="{{ $type }}">@endif
                     <input type="search" name="q" value="{{ request('q') }}" class="form-control form-control-sm" placeholder="Rechercher un nom…" aria-label="Rechercher un nom">
                 </form>
             </div>
 
             @if($etablissements->isEmpty())
                 <div class="empty-admin">
-                    <i class="bi bi-{{ $seules ? 'capsule' : 'geo-alt' }}"></i>
-                    <h3>{{ $seules ? 'Aucune pharmacie' : 'Aucune fiche' }}</h3>
-                    <p>{{ $seules ? 'Le premier import de la garde crée les pharmacies automatiquement. Vous pouvez aussi les ajouter à la main.' : 'Ajoutez les pharmacies, hôpitaux et cliniques de votre ville.' }}</p>
-                    <a href="{{ route('etablissement.create', ['type' => $type ?: 'pharmacie']) }}" class="btn btn-primary"><i class="bi bi-plus-lg me-1"></i>Ajouter</a>
+                    <i class="bi bi-capsule"></i>
+                    <h3>Aucune pharmacie</h3>
+                    <p>Le premier import de la garde crée les pharmacies automatiquement. Vous pouvez aussi les ajouter à la main.</p>
+                    <a href="{{ route('etablissement.create') }}" class="btn btn-primary"><i class="bi bi-plus-lg me-1"></i>Ajouter</a>
                 </div>
             @else
                 <div class="table-responsive">
@@ -67,11 +50,7 @@
                                     <td class="ps-3">
                                         <a href="{{ route('etablissement.edit', $e) }}" class="fw-semibold text-decoration-none">{{ $e->nom }}</a>
                                         @if($e->estDeGarde())<span class="status status--live ms-1">De garde jusqu'au {{ $e->garde_fin->format('d/m') }}</span>@endif
-                                        @if($seules)
-                                            @if($e->quartier)<div class="small text-muted">{{ $e->quartier }}</div>@endif
-                                        @else
-                                            <div class="small text-muted"><i class="bi bi-{{ $types[$e->type]['icon'] }} me-1"></i>{{ $types[$e->type]['label'] }}@if($e->quartier) · {{ $e->quartier }}@endif</div>
-                                        @endif
+                                        @if($e->quartier)<div class="small text-muted">{{ $e->quartier }}</div>@endif
                                     </td>
                                     <td class="small table-admin-hide">{{ $e->ville ?: '—' }}</td>
                                     <td class="small table-admin-hide text-nowrap">{{ $e->telephone ?: '—' }}</td>
@@ -90,7 +69,7 @@
                                                 <button class="btn btn-sm {{ $e->actif ? 'btn-outline-warning' : 'btn-outline-success' }} icon-action" title="{{ $e->actif ? 'Masquer' : 'Afficher' }}" aria-label="{{ $e->actif ? 'Masquer' : 'Afficher' }}"><i class="bi bi-{{ $e->actif ? 'eye-slash' : 'eye' }}"></i></button>
                                             </form>
                                             <a href="{{ route('etablissement.edit', $e) }}" class="btn btn-sm btn-outline-primary icon-action" title="Modifier" aria-label="Modifier"><i class="bi bi-pencil"></i></a>
-                                            <form action="{{ route('etablissement.destroy', $e) }}" method="POST" data-confirm="Supprimer « {{ $e->nom }} »{{ $seules ? '' : ' de l\'annuaire' }} ?">
+                                            <form action="{{ route('etablissement.destroy', $e) }}" method="POST" data-confirm="Supprimer « {{ $e->nom }} » ?">
                                                 @csrf @method('DELETE')
                                                 <button class="btn btn-sm btn-outline-danger icon-action" title="Supprimer" aria-label="Supprimer"><i class="bi bi-trash"></i></button>
                                             </form>
