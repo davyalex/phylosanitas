@@ -502,6 +502,9 @@ a.tag:hover { background: #d3eee1; color: #05613f; }
 .ad--spaced { margin: clamp(1.75rem, 1.2rem + 2vw, 2.5rem) 0 0; }
 .ad__label { font-size: .6875rem; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: #7d8a9b; text-align: center; }
 .ad__frame { display: flex; justify-content: center; align-items: center; background: var(--bg); border-radius: var(--r-md); overflow: hidden; }
+/* Le bloc AdSense doit occuper toute la largeur : vide, un élément flex mesure 0 px et Google refuse
+   d'afficher une annonce (« No slot size for availableWidth=0 ») */
+.ad__frame > .adsbygoogle { width: 100%; }
 .ad--leaderboard .ad__frame { min-height: 100px; }
 .ad--rectangle .ad__frame { min-height: 250px; }
 .ad--infeed .ad__frame, .ad--inarticle .ad__frame { min-height: 120px; }
