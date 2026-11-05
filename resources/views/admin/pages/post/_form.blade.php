@@ -34,6 +34,15 @@
             <textarea id="post-content" name="description" class="tinymce-editor">{{ old('description', $post->description ?? '') }}</textarea>
         </section>
 
+        {{-- Sources --}}
+        <section class="fsec">
+            <h2 class="fsec__title"><i class="bi bi-journal-bookmark"></i>Sources</h2>
+            <p class="fsec__hint">Une source par ligne (organisme, étude, lien). Elles s'affichent en bas de l'article et renforcent la confiance des lecteurs et de Google.</p>
+            <textarea id="post-sources" name="sources" rows="3" class="form-control @error('sources') is-invalid @enderror"
+                      placeholder="OMS — Paludisme : principaux faits https://www.who.int/…&#10;Ministère de la Santé — Programme national de lutte contre le paludisme">{{ old('sources', $post->sources ?? '') }}</textarea>
+            @error('sources')<div class="invalid-feedback">{{ $message }}</div>@enderror
+        </section>
+
         {{-- SEO --}}
         <section class="fsec">
             <h2 class="fsec__title"><i class="bi bi-google"></i>Référencement Google</h2>
@@ -86,6 +95,34 @@
                 @error('lien')<div class="invalid-feedback">{{ $message }}</div>@enderror
             </div>
         </section>
+
+        @isset($redacteurs)
+        @php
+            $auteurId   = (string) old('auteur', $post->user_id ?? auth()->id());
+            $reviewerId = (string) old('reviewer', $post->reviewer_id ?? '');
+        @endphp
+        <section class="fsec">
+            <h2 class="fsec__title"><i class="bi bi-person-badge"></i>Auteur et relecture</h2>
+            <div class="mb-3">
+                <label for="post-auteur" class="form-label">Auteur</label>
+                <select id="post-auteur" name="auteur" class="form-select">
+                    @foreach($redacteurs as $u)
+                        <option value="{{ $u->id }}" {{ $auteurId === (string) $u->id ? 'selected' : '' }}>{{ $u->name }}{{ $u->titre_pro ? ' — ' . $u->titre_pro : '' }}</option>
+                    @endforeach
+                </select>
+            </div>
+            <div>
+                <label for="post-reviewer" class="form-label">Relu par un médecin</label>
+                <select id="post-reviewer" name="reviewer" class="form-select @error('reviewer') is-invalid @enderror">
+                    <option value="">— Pas de relecture indiquée —</option>
+                    @foreach($redacteurs as $u)
+                        <option value="{{ $u->id }}" {{ $reviewerId === (string) $u->id ? 'selected' : '' }}>{{ $u->est_medecin ? '🩺 ' : '' }}{{ $u->name }}{{ $u->titre_pro ? ' — ' . $u->titre_pro : '' }}</option>
+                    @endforeach
+                </select>
+                <div class="form-text">Affiche « Relu par … » sous le titre. Le nom n'apparaît que si le profil public du compte est activé (Mon profil &gt; Profil public).</div>
+            </div>
+        </section>
+        @endisset
 
         <section class="fsec">
             <h2 class="fsec__title"><i class="bi bi-image"></i>Image de couverture</h2>

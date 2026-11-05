@@ -16,6 +16,12 @@ class Kernel extends ConsoleKernel
     protected function schedule(Schedule $schedule)
     {
         // $schedule->command('inspire')->hourly();
+
+        // Pharmacies de garde : seulement si une tâche cron « php artisan schedule:run » existe sur le serveur.
+        // Sans cron, l'import se fait quand même automatiquement au fil des visites (toutes les 6 h au plus).
+        // Rien tant que l'import automatique depuis Drive n'est pas activé (import manuel pour l'instant).
+        $schedule->command('gardes:import')->everySixHours()->withoutOverlapping()
+            ->when(fn() => \App\Services\GardesImport::autoActif());
     }
 
     /**

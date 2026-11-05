@@ -45,8 +45,10 @@ class Post extends Model implements HasMedia, Viewable
         'tag',
         'description',
         'lien',
+        'sources',
         'category_id',
         'user_id',
+        'reviewer_id',
         'published',
         'actualite_une', // Article : « À la une » de l'accueil · Actualité : widget Actualités
         'une_at',        // date de mise à la une (le plus récent = article principal)
@@ -114,6 +116,33 @@ class Post extends Model implements HasMedia, Viewable
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class, 'user_id');
+    }
+
+    /** Médecin qui a relu l'article */
+    public function reviewer(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'reviewer_id');
+    }
+
+    public function dossiers(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
+    {
+        return $this->belongsToMany(Dossier::class, 'dossier_post')->withPivot('ordre');
+    }
+
+    /** Sources saisies une par ligne → [['texte' => …, 'url' => …|null]] */
+    public function listeSources(): array
+    {
+        $out = [];
+        foreach (preg_split('/\R/u', (string) $this->sources) as $ligne) {
+            $ligne = trim($ligne, " \t-•*");
+            if ($ligne === '') continue;
+            preg_match('#https?://\S+#i', $ligne, $m);
+            $url   = $m[0] ?? null;
+            $texte = trim(str_replace($url ?? '', '', $ligne), " \t:-–—");
+            $out[] = ['texte' => $texte ?: ($url ? parse_url($url, PHP_URL_HOST) : $ligne), 'url' => $url];
+        }
+
+        return $out;
     }
 
     public function category(): BelongsTo

@@ -122,6 +122,7 @@
     <!-- Thème du site -->
     <link href="{{ asset('assets_site/css/site.css') }}?v={{ @filemtime(public_path('assets_site/css/site.css')) }}" rel="stylesheet">
     <link href="{{ asset('assets_site/css/site-motion.css') }}?v={{ @filemtime(public_path('assets_site/css/site-motion.css')) }}" rel="stylesheet">
+    <link href="{{ asset('assets_site/css/site-services.css') }}?v={{ @filemtime(public_path('assets_site/css/site-services.css')) }}" rel="stylesheet">
 
     @stack('head')
 
@@ -132,6 +133,8 @@
 
 @php
     $navCategories = $category->filter(fn($c) => !in_array(strtolower($c->slug), ['sondage', 'actualites']));
+    $navServices   = config('sante.services', []);
+    $serviceActif  = collect(array_keys($navServices))->first(fn($r) => request()->routeIs(Str::before($r, '.') . '*'));
 @endphp
 
 <body>
@@ -180,11 +183,35 @@
                                href="{{ route('post.list', ['category' => $item->slug]) }}">{{ $item->title }}</a>
                         </li>
                     @endforeach
+                    <li class="nav__more">
+                        <button type="button" class="nav__link nav__toggle {{ $serviceActif ? 'is-active' : '' }} js-nav-more" aria-expanded="false" aria-controls="nav-services">
+                            Services santé <i class="bi bi-chevron-down" aria-hidden="true"></i>
+                        </button>
+                        <div id="nav-services" class="nav__panel" hidden>
+                            <ul class="nav__grid">
+                                @foreach($navServices as $route => $s)
+                                    <li>
+                                        <a href="{{ route($route) }}" class="nav__item {{ $serviceActif === $route ? 'is-active' : '' }}" @if($serviceActif === $route) aria-current="page" @endif>
+                                            <span class="nav__item-icon" aria-hidden="true"><i class="bi bi-{{ $s['icon'] }}"></i></span>
+                                            <span><strong>{{ $s['label'] }}</strong><small>{{ $s['texte'] }}</small></span>
+                                        </a>
+                                    </li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    </li>
                     <li><a href="{{ route('contact') }}" class="nav__link {{ request()->routeIs('contact') ? 'is-active' : '' }}" @if(request()->routeIs('contact')) aria-current="page" @endif>Contact</a></li>
                 </ul>
             </nav>
 
             <div class="site-header__actions">
+                {{-- Accès direct aux pharmacies de garde (page la plus consultée) --}}
+                <a href="{{ route('garde') }}" class="garde-btn {{ request()->routeIs('garde') ? 'is-active' : '' }}" title="Pharmacies de garde cette semaine" @if(request()->routeIs('garde')) aria-current="page" @endif>
+                    <i class="bi bi-moon-stars-fill" aria-hidden="true"></i>
+                    <span class="garde-btn__long">Pharmacies de garde</span>
+                    <span class="garde-btn__short" aria-hidden="true">De garde</span>
+                    @if(($gardes_jour ?? collect())->count())<span class="garde-btn__count" aria-label="{{ $gardes_jour->count() }} pharmacies">{{ $gardes_jour->count() }}</span>@endif
+                </a>
                 <button type="button" class="icon-btn js-search-toggle" aria-expanded="false" aria-controls="site-search" aria-label="Rechercher">
                     <i class="bi bi-search" aria-hidden="true"></i>
                 </button>
@@ -245,6 +272,29 @@
         </div>
     @endif
 
+    {{-- ======= Journée / campagne de santé (Admin > Journées santé) ======= --}}
+    @if($journee_sante ?? null)
+        @php
+            $js     = $journee_sante;
+            $jsHref = $js->lien ?: route('search', ['query' => Str::of($js->titre)->replaceMatches('/^(journée mondiale (de lutte )?(contre |de la |du |de l\'|des |de )?)/iu', '')->trim()]);
+            $jsWhen = match ($js->etat) {
+                'jour'  => "Aujourd'hui",
+                'mois'  => 'Ce mois-ci',
+                default => $js->dans === 1 ? 'Demain' : 'Dans ' . $js->dans . ' jours',
+            };
+        @endphp
+        <div class="hday js-hday" data-id="{{ $js->id }}-{{ $js->date }}" style="--hday: {{ $js->couleur }}" role="region" aria-label="Journée de santé">
+            <div class="container-xl hday__inner">
+                <span class="hday__when"><i class="bi bi-calendar-heart" aria-hidden="true"></i>{{ $jsWhen }}</span>
+                <a href="{{ $jsHref }}" class="hday__link">
+                    <strong>{{ $js->titre }}</strong>
+                    @if($js->texte)<span class="hday__text">{{ $js->texte }}</span>@endif
+                </a>
+                <button type="button" class="hday__close js-hday-close" aria-label="Masquer ce bandeau"><i class="bi bi-x-lg" aria-hidden="true"></i></button>
+            </div>
+        </div>
+    @endif
+
     {{-- ======= Menu mobile (tiroir) ======= --}}
     <div class="drawer-backdrop js-drawer-close" hidden></div>
     <aside id="nav-drawer" class="drawer" aria-label="Menu" aria-hidden="true">
@@ -271,6 +321,11 @@
                     </li>
                 @endforeach
                 <li><a href="{{ route('post.list', ['category' => 'sondage']) }}"><i class="bi bi-bar-chart-line" aria-hidden="true"></i>Sondages</a></li>
+                <li class="drawer__label" aria-hidden="true">Services santé</li>
+                @foreach($navServices as $route => $s)
+                    <li><a href="{{ route($route) }}" class="{{ $serviceActif === $route ? 'is-active' : '' }}"><i class="bi bi-{{ $s['icon'] }}" aria-hidden="true"></i>{{ $s['label'] }}</a></li>
+                @endforeach
+                <li class="drawer__label" aria-hidden="true">Nous joindre</li>
                 <li><a href="{{ route('contact') }}" class="{{ request()->routeIs('contact') ? 'is-active' : '' }}"><i class="bi bi-envelope" aria-hidden="true"></i>Contact</a></li>
                 @auth
                     <li><a href="{{ route('dashboard') }}"><i class="bi bi-grid" aria-hidden="true"></i>Tableau de bord</a></li>
@@ -354,6 +409,20 @@
                         @endforeach
                         <li><a href="{{ route('post.list', ['category' => 'sondage']) }}">Sondages</a></li>
                     </ul>
+                </div>
+
+                <div>
+                    <h2 class="footer__title">Services santé</h2>
+                    <ul class="footer__links">
+                        @foreach($navServices as $route => $s)
+                            <li><a href="{{ route($route) }}">{{ $s['label'] }}</a></li>
+                        @endforeach
+                    </ul>
+                    @if(config('sante.modules.notifications'))
+                        <button type="button" class="footer__notify js-push-btn" hidden>
+                            <i class="bi bi-bell" aria-hidden="true"></i><span class="js-push-label">Recevoir les nouveaux articles</span>
+                        </button>
+                    @endif
                 </div>
 
                 <div>
@@ -455,6 +524,7 @@
 
     <!-- Site JS -->
     <script src="{{ asset('assets_site/js/site.js') }}?v={{ @filemtime(public_path('assets_site/js/site.js')) }}" defer></script>
+    <script src="{{ asset('assets_site/js/site-services.js') }}?v={{ @filemtime(public_path('assets_site/js/site-services.js')) }}" defer></script>
     @stack('scripts')
 </body>
 

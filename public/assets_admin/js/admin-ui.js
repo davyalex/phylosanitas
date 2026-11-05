@@ -51,13 +51,15 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   });
 
-  /* Affichage conditionnel : <div data-show-when="type=image"> */
+  /* Affichage conditionnel : <div data-show-when="type=image"> ou <div data-show-when="type!=urgence"> */
   var conditionals = document.querySelectorAll('[data-show-when]');
   var refreshConditionals = function () {
     conditionals.forEach(function (el) {
-      var rule = el.getAttribute('data-show-when').split('=');
-      var checked = document.querySelector('[name="' + rule[0] + '"]:checked') || document.querySelector('select[name="' + rule[0] + '"]');
-      var visible = checked && checked.value === rule[1];
+      var raw = el.getAttribute('data-show-when');
+      var not = raw.indexOf('!=') !== -1;
+      var rule = raw.split(not ? '!=' : '=');
+      var checked = document.querySelector('[name="' + rule[0] + '"]:checked') || document.querySelector('select[name="' + rule[0] + '"], input[type="hidden"][name="' + rule[0] + '"]');
+      var visible = checked && (not ? checked.value !== rule[1] : checked.value === rule[1]);
       el.hidden = !visible;
       el.querySelectorAll('input, textarea, select').forEach(function (f) { f.disabled = !visible; });
     });

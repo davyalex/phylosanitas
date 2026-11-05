@@ -64,9 +64,18 @@ class SiteController extends Controller
                 ->orderBy('created_at', 'desc')
                 ->get();
 
-            return view('site.pages.accueil', compact('post', 'slide'));
+            // Quiz du moment : une affirmation tirée au hasard, à jouer directement sur l'accueil
+            $quizAccueil = Cache::remember(\App\Models\Quiz::CACHE_ACCUEIL, 600, function () {
+                try {
+                    return \App\Models\Quiz::enLigne()->with('questions')->latest()->first() ?: false;
+                } catch (\Throwable) {
+                    return false;
+                }
+            }) ?: null;
+
+            return view('site.pages.accueil', compact('post', 'slide', 'quizAccueil'));
         } catch (\Throwable) {
-            return view('site.pages.accueil', ['post' => collect(), 'slide' => collect()]);
+            return view('site.pages.accueil', ['post' => collect(), 'slide' => collect(), 'quizAccueil' => null]);
         }
     }
 
@@ -106,7 +115,8 @@ class SiteController extends Controller
                     'category:id,title,slug',
                     'commentaires',
                     'media'         => fn($q) => $q->where('collection_name', 'image'),
-                    'user:id,name',
+                    'user:id,name,slug,titre_pro,bio,photo,est_medecin,profil_public',
+                    'reviewer:id,name,slug,titre_pro,photo,est_medecin,profil_public',
                     'optionSondages',
                 ])
                 ->withCount('commentaires')
@@ -140,7 +150,43 @@ class SiteController extends Controller
                     ?? Soumission::where('post_id', $post->id)->where('user_session', $request->session()->getId())->value('option_sondage_id');
             }
 
-            return view('site.pages.detail', compact('post', 'statistic_sondage', 'sondage_total', 'my_vote'));
+            // À lire aussi : même catégorie d'abord (cache 30 min)
+            $related = Cache::remember("post_related_{$post->id}", 1800, fn() =>
+                Post::with($this->listWith())
+                    ->select(self::LIST_SELECT)
+                    ->withCount('commentaires')
+                    ->withViewsCount()
+                    ->where('published', 'public')
+                    ->where('id', '!=', $post->id)
+                    ->whereNotNull('title')
+                    ->orderByRaw('category_id = ? DESC', [$post->category_id])
+                    ->latest()
+                    ->take(3)
+                    ->get()
+            );
+
+            // Dossier thématique dont l'article fait partie : précédent / suivant
+            $dossierNav = null;
+            try {
+                $dossier = !config('sante.modules.dossiers') ? null : $post->dossiers()->where('dossiers.actif', true)->first();
+                if ($dossier) {
+                    $etapes = $dossier->postsPublies()->get(['posts.id', 'posts.title', 'posts.slug'])->values();
+                    $i = $etapes->search(fn($p) => $p->id === $post->id);
+                    if ($i !== false && $etapes->count() > 1) {
+                        $dossierNav = (object) [
+                            'dossier' => $dossier,
+                            'rang'    => $i + 1,
+                            'total'   => $etapes->count(),
+                            'prev'    => $etapes[$i - 1] ?? null,
+                            'next'    => $etapes[$i + 1] ?? null,
+                        ];
+                    }
+                }
+            } catch (\Throwable) {}
+
+            $mon_avis = $request->session()->get("avis.{$post->id}");
+
+            return view('site.pages.detail', compact('post', 'statistic_sondage', 'sondage_total', 'my_vote', 'related', 'dossierNav', 'mon_avis'));
         } catch (\Symfony\Component\HttpKernel\Exception\HttpExceptionInterface $e) {
             throw $e; // vraie 404 pour les moteurs de recherche
         } catch (\Throwable) {
@@ -192,6 +238,7 @@ class SiteController extends Controller
                 ['src' => asset('assets_site/img/android-chrome-512x512.png'), 'sizes' => '512x512', 'type' => 'image/png', 'purpose' => 'maskable'],
             ],
             'shortcuts'        => [
+                ['name' => 'Pharmacies de garde', 'short_name' => 'De garde', 'url' => '/pharmacies-de-garde?source=pwa', 'icons' => [['src' => asset('assets_site/img/android-chrome-192x192.png'), 'sizes' => '192x192']]],
                 ['name' => 'Tous les articles', 'url' => '/articles?source=pwa', 'icons' => [['src' => asset('assets_site/img/android-chrome-192x192.png'), 'sizes' => '192x192']]],
                 ['name' => 'Rechercher', 'url' => '/recherche?source=pwa', 'icons' => [['src' => asset('assets_site/img/android-chrome-192x192.png'), 'sizes' => '192x192']]],
                 ['name' => 'Contact', 'url' => '/contact?source=pwa', 'icons' => [['src' => asset('assets_site/img/android-chrome-192x192.png'), 'sizes' => '192x192']]],
@@ -226,7 +273,17 @@ class SiteController extends Controller
 
             $categories = Category::select('id', 'slug', 'updated_at')->get();
 
-            return view('site.sitemap', compact('posts', 'categories'))->render();
+            // Services santé
+            $services = [
+                'quiz'      => \App\Models\Quiz::enLigne()->get(['slug', 'updated_at']),
+                'maladies'  => config('sante.modules.maladies') ? \App\Models\Maladie::publiees()->get(['slug', 'updated_at']) : collect(),
+                'dossiers'  => config('sante.modules.dossiers') ? \App\Models\Dossier::enLigne()->get(['slug', 'updated_at']) : collect(),
+                'questions' => config('sante.modules.questions') ? \App\Models\QuestionLecteur::publiees()->get(['slug', 'updated_at']) : collect(),
+                'auteurs'   => \App\Models\User::where('profil_public', true)->whereNotNull('slug')->get(['slug', 'updated_at']),
+                'outils'    => array_keys(config('sante.outils', [])),
+            ];
+
+            return view('site.sitemap', compact('posts', 'categories', 'services'))->render();
         });
 
         return response($xml, 200, ['Content-Type' => 'application/xml; charset=UTF-8']);

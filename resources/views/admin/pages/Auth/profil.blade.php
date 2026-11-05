@@ -71,6 +71,13 @@
                             <i class="bi bi-key me-1"></i>Mot de passe
                         </button>
                     </li>
+                    @if(auth()->id() === $user->id || auth()->user()->hasRole('administrateur'))
+                    <li class="nav-item">
+                        <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-public" id="tab-public-btn">
+                            <i class="bi bi-person-badge me-1"></i>Profil public
+                        </button>
+                    </li>
+                    @endif
                 </ul>
 
                 <div class="tab-content">
@@ -148,6 +155,64 @@
                         </form>
                     </div>
 
+                    {{-- Onglet profil public (page auteur + « Relu par » sur les articles) --}}
+                    @if(auth()->id() === $user->id || auth()->user()->hasRole('administrateur'))
+                    <div class="tab-pane fade" id="tab-public">
+                        <p class="text-muted small">
+                            Ces informations apparaissent sur les articles que ce compte a écrits ou relus, et sur sa page auteur.
+                            Google accorde plus de confiance aux articles santé dont l'auteur et le médecin relecteur sont clairement présentés.
+                        </p>
+                        <form method="POST" action="{{ route('user.profil-public', $user) }}" enctype="multipart/form-data" data-once>
+                            @csrf
+                            <div class="row g-3">
+                                <div class="col-sm-auto text-center">
+                                    @if($user->photoUrl())
+                                        <img src="{{ $user->photoUrl() }}" alt="" class="rounded-circle mb-2" width="96" height="96" style="object-fit:cover">
+                                    @else
+                                        <div class="profile-avatar mx-auto mb-2" style="width:96px;height:96px">{{ $user->initiales() }}</div>
+                                    @endif
+                                    <label class="btn btn-sm btn-outline-primary d-block">
+                                        <i class="bi bi-camera me-1"></i>Photo
+                                        <input type="file" name="photo" accept="image/*" hidden>
+                                    </label>
+                                    @if($user->photo)
+                                        <label class="small text-muted d-block mt-1"><input type="checkbox" name="retirer_photo" value="1" class="form-check-input me-1">Retirer</label>
+                                    @endif
+                                    @error('photo')<div class="text-danger small">{{ $message }}</div>@enderror
+                                </div>
+                                <div class="col">
+                                    <label class="form-label fw-semibold" for="pp-titre-pro">Fonction affichée</label>
+                                    <input id="pp-titre-pro" type="text" name="titre_pro" value="{{ old('titre_pro', $user->titre_pro) }}" class="form-control" maxlength="120"
+                                           placeholder="Ex. : Médecin généraliste · Pharmacienne · Journaliste santé">
+                                    <div class="form-text">Le nom affiché sur le site est le nom du compte : « {{ $user->nom_public }} ». Modifiez-le dans l'onglet « Modifier » si besoin (ex. « Dr Awa Koné »).</div>
+
+                                    <label class="form-label fw-semibold mt-3" for="pp-bio">Courte biographie</label>
+                                    <textarea id="pp-bio" name="bio" rows="4" class="form-control" maxlength="1500"
+                                              placeholder="Parcours, spécialité, années d'expérience, lieu d'exercice…">{{ old('bio', $user->bio) }}</textarea>
+                                </div>
+                            </div>
+
+                            <div class="switch-row mt-3">
+                                <div class="switch-row__text"><strong>Professionnel de santé</strong><span>Proposé en premier comme médecin relecteur</span></div>
+                                <input class="form-check-input" type="checkbox" role="switch" name="est_medecin" value="1" {{ $user->est_medecin ? 'checked' : '' }} aria-label="Professionnel de santé">
+                            </div>
+                            <div class="switch-row">
+                                <div class="switch-row__text"><strong>Afficher ce profil sur le site</strong><span>Nom, fonction et page auteur visibles par les lecteurs</span></div>
+                                <input class="form-check-input" type="checkbox" role="switch" name="profil_public" value="1" {{ $user->profil_public ? 'checked' : '' }} aria-label="Afficher ce profil sur le site">
+                            </div>
+
+                            <div class="d-flex justify-content-between align-items-center mt-3 flex-wrap gap-2">
+                                @if($user->profil_public && $user->slug)
+                                    <a href="{{ route('auteur.show', $user->slug) }}" target="_blank" rel="noopener" class="small"><i class="bi bi-box-arrow-up-right me-1"></i>Voir la page auteur</a>
+                                @else
+                                    <span></span>
+                                @endif
+                                <button type="submit" class="btn btn-primary px-4"><i class="bi bi-check-lg me-1"></i>Enregistrer le profil public</button>
+                            </div>
+                        </form>
+                    </div>
+                    @endif
+
                     {{-- Onglet mot de passe --}}
                     <div class="tab-pane fade" id="tab-password">
                         <form method="POST" action="{{ route('user.newpassword', $user->id) }}" novalidate>
@@ -193,4 +258,15 @@
     font-size: 1.6rem; font-weight: 700;
 }
 </style>
+
+@if(session('onglet') === 'public' || $errors->has('photo') || request('onglet') === 'public')
+@push('scripts')
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        var btn = document.getElementById('tab-public-btn');
+        if (btn && window.bootstrap) bootstrap.Tab.getOrCreateInstance(btn).show();
+    });
+</script>
+@endpush
+@endif
 @endsection

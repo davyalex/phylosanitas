@@ -20,3 +20,6 @@ yarn-error.log
 # Notes locales (codes AdSense copiés depuis Google)
 /fichier-goofle-ads
 /fichier-google-ads
+
+# Fichiers de travail (listes de gardes avec données personnelles)
+/files_utiles

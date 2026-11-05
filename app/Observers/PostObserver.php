@@ -19,6 +19,7 @@ class PostObserver
         Cache::forget("post_detail_{$post->slug}");
         Cache::forget("post_stats_{$post->id}");
         Cache::forget("post_votes_{$post->id}");
+        Cache::forget("post_related_{$post->id}");
     }
 
     private function clearListCache(): void

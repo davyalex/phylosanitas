@@ -352,7 +352,8 @@ document.addEventListener('DOMContentLoaded', function () {
   // Seuls les éléments encore sous l'écran sont masqués : rien ne clignote au chargement.
   if (!reduceMotion && 'IntersectionObserver' in window) {
     var REVEAL = '.sec-head, .lead, .prow--feature, .pcard, .ptile, .prevention__head, .consult__art, .consult__body, .stat, '
-      + '.endread, .litem, .widget, .cta-band, .related, .panel, .page-head, .empty, .contact__line';
+      + '.endread, .litem, .widget, .cta-band, .related, .panel, .page-head, .empty, .contact__line, '
+      + '.svc, .qcard, .dcard, .qa-item, .place, .cal__item, .dpath__item, .quiz-teaser';
     var fold = window.innerHeight * 0.95;
 
     var revealObs = new IntersectionObserver(function (entries) {
