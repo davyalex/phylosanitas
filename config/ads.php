@@ -8,7 +8,7 @@
 | (data-ad-slot) est renseigné dans le .env. Sans identifiant, un encart
 | « Espace partenaire » discret est affiché si ADS_PLACEHOLDERS=true.
 |
-|   ADSENSE_CLIENT=ca-pub-6925205610540207
+|   ADSENSE_CLIENT=ca-pub-XXXXXXXXXXXXXXXX   (identifiant éditeur du compte)
 |   ADSENSE_SLOT_LEADERBOARD=1234567890   (bandeau horizontal)
 |   ADSENSE_SLOT_RECTANGLE=1234567890     (barre latérale)
 |   ADSENSE_SLOT_INFEED=1234567890        (dans les listes d'articles)
@@ -17,8 +17,9 @@
 */
 
 return [
-    // « ?: » : une ligne ADSENSE_CLIENT= vide dans le .env garde quand même le bon identifiant
-    'client' => env('ADSENSE_CLIENT') ?: 'ca-pub-6925205610540207',
+    // Identifiant éditeur (ca-pub-…) : seul endroit à changer en cas de nouveau compte.
+    // Vide : aucun script AdSense n'est chargé sur le site.
+    'client' => env('ADSENSE_CLIENT') ?: null,
 
     'placeholders' => (bool) env('ADS_PLACEHOLDERS', true),
 

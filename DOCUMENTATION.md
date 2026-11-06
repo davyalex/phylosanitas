@@ -355,8 +355,10 @@ Accès : `/login`, puis `/admin`.
 ## 9. Revenus : publicités et AdSense
 
 - **Google AdSense** :
-  - le script et la balise de vérification sont intégrés en dur dans le `<head>` ;
-  - le fichier `public/ads.txt` est présent ;
+  - le script et la balise de vérification sont dans le `<head>`, avec l'identifiant éditeur lu dans le `.env` (`ADSENSE_CLIENT`) ;
+  - les identifiants des blocs sont aussi dans le `.env` (`ADSENSE_SLOT_…`, `ADSENSE_INFEED_LAYOUT_KEY`) ;
+  - le fichier `public/ads.txt` (et sa copie à la racine) contient l'identifiant éditeur ;
+  - **changement de compte** : modifier ces lignes du `.env` et les deux `ads.txt`, puis `php artisan config:clear` en production ;
   - les blocs In-feed et In-article sont conformes aux codes fournis par Google.
 - **Emplacements** :
 
