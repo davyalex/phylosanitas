@@ -58,7 +58,9 @@
     <meta name="twitter:image" content="{{ $ogImage }}">
     @stack('meta')
 
-    <meta name="google-adsense-account" content="ca-pub-6925205610540207">
+    @if(config('ads.client'))
+    <meta name="google-adsense-account" content="{{ config('ads.client') }}">
+    @endif
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
     {{-- Données structurées : site + organisation --}}
@@ -126,9 +128,11 @@
 
     @stack('head')
 
-    {{-- Google AdSense : script fourni par Google, identique sur toutes les pages (ne dépend pas du .env) --}}
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6925205610540207"
+    {{-- Google AdSense : identifiant éditeur lu dans le .env (ADSENSE_CLIENT) --}}
+    @if(config('ads.client'))
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client={{ config('ads.client') }}"
      crossorigin="anonymous"></script>
+    @endif
 </head>
 
 @php
